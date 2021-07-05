@@ -1,27 +1,27 @@
-from modules.camera import Camera
-from modules.constants import BODYJOINT
-import cv2, time
-import pygame
-
-screen = pygame.display.set_mode([720, 1280])
-
-cam = Camera()
-cam.debugMode = True
-cam.openAdress("http://192.168.0.14:8080/video")
-cam.startTracker()
-cam.startCapture()
-
-run = True
-while run:
-    for e in pygame.event.get():
-        if e.type == pygame.QUIT:
-            run = False
-    frame = cam.getFrame()
-    img = pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "RGB")
-    screen.blit(img, [0, 0])
-    pygame.display.flip()
-    time.sleep(0.01)
-
-cam.stopTracker()
-cam.stopCapture()
-pygame.quit()
+import numpy as np
+import cv2 as cv
+import glob
+# termination criteria
+criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+# prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
+objp = np.zeros((6*9,3), np.float32)
+objp[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
+# Arrays to store object points and image points from all the images.
+objpoints = [] # 3d point in real world space
+imgpoints = [] # 2d points in image plane.
+cap = cv.VideoCapture("http://192.168.0.50:8080/video")
+while True:
+    res, img = cap.read()
+    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    # Find the chess board corners
+    ret, corners = cv.findChessboardCorners(gray, (6,9), None)
+    # If found, add object points, image points (after refining them)
+    if ret == True:
+        objpoints.append(objp)
+        corners2 = cv.cornerSubPix(gray,corners, (11,11), (-1,-1), criteria)
+        imgpoints.append(corners)
+        # Draw and display the corners
+        cv.drawChessboardCorners(img, (6,9), corners2, ret)
+    cv.imshow('img', img)
+    if (cv.waitKey(50) == 27): break;
+cv.destroyAllWindows()
