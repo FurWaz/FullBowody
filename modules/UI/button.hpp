@@ -1,4 +1,5 @@
 #include "constants.hpp"
+#include "CallbackContainer.hpp"
 #include "graphicElement.hpp"
 
 class Button : public virtual GraphicElement
@@ -12,6 +13,8 @@ private:
     sf::Color fgColor_hover;
     sf::Color bgColor_hover;
     int textSize;
+    
+    CallbackContainer* cont;
 
     void generateHoverColors()
     {
@@ -81,11 +84,16 @@ public:
         generateTexture();
     }
 
+    template<class T> void setCallback(void (T::*callback)(), T* c)
+    {
+        this->cont = new TypedCallbackContainer<T>(callback, c);
+    }
+
     void onClick(int btn, bool clicked)
     {
         if (btn != sf::Mouse::Left) return;
         this->clicked = clicked;
-        std::cout << "click: " << btn << std::endl;
+        this->cont->func();
     }
 
     void onHover(bool hovered)
@@ -123,12 +131,12 @@ public:
         std::cout << "scroll: " << delta << std::endl;
     }
 
-    void update(sf::Vector2i mousePos)
+    void update(float dt, sf::Vector2i mousePos)
     {
-
+        std::cout << "updating with dt=" << dt << std::endl;
     }
 
-    sf::Sprite getSprite()
+    sf::Sprite getSprite(float dt)
     {
         return this->sprite;
     }
@@ -137,5 +145,4 @@ public:
     {
 
     }
-
 };

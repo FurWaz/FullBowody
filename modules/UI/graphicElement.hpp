@@ -14,6 +14,8 @@ protected:
     void setDimensions(int x, int y, int width, int height)
     {
         this->dimensions = sf::Rect<int>(x, y, width, height);
+        this->renderTexture.create(this->dimensions.width, this->dimensions.height);
+        this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
     }
 
 public:
@@ -22,14 +24,15 @@ public:
      */
     GraphicElement()
     {
-
+        this->sprite.setTexture(this->renderTexture.getTexture());
+        this->sprite.setPosition(0, 0);
     }
 
     /**
      * @brief Returns the sprite correponding to the element's UI
      * @return The Sprite correponding to the element's UI
      */
-    virtual sf::Sprite getSprite() = 0;
+    virtual sf::Sprite getSprite(float dt) = 0;
 
     /**
      * @brief OnHover event callback when mouse is hovering the object
@@ -59,8 +62,10 @@ public:
 
     /**
      * @brief Updates the element's components
+     * @param dt Update delta time
+     * @param mousePos Current mouse position
      */
-    virtual void update(sf::Vector2i mousePos) = 0;
+    virtual void update(float dt, sf::Vector2i mousePos) = 0;
     
     /**
      * @brief Returns if the position is in the element's hitbox

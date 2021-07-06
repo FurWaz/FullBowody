@@ -2,6 +2,7 @@
 #include "graphicElement.hpp"
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <thread>
 
 class Window
 {
@@ -11,9 +12,29 @@ private:
     sf::Vector2i size;
     sf::Event event;
     sf::Vector2i mousePos;
+    sf::Clock updateClock;
+    sf::Clock refreshClock;
+
+    std::thread updateThread;
     
     std::vector<GraphicElement*> elements;
     GraphicElement* focused = nullptr;
+
+    bool shouldUpdate = false;
+
+    /**
+     * @brief Update the window's UI elements
+     */
+    void update()
+    {
+        while (this->shouldUpdate)
+        {
+            float dt = this->updateClock.restart().asSeconds();
+            for (GraphicElement* el: this->elements)
+                el->update(dt, this->mousePos);
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+    }
 
 public:
     /**
@@ -21,8 +42,7 @@ public:
      */
     Window()
     {
-        this->screen.create(sf::VideoMode(1280, 720), "Window");
-        this->size = sf::Vector2i(1280, 720);
+        
     }
 
     /**
@@ -35,14 +55,9 @@ public:
     {
         this->screen.create(sf::VideoMode(width, height), name, sf::Style::Default, this->context);
         this->size = sf::Vector2i(width, height);
-    }
-
-    /**
-     * @brief Update the window's UI elements
-     */
-    void update()
-    {
-
+        this->updateClock.restart();
+        this->refreshClock.restart();
+        this->screen.setVerticalSyncEnabled(true);
     }
 
     /**
@@ -50,10 +65,23 @@ public:
      */
     void refresh()
     {
+        float dt = this->refreshClock.restart().asSeconds();
         screen.clear(sf::Color::Black);
         for (GraphicElement* el: this->elements)
-            this->screen.draw(el->getSprite());
+            this->screen.draw(el->getSprite(dt));
         screen.display();
+    }
+
+    void startUpdating()
+    {
+        shouldUpdate = true;
+        this->updateThread = std::thread(&Window::update, this);
+    }
+
+    void stopUpdating()
+    {
+        shouldUpdate = false;
+        this->updateThread.join();
     }
 
     /**
@@ -98,7 +126,7 @@ public:
             this->screen.pollEvent(this->event);
             if (event.type == sf::Event::TextEntered)
                 this->focused->onKey(key, event.text.unicode, true);
-            else this->focused->onKey(key, CONST::NO_CHAR, true);
+            else this->focused->onKey(key, '~', true);
             break;
         case sf::Event::KeyReleased:
             if (this->focused == nullptr) return;
@@ -106,7 +134,7 @@ public:
             this->screen.pollEvent(this->event);
             if (event.type == sf::Event::TextEntered)
                 this->focused->onKey(key, event.text.unicode, false);
-            else this->focused->onKey(key, CONST::NO_CHAR, false);
+            else this->focused->onKey(key, '~', false);
             break;
         default:
             break;
@@ -116,16 +144,15 @@ public:
         {
             if (el->collides(this->mousePos))
             {
-                if (!el->isHovered()) el->onHover(true);
+                if (!el->isHovered())
+                    el->onHover(true);
             }
             else
             {
-                if (el->isHovered()) el->onHover(false);
+                if (el->isHovered())
+                    el->onHover(false);
             }
         }
-
-        for (GraphicElement* el: this->elements)
-            el->update(mousePos);
     }
 
     /**

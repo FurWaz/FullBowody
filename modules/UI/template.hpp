@@ -1,3 +1,4 @@
+#include "constants.hpp"
 #include "graphicElement.hpp"
 
 class Template : public virtual GraphicElement
@@ -10,7 +11,7 @@ public:
         
     }
 
-    void onClick(bool clicked)
+    void onClick(int btn, bool clicked)
     {
         this->clicked = clicked;
     }
@@ -19,8 +20,18 @@ public:
     {
         this->hovered = hovered;
     }
+    
+    void onKey(int key, char c, bool pressed)
+    {
+        
+    }
 
-    void update(sf::Vector2i mousePos)
+    void onScroll(int delta)
+    {
+        
+    }
+
+    void update(float dt, sf::Vector2i mousePos)
     {
         
     }
@@ -34,4 +45,5 @@ public:
     {
 
     }
+
 };
