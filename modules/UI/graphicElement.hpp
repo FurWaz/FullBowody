@@ -14,8 +14,6 @@ protected:
     void setDimensions(int x, int y, int width, int height)
     {
         this->dimensions = sf::Rect<int>(x, y, width, height);
-        this->renderTexture.create(this->dimensions.width, this->dimensions.height);
-        this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
     }
 
 public:
@@ -24,8 +22,7 @@ public:
      */
     GraphicElement()
     {
-        this->sprite.setTexture(this->renderTexture.getTexture());
-        this->sprite.setPosition(0, 0);
+        
     }
 
     /**

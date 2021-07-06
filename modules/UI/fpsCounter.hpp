@@ -40,16 +40,16 @@ public:
     {
         std::string txt = std::to_string((int)(1 / dt)) + " FPS";
 
-        this->renderTexture.create(300, 300);
-        this->renderTexture.clear(sf::Color::Red);
+        this->renderTexture.create(this->dimensions.width, this->dimensions.height);
+        this->renderTexture.clear();
 
-        sf::Text text("yay", CONST::FONT, 20);
+        sf::Text text(txt, CONST::FONT, 20);
         text.setFillColor(sf::Color::White);
         this->renderTexture.draw(text);
         this->renderTexture.display();
 
         this->sprite.setTexture(this->renderTexture.getTexture());
-        this->sprite.setPosition(sf::Vector2f(20, 20));
+        this->sprite.setPosition(sf::Vector2f(this->dimensions.left, this->dimensions.top));
         return this->sprite;
     }
 

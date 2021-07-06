@@ -25,14 +25,14 @@ private:
     /**
      * @brief Update the window's UI elements
      */
-    void update()
+    void _update()
     {
         while (this->shouldUpdate)
         {
             float dt = this->updateClock.restart().asSeconds();
             for (GraphicElement* el: this->elements)
                 el->update(dt, this->mousePos);
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
     }
 
@@ -67,6 +67,7 @@ public:
     {
         float dt = this->refreshClock.restart().asSeconds();
         screen.clear(sf::Color::Black);
+        int index = 0;
         for (GraphicElement* el: this->elements)
             this->screen.draw(el->getSprite(dt));
         screen.display();
@@ -75,7 +76,7 @@ public:
     void startUpdating()
     {
         shouldUpdate = true;
-        this->updateThread = std::thread(&Window::update, this);
+        this->updateThread = std::thread(&Window::_update, this);
     }
 
     void stopUpdating()
@@ -126,7 +127,7 @@ public:
             this->screen.pollEvent(this->event);
             if (event.type == sf::Event::TextEntered)
                 this->focused->onKey(key, event.text.unicode, true);
-            else this->focused->onKey(key, '~', true);
+            else this->focused->onKey(key, CONST::NO_CHAR, true);
             break;
         case sf::Event::KeyReleased:
             if (this->focused == nullptr) return;
@@ -134,7 +135,7 @@ public:
             this->screen.pollEvent(this->event);
             if (event.type == sf::Event::TextEntered)
                 this->focused->onKey(key, event.text.unicode, false);
-            else this->focused->onKey(key, '~', false);
+            else this->focused->onKey(key, CONST::NO_CHAR, false);
             break;
         default:
             break;
@@ -188,6 +189,16 @@ public:
     void close()
     {
         this->screen.close();
+    }
+
+    int getWidth()
+    {
+        return this->size.x;
+    }
+
+    int getHeight()
+    {
+        return this->size.y;
     }
 
     /**

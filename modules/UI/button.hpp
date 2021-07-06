@@ -128,16 +128,17 @@ public:
 
     void onScroll(int delta)
     {
-        std::cout << "scroll: " << delta << std::endl;
+        
     }
 
     void update(float dt, sf::Vector2i mousePos)
     {
-        std::cout << "updating with dt=" << dt << std::endl;
+        
     }
 
     sf::Sprite getSprite(float dt)
     {
+        generateTexture();
         return this->sprite;
     }
 

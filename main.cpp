@@ -9,7 +9,11 @@ int main(int argc, char const *argv[])
     Window win("FullBowody", 1280, 720);
     win.addElement(new FPSCounter());
 
-    Button * btn = new Button();
+    Button* btn = new Button(
+        "Quit",
+        sf::Vector2i(win.getWidth()-120, 0), sf::Vector2i(120, 50),
+        CONST::COLOR_BLACK, CONST::COLOR_PRIMARY
+    );
     btn->setCallback(&Window::close, &win);
     win.addElement(btn);
 
