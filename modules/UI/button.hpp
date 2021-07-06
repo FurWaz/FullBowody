@@ -93,7 +93,15 @@ public:
     {
         if (btn != sf::Mouse::Left) return;
         this->clicked = clicked;
-        this->cont->func();
+        if (clicked && this->cont != nullptr) this->cont->func();
+    }
+
+    void onFocus(bool focused)
+    {
+        this->focused = focused;
+        if (focused) this->bgColor_normal = CONST::COLOR_PRIMARY;
+        else this->bgColor_normal = CONST::COLOR_BLACK;
+        generateHoverColors();
     }
 
     void onHover(bool hovered)

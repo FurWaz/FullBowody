@@ -12,9 +12,9 @@ int main(int argc, char const *argv[])
     Button* btn = new Button(
         "Quit",
         sf::Vector2i(win.getWidth()-120, 0), sf::Vector2i(120, 50),
-        CONST::COLOR_BLACK, CONST::COLOR_PRIMARY
+        CONST::COLOR_BLACK, CONST::COLOR_WHITE
     );
-    btn->setCallback(&Window::close, &win);
+    //btn->setCallback(&Window::close, &win);
     win.addElement(btn);
 
     win.startUpdating();

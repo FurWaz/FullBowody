@@ -19,7 +19,6 @@ private:
     
     std::vector<GraphicElement*> elements;
     GraphicElement* focused = nullptr;
-
     bool shouldUpdate = false;
 
     /**
@@ -103,13 +102,15 @@ public:
             break;
 
         case sf::Event::MouseButtonPressed:
-            this->focused = nullptr;
+        this->focused = nullptr;
             for (GraphicElement* el: this->elements)
                 if (el->isHovered())
                 {
                     el->onClick(event.mouseButton.button, true);
                     this->focused = el;
-                }
+                    if (!el->isFocused()) el->onFocus(true);
+                } else
+                    if (el->isFocused()) el->onFocus(false);
             break;
         case sf::Event::MouseButtonReleased:
             for (GraphicElement* el: this->elements)

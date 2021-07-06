@@ -6,10 +6,11 @@ class GraphicElement
 protected:
     sf::Sprite sprite;
     sf::RenderTexture renderTexture;
-    sf::Rect<int> dimensions;
+    sf::IntRect dimensions;
 
     bool hovered = false;
     bool clicked = false;
+    bool focused = false;
 
     void setDimensions(int x, int y, int width, int height)
     {
@@ -36,6 +37,12 @@ public:
      * @param hovering the mouse is hovering or not the object
      */
     virtual void onHover(bool hovered) = 0;
+
+    /**
+     * @brief OnFocus event callback when the element is in focus
+     * @param hovering Is the element focused or not
+     */
+    virtual void onFocus(bool focused) = 0;
 
     /**
      * @brief OnClick event callback when mouse is pressed or released
@@ -91,6 +98,20 @@ public:
     bool isClicked()
     {
         return this->clicked;
+    }
+
+    /**
+     * @brief Returns if the element is focused or not
+     * @return Is the element focused or not
+     */
+    bool isFocused()
+    {
+        return this->focused;
+    }
+
+    sf::IntRect getDimensions()
+    {
+        return this->dimensions;
     }
 
     ~GraphicElement()

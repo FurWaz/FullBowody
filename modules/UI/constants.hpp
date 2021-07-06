@@ -16,9 +16,4 @@ namespace CONST
         if (!FONT.loadFromFile("./resources/fonts/Roboto-Regular.ttf"))
             std::cout << "Error loading default font" << std::endl;
     }
-
-    void EMPTY_CALLBACK()
-    {
-        
-    }
 };

@@ -16,6 +16,11 @@ public:
         this->clicked = clicked;
     }
 
+    void onFocus(bool focused)
+    {
+        this->focused = focused;
+    }
+
     void onHover(bool hovered)
     {
         this->hovered = hovered;
