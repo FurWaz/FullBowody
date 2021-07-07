@@ -41,7 +41,7 @@ public:
         
     }
 
-    sf::Sprite getSprite()
+    sf::Sprite getSprite(float dt)
     {
         return this->sprite;
     }

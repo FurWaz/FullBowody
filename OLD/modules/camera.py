@@ -54,7 +54,7 @@ class Camera:
     def getFrame(self) -> np.ndarray:
         pos = tracker.getTracking(self.trackerID)
         if (self.debugMode and pos != None):
-            black = self.frame.copy() #np.zeros(self.frame.shape, dtype=np.uint8)
+            black = np.zeros(self.frame.shape, dtype=np.uint8)
             mpDraw.draw_landmarks(black, pos.pose_landmarks, tracker.POSE_CONNECTIONS)
             for c in self.marker_corners:
                 cv2.ellipse(black, np.array(c, dtype=np.uint32), (10, 10), 0, 0, 360, (255, 0, 0), -1)

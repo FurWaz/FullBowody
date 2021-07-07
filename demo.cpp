@@ -58,7 +58,7 @@ int main(int argc, char const *argv[])
     sf::Event ev;
 
     cv::VideoCapture cap;
-    cap.open("http://192.168.0.50:8080/video");
+    cap.open("http://192.168.43.163:8080/video");
     if (!cap.isOpened())
     {
         std::cout << "Error reading stream" << std::endl;
@@ -108,7 +108,7 @@ int main(int argc, char const *argv[])
         cv::drawFrameAxes(black, camMatrix, distCoeffs, camRot, camPos, 0.1, 6);
 
         cv::Mat rgba;
-        cv::cvtColor(black, rgba, cv::COLOR_BGR2RGBA);
+        cv::cvtColor(bgr, rgba, cv::COLOR_BGR2RGBA);
         sf::Image im;
         im.create(rgba.cols, rgba.rows, rgba.ptr());
         sf::Texture tex;

@@ -65,7 +65,7 @@ public:
     void refresh()
     {
         float dt = this->refreshClock.restart().asSeconds();
-        screen.clear(sf::Color::Black);
+        screen.clear(sf::Color(30, 20, 10));
         int index = 0;
         for (GraphicElement* el: this->elements)
             this->screen.draw(el->getSprite(dt));
