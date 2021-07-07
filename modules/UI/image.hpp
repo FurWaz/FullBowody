@@ -74,6 +74,13 @@ public:
         generateTexture();
     }
 
+    void resizeTo(int width, int height)
+    {
+        this->dimensions.width = width;
+        this->dimensions.height = height;
+        generateTexture();
+    }
+
     void fromArray(const sf::Uint8 *pixels, int width, int height)
     {
         this->img.create(width, height, pixels);
@@ -96,12 +103,7 @@ public:
     
     void onKey(int key, char c, bool pressed)
     {
-        if (key == sf::Keyboard::Right)
-            this->dimensions.width++;
-        if (key == sf::Keyboard::Left)
-            this->dimensions.width--;
         
-        generateTexture();
     }
 
     void onScroll(int delta)
