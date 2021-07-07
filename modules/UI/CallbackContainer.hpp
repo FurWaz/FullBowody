@@ -30,3 +30,22 @@ public:
         (this->instance->*this->callback)();
     }
 };
+
+/**
+ * @brief Contains a void callback function
+ */
+class VoidCallbackContainer: public virtual CallbackContainer
+{
+private:
+    void (*function)();
+public:
+    VoidCallbackContainer(void (*callback)())
+    {
+        this->function = callback;
+    }
+
+    void func()
+    {
+        this->function();
+    }
+};

@@ -89,19 +89,22 @@ public:
         this->cont = new TypedCallbackContainer<T>(callback, c);
     }
 
+    void setCallback(void (*callback)())
+    {
+        this->cont = new VoidCallbackContainer(callback);
+    }
+
     void onClick(int btn, bool clicked)
     {
         if (btn != sf::Mouse::Left) return;
         this->clicked = clicked;
-        if (clicked && this->cont != nullptr) this->cont->func();
+        if (clicked && this->cont != nullptr)
+            this->cont->func();
     }
 
     void onFocus(bool focused)
     {
         this->focused = focused;
-        if (focused) this->bgColor_normal = CONST::COLOR_PRIMARY;
-        else this->bgColor_normal = CONST::COLOR_BLACK;
-        generateHoverColors();
     }
 
     void onHover(bool hovered)
@@ -122,16 +125,7 @@ public:
     
     void onKey(int key, char c, bool pressed)
     {
-        if (pressed)
-        {
-            if (key == sf::Keyboard::BackSpace)
-                this->text = this->text.substr(0, this->text.size()-1);
-            else if (c != CONST::NO_CHAR)
-            {
-                this->text += c;
-            }
-            generateTexture();
-        }
+        
     }
 
     void onScroll(int delta)
@@ -146,7 +140,6 @@ public:
 
     sf::Sprite getSprite(float dt)
     {
-        generateTexture();
         return this->sprite;
     }
 
