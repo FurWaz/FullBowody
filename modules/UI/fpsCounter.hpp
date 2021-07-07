@@ -46,7 +46,7 @@ public:
         std::string txt = std::to_string((int)(1 / dt)) + " FPS";
 
         this->renderTexture.create(this->dimensions.width, this->dimensions.height);
-        this->renderTexture.clear(sf::Color(0, 0, 0, 0));
+        this->renderTexture.clear(CONST::COLOR_TRANS);
 
         sf::Text text(txt, CONST::FONT, 20);
         text.setFillColor(sf::Color::White);

@@ -16,7 +16,7 @@ private:
         sf::Sprite s(tex);
 
         this->renderTexture.create(this->dimensions.width, this->dimensions.height);
-        this->renderTexture.clear(sf::Color::White);
+        this->renderTexture.clear(CONST::COLOR_TRANS);
 
         float scaleFactor = 0;
         if ((this->dimensions.width / (float)this->dimensions.height) > (imgSize.x / (float)imgSize.y)) // scale on height
@@ -27,9 +27,10 @@ private:
         s.setScale(scaleFactor, scaleFactor);
         s.setPosition((this->dimensions.width-imgSize.x*scaleFactor)/2, (this->dimensions.height-imgSize.y*scaleFactor)/2);
         this->renderTexture.draw(s);
+        this->renderTexture.display();
         
         this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
-        this->sprite.setTexture(this->renderTexture.getTexture());
+        this->sprite.setTexture(this->renderTexture.getTexture(), true);
     }
 
 public:

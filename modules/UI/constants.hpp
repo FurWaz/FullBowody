@@ -7,6 +7,7 @@ namespace CONST
     sf::Color COLOR_BLACK(30, 35, 40);
     sf::Color COLOR_WHITE(255, 255, 255);
     sf::Color COLOR_PRIMARY(0, 128, 192);
+    sf::Color CONST::COLOR_TRANS(0, 0, 0, 0);
     sf::Font FONT;
     
     char NO_CHAR = '~';
