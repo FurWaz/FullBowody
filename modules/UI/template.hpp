@@ -1,54 +1,57 @@
+#pragma once
 #include "constants.hpp"
 #include "graphicElement.hpp"
 
-class Template : public virtual GraphicElement
-{
-private:
-
-public:
-    Template()
+namespace owo {
+    class Template : public virtual GraphicElement
     {
+    private:
+
+    public:
+        Template()
+        {
+            
+        }
+
+        void onClick(int btn, bool clicked)
+        {
+            this->clicked = clicked;
+        }
+
+        void onFocus(bool focused)
+        {
+            this->focused = focused;
+        }
+
+        void onHover(bool hovered)
+        {
+            this->hovered = hovered;
+        }
         
-    }
+        void onKey(int key, char c, bool pressed)
+        {
+            
+        }
 
-    void onClick(int btn, bool clicked)
-    {
-        this->clicked = clicked;
-    }
+        void onScroll(int delta)
+        {
+            
+        }
 
-    void onFocus(bool focused)
-    {
-        this->focused = focused;
-    }
+        void update(float dt, sf::Vector2i mousePos)
+        {
+            
+        }
 
-    void onHover(bool hovered)
-    {
-        this->hovered = hovered;
-    }
-    
-    void onKey(int key, char c, bool pressed)
-    {
-        
-    }
+        sf::Sprite getSprite(float dt)
+        {
+            return this->sprite;
+        }
 
-    void onScroll(int delta)
-    {
-        
-    }
+        ~Template()
+        {
 
-    void update(float dt, sf::Vector2i mousePos)
-    {
-        
-    }
+        }
 
-    sf::Sprite getSprite(float dt)
-    {
-        return this->sprite;
-    }
-
-    ~Template()
-    {
-
-    }
-
-};
+    };
+}

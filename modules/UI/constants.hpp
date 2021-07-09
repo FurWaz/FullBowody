@@ -11,6 +11,7 @@ namespace CONST
     sf::Font FONT;
     
     char NO_CHAR = '~';
+    int CAMERA_FPS = 15;
 
     void init()
     {

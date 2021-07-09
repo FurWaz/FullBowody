@@ -1,66 +1,69 @@
+#pragma once
 #include "constants.hpp"
 #include "graphicElement.hpp"
 
-class FPSCounter : public virtual GraphicElement
-{
-private:
+namespace owo {
+    class FPSCounter : public virtual GraphicElement
+    {
+    private:
 
-public:
-    FPSCounter()
-    {
-        setDimensions(0, 0, 200, 50);
-    }
+    public:
+        FPSCounter()
+        {
+            setDimensions(0, 0, 200, 50);
+        }
 
-    void onClick(int btn, bool clicked)
-    {
-        this->clicked = clicked;
-    }
+        void onClick(int btn, bool clicked)
+        {
+            this->clicked = clicked;
+        }
 
-    void onFocus(bool focused)
-    {
-        this->focused = focused;
-    }
+        void onFocus(bool focused)
+        {
+            this->focused = focused;
+        }
 
-    void onHover(bool hovered)
-    {
-        this->hovered = hovered;
-    }
-    
-    void onKey(int key, char c, bool pressed)
-    {
+        void onHover(bool hovered)
+        {
+            this->hovered = hovered;
+        }
         
-    }
+        void onKey(int key, char c, bool pressed)
+        {
+            
+        }
 
-    void onScroll(int delta)
-    {
-        
-    }
+        void onScroll(int delta)
+        {
+            
+        }
 
-    void update(float dt, sf::Vector2i mousePos)
-    {
-        
-    }
+        void update(float dt, sf::Vector2i mousePos)
+        {
+            
+        }
 
-    sf::Sprite getSprite(float dt)
-    {
-        std::string txt = std::to_string((int)(1 / dt)) + " FPS";
+        sf::Sprite getSprite(float dt)
+        {
+            std::string txt = std::to_string((int)(1 / dt)) + " FPS";
 
-        this->renderTexture.create(this->dimensions.width, this->dimensions.height);
-        this->renderTexture.clear(CONST::COLOR_TRANS);
+            this->renderTexture.create(this->dimensions.width, this->dimensions.height);
+            this->renderTexture.clear(CONST::COLOR_TRANS);
 
-        sf::Text text(txt, CONST::FONT, 20);
-        text.setFillColor(sf::Color::White);
-        this->renderTexture.draw(text);
-        this->renderTexture.display();
+            sf::Text text(txt, CONST::FONT, 20);
+            text.setFillColor(sf::Color::White);
+            this->renderTexture.draw(text);
+            this->renderTexture.display();
 
-        this->sprite.setTexture(this->renderTexture.getTexture());
-        this->sprite.setPosition(sf::Vector2f(this->dimensions.left, this->dimensions.top));
-        return this->sprite;
-    }
+            this->sprite.setTexture(this->renderTexture.getTexture());
+            this->sprite.setPosition(sf::Vector2f(this->dimensions.left, this->dimensions.top));
+            return this->sprite;
+        }
 
-    ~FPSCounter()
-    {
-        
-    }
+        ~FPSCounter()
+        {
+            
+        }
 
-};
+    };
+}

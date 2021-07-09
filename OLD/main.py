@@ -8,7 +8,7 @@ screen = pygame.display.set_mode([720, 1280])
 
 cam = Camera()
 cam.debugMode = True
-cam.openAdress("http://192.168.43.163:8080/video")
+cam.openAdress("http://192.168.1.59:8080/video")
 cam.startTracker()
 cam.startCapture()
 

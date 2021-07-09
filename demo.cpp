@@ -58,7 +58,7 @@ int main(int argc, char const *argv[])
     sf::Event ev;
 
     cv::VideoCapture cap;
-    cap.open("http://192.168.43.163:8080/video");
+    cap.open("http://192.168.1.23:8080/video");
     if (!cap.isOpened())
     {
         std::cout << "Error reading stream" << std::endl;
