@@ -1,5 +1,5 @@
 #pragma once
-#include "constants.hpp"
+#include "../constants.hpp"
 #include "CallbackContainer.hpp"
 #include "graphicElement.hpp"
 
@@ -55,8 +55,8 @@ namespace owo {
     public:
         Button()
         {
-            this->bgColor_normal = CONST::COLOR_BLACK;
-            this->fgColor_normal = CONST::COLOR_WHITE;
+            this->bgColor_normal = CONST::COLOR_BACKGROUND;
+            this->fgColor_normal = CONST::COLOR_FOREGROUND;
             this->text = "Button";
             this->textSize = 18;
             this->setDimensions(0, 0, 140, 40);
@@ -66,8 +66,8 @@ namespace owo {
 
         Button(std::string text, sf::Vector2i pos, sf::Vector2i size)
         {
-            this->bgColor_normal = CONST::COLOR_BLACK;
-            this->fgColor_normal = CONST::COLOR_WHITE;
+            this->bgColor_normal = CONST::COLOR_BACKGROUND;
+            this->fgColor_normal = CONST::COLOR_FOREGROUND;
             this->text = text;
             this->textSize = 18;
             this->setDimensions(pos.x, pos.y, size.x, size.y);

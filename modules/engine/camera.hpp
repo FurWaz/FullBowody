@@ -6,6 +6,7 @@
 #include <opencv2/imgproc.hpp>
 #include "../UI/image.hpp"
 #include <SFML/System.hpp>
+#include <thread>
 #include <fstream>
 #include <iostream>
 
@@ -89,7 +90,11 @@ namespace owo {
         cv::Mat frame;
         sf::Vector2u dimensions;
         Image* graphImage;
+        std::string path;
         bool sourceAvailable;
+
+        bool shouldRead;
+        std::thread updateThread;
 
         void setDimensionsFromSource()
         {
@@ -97,7 +102,6 @@ namespace owo {
                 this->source.get(cv::CAP_PROP_FRAME_WIDTH),
                 this->source.get(cv::CAP_PROP_FRAME_HEIGHT)
             );
-            this->source.set(cv::CAP_PROP_BUFFERSIZE, 1);
             this->sourceAvailable = true;
         }
 
@@ -112,26 +116,82 @@ namespace owo {
             this->dimensions = sf::Vector2u(1280, 720);
             this->initFrame();
             this->sourceAvailable = false;
+            this->shouldRead = false;
         }
 
         Camera(Image* im)
         {
             this->graphImage = im;
             this->sourceAvailable = false;
+            this->shouldRead = false;
         }
         
         bool openSource(int index)
         {
-            this->source = cv::VideoCapture(index);
-            this->setDimensionsFromSource();
-            return true;
+            char* str;
+            itoa(index, str, 0);
+            this->path = str;
+            bool result = true;
+            try
+            {
+                result = this->source.open(index);
+                this->setDimensionsFromSource();
+            }
+            catch (std::exception &e)
+            {
+                std::cerr << "err: " << std::endl << e.what();
+            }
+            if (this->shouldRead == false)
+                this->updateThread = std::thread(&Camera::_read_frame, this);
+            if (!result)
+            {
+                this->dimensions = sf::Vector2u(300, 300);
+                this->sourceAvailable = false;
+                this->graphImage->black(sf::Vector2u(300, 300));
+            }
+            return result;
         }
         
         bool openSource(std::string address)
         {
-            this->source = cv::VideoCapture(address);
-            this->setDimensionsFromSource();
-            return true;
+            this->path = address;
+            bool result = true;
+            try
+            {
+                result = this->source.open(address);
+                this->setDimensionsFromSource();
+            }
+            catch (std::exception &e)
+            {
+                std::cerr << "err: " << std::endl << e.what();
+            }
+            if (this->shouldRead == false)
+                this->updateThread = std::thread(&Camera::_read_frame, this);
+            if (!result)
+            {
+                this->dimensions = sf::Vector2u(300, 300);
+                this->sourceAvailable = false;
+                this->graphImage->black(sf::Vector2u(300, 300));
+            }
+            return result;
+        }
+
+        void updateFrame()
+        {
+            if (this->graphImage != nullptr)
+            {
+                try
+                {
+                    this->source.retrieve(this->frame);
+                    cv::Mat rgba;
+                    cv::cvtColor(this->frame, rgba, cv::COLOR_BGR2RGBA);
+                    this->graphImage->fromArray(rgba.ptr(), this->dimensions);
+                }
+                catch (std::exception &e) 
+                {
+                    this->graphImage->black(sf::Vector2u(300, 300));
+                }
+            }
         }
 
         void attachImage(Image* im)
@@ -139,26 +199,25 @@ namespace owo {
             this->graphImage = im;
         }
         
-        void readFrame()
+        void _read_frame()
         {
-            try
+            this->shouldRead = true;
+            while (this->shouldRead)
             {
-                this->source.read(this->frame);
-            } catch (std::exception &e)
-            {
-                std::cerr << "error" << std::endl;
+                this->source.grab();
+                this->source.retrieve(this->frame);
             }
-            if (this->graphImage != nullptr)
-            {
-                cv::Mat rgba;
-                cv::cvtColor(this->frame, rgba, cv::COLOR_BGR2RGBA);
-                this->graphImage->fromArray(rgba.ptr(), this->dimensions);
-            }
+        }
+
+        std::string getPath()
+        {
+            return this->path;
         }
 
         ~Camera()
         {
-            
+            this->shouldRead = false;
+            this->updateThread.join();
         }
     };
 }

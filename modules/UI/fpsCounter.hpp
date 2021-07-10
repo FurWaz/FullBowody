@@ -1,15 +1,17 @@
 #pragma once
-#include "constants.hpp"
+#include "../constants.hpp"
 #include "graphicElement.hpp"
 
 namespace owo {
     class FPSCounter : public virtual GraphicElement
     {
     private:
+        float avgDelta;
 
     public:
         FPSCounter()
         {
+            this->avgDelta = 0;
             setDimensions(0, 0, 200, 50);
         }
 
@@ -45,12 +47,13 @@ namespace owo {
 
         sf::Sprite getSprite(float dt)
         {
-            std::string txt = std::to_string((int)(1 / dt)) + " FPS";
+            this->avgDelta += (dt - this->avgDelta) * 0.2;
+            std::string txt = std::to_string((int)(1 / this->avgDelta)) + " FPS";
 
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
             this->renderTexture.clear(CONST::COLOR_TRANS);
 
-            sf::Text text(txt, CONST::FONT, 20);
+            sf::Text text(txt, CONST::FONT, 16);
             text.setFillColor(sf::Color::White);
             this->renderTexture.draw(text);
             this->renderTexture.display();

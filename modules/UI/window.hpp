@@ -68,7 +68,7 @@ namespace owo {
         void refresh()
         {
             this->refreshDelta = this->refreshClock.restart().asSeconds();
-            screen.clear(sf::Color(30, 20, 10));
+            screen.clear(CONST::COLOR_CLEAR);
             int index = 0;
             for (GraphicElement* el: this->elements)
                 this->screen.draw(el->getSprite(this->refreshDelta));
@@ -105,7 +105,7 @@ namespace owo {
                 break;
 
             case sf::Event::MouseButtonPressed:
-            this->focused = nullptr;
+                this->focused = nullptr;
                 for (GraphicElement* el: this->elements)
                     if (el->isHovered())
                     {
@@ -209,6 +209,11 @@ namespace owo {
         float getDeltaTime()
         {
             return this->refreshDelta;
+        }
+
+        sf::Vector2i getMousePos()
+        {
+            return this->mousePos;
         }
 
         /**

@@ -1,5 +1,5 @@
 #pragma once
-#include "constants.hpp"
+#include "../constants.hpp"
 #include "graphicElement.hpp"
 
 namespace owo {
@@ -86,6 +86,12 @@ namespace owo {
         void fromArray(const sf::Uint8 *pixels, sf::Vector2u dims)
         {
             this->img.create(dims.x, dims.y, pixels);
+            this->generateTexture();
+        }
+
+        void black(sf::Vector2u dims)
+        {
+            this->img.create(dims.x, dims.y, sf::Color(0, 0, 0));
             this->generateTexture();
         }
 

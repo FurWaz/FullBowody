@@ -1,7 +1,8 @@
 #pragma once
-#include "constants.hpp"
+#include "../constants.hpp"
 #include "graphicElement.hpp"
 #include "image.hpp"
+#include "input.hpp"
 #include "../engine/camera.hpp"
 
 namespace owo {
@@ -10,26 +11,29 @@ namespace owo {
     private:
         Camera* cam;
         Image* im;
-
-        float delta = 0;
+        Input* input;
+        std::string cameraSource;
 
         void setupCamView()
         {
-            this->im->setDimensions(10, 10, this->dimensions.width - 20, this->dimensions.height - 60);
+            this->im->setDimensions(this->dimensions.left+10, this->dimensions.top+50, this->dimensions.width - 20, this->dimensions.height - 60);
+            this->input = new Input(
+                this->cam->getPath(),
+                sf::Vector2i(this->dimensions.left, this->dimensions.top), sf::Vector2i(this->dimensions.width, 40),
+                14, Input::CENTER
+            );
+            this->input->setCallback(&CameraView::_update_source, this);
+            this->renderTexture.create(this->dimensions.width, this->dimensions.height);
+            this->renderTexture.clear(CONST::COLOR_BACKGROUND);
+            this->sprite.setTexture(this->renderTexture.getTexture());
+            this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
         }
 
     public:
         CameraView()
         {
             this->im = new Image();
-            this->cam = new Camera(this->im);
-            this->setDimensions(0, 0, 120, 200);
-            this->setupCamView();
-        }
-
-        CameraView(Image* im)
-        {
-            this->im = im;
+            this->input = new Input();
             this->cam = new Camera(this->im);
             this->setDimensions(0, 0, 120, 200);
             this->setupCamView();
@@ -37,23 +41,14 @@ namespace owo {
 
         CameraView(Camera* cam)
         {
-            this->im = new Image;
+            this->im = new Image();
             this->cam = cam;
             this->cam->attachImage(this->im);
             this->setDimensions(0, 0, 120, 200);
             this->setupCamView();
         }
 
-        CameraView(Image* im, Camera* cam)
-        {
-            this->im = im;
-            this->cam = cam;
-            this->cam->attachImage(this->im);
-            this->setDimensions(0, 0, 120, 200);
-            this->setupCamView();
-        }
-
-        CameraView(Camera* cam, sf::Vector2i position, sf::Vector2u size)
+        CameraView(Camera* cam, sf::Vector2i position, sf::Vector2i size)
         {
             this->im = new Image();
             this->cam = cam;
@@ -89,21 +84,12 @@ namespace owo {
 
         void update(float dt, sf::Vector2i mousePos)
         {
-            this->delta += dt;
-            if (this->delta >= 1/CONST::CAMERA_FPS)
-            {
-                this->delta = 0;
-                this->cam->readFrame();
-            }
+            
         }
 
         sf::Sprite getSprite(float dt)
         {
-            this->renderTexture.create(this->dimensions.width, this->dimensions.height);
-            this->renderTexture.clear(CONST::COLOR_BLACK);
-            this->renderTexture.draw(this->im->getSprite(dt));
-            this->sprite.setTexture(this->renderTexture.getTexture());
-            this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
+            this->cam->updateFrame();
             return this->sprite;
         }
 
@@ -117,6 +103,11 @@ namespace owo {
             return this->im;
         }
 
+        Input* getInput()
+        {
+            return this->input;
+        }
+
         void setCamera(Camera* cam)
         {
             this->cam = cam;
@@ -125,6 +116,11 @@ namespace owo {
         void setImage(Image* im)
         {
             this->im = im;
+        }
+
+        void _update_source()
+        {
+            this->cam->openSource(this->input->getText());
         }
 
         ~CameraView()
