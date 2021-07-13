@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto');
+
+body {
+    margin: 0px;
+    padding: 0px;
+}
+
+header {
+    background: linear-gradient(75deg, #43cea2, #185a9d);
+    background-attachment: fixed;
+    background-size: 100vw 100vh;
+    box-shadow: 0px 0px 14px #0004 inset;
+    height: 32vh;
+}
+
+div#content {
+    padding: 20px;
+}
+
+h1 {
+    font-family: "Roboto";
+    color: white;
+    font-size: 10vh;
+    text-shadow: 0px 4px 14px #0004;
+}
+
+h2 {
+    font-family: "Roboto";
+    color: #333;
+    font-size: 4vh;
+    border-left: solid 4px #333;
+    padding: 0px 14px;
+    margin: 0px;
+}
+
+p {
+    font-family: "Roboto";
+    color: #666;
+    font-size: 3vh;
+    text-align: center;
+    padding: 0px 14px;
+    margin: 0px;
+}
+
+.center-x {
+    text-align: center;
+    margin: 0px auto;
+    width: 100%;
+}
+
+.center-y {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+}
