@@ -10,11 +10,12 @@
 #include <fstream>
 #include <iostream>
 
-namespace owo {
+namespace owo
+{
     struct CalibrationData
     {
-        cv::Mat cameraMatrix = cv::Mat(8, 1, CV_64F);
-        cv::Mat distanceCoefficients = cv::Mat(3, 3, CV_64F);
+        cv::Mat cameraMatrix = cv::Mat(3, 3, CV_64F);
+        cv::Mat distanceCoefficients = cv::Mat(8, 1, CV_64F);
 
         bool loadFromFile(std::string path)
         {
@@ -81,20 +82,30 @@ namespace owo {
         }
     };
 
-
     class Camera
     {
     private:
         CalibrationData calibrData;
         cv::VideoCapture source;
         cv::Mat frame;
+        cv::Mat frame_gray;
+        cv::Vec3d rotation, position;
+
         sf::Vector2u dimensions;
         Image* graphImage;
         std::string path;
         bool sourceAvailable;
+        bool debugMode;
 
         bool shouldRead;
         std::thread updateThread;
+
+        cv::Ptr<cv::aruco::Dictionary> aruco_dict = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
+        cv::Ptr<cv::aruco::DetectorParameters> aruco_params = cv::aruco::DetectorParameters::create();
+        cv::Ptr<cv::aruco::GridBoard> aruco_board;
+        std::vector<std::vector<cv::Point2f>> aruco_corners, aruco_rejected;
+        std::vector<int> aruco_ids;
+        cv::Vec3d aruco_boardPosition, aruco_boardRotation;
 
         void setDimensionsFromSource()
         {
@@ -105,25 +116,58 @@ namespace owo {
             this->sourceAvailable = true;
         }
 
-        void initFrame()
+        void init()
         {
-            this->frame = cv::Mat(this->dimensions.x, this->dimensions.y, CV_8U);
+            this->dimensions = sf::Vector2u(300, 300);
+            this->frame = cv::Mat(this->dimensions.x, this->dimensions.y, CV_8UC3);
+            this->frame_gray = cv::Mat(this->dimensions.x, this->dimensions.y, CV_8U);
+            this->sourceAvailable = false;
+            this->shouldRead = false;
+            this->debugMode = false;
+            this->aruco_board = cv::aruco::GridBoard::create(3, 2, 0.088, 0.005, this->aruco_dict, 0);
+        }
+
+        void getCamPosRot()
+        {
+            cv::Mat rotMat(3, 3, CV_64F);
+            cv::Rodrigues(this->aruco_boardRotation, rotMat);
+            rotMat = rotMat.t();
+            cv::Rodrigues(rotMat, this->rotation);
+            cv::Mat position(3, 1, CV_64F);
+            position = -rotMat * this->aruco_boardPosition;
+            this->position[0] = position.at<double>(0, 0);
+            this->position[1] = position.at<double>(1, 0);
+            this->position[2] = position.at<double>(2, 0);
+        }
+
+        void detectArucoMarkers()
+        {
+            cv::aruco::detectMarkers(
+                this->frame_gray, this->aruco_dict,
+                this->aruco_corners, this->aruco_ids, this->aruco_params, this->aruco_rejected
+            );
+        }
+
+        void getArucoBoardPosition()
+        {
+            cv::aruco::estimatePoseBoard(
+                this->aruco_corners, this->aruco_ids, this->aruco_board,
+                this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients,
+                this->aruco_boardRotation, this->aruco_boardPosition, false
+            );
+            getCamPosRot();
         }
 
     public:
         Camera()
         {
-            this->dimensions = sf::Vector2u(1280, 720);
-            this->initFrame();
-            this->sourceAvailable = false;
-            this->shouldRead = false;
+            this->init();
         }
 
         Camera(Image* im)
         {
             this->graphImage = im;
-            this->sourceAvailable = false;
-            this->shouldRead = false;
+            this->init();
         }
         
         bool openSource(int index)
@@ -183,12 +227,21 @@ namespace owo {
                 try
                 {
                     this->source.retrieve(this->frame);
+                    if (this->debugMode)
+                    {
+                        cv::aruco::drawDetectedMarkers(this->frame, this->aruco_corners, this->aruco_ids);
+                        cv::drawFrameAxes(
+                            this->frame, this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients,
+                            this->aruco_boardRotation, this->aruco_boardPosition, 0.042, 6
+                        );
+                    }
                     cv::Mat rgba;
                     cv::cvtColor(this->frame, rgba, cv::COLOR_BGR2RGBA);
                     this->graphImage->fromArray(rgba.ptr(), this->dimensions);
                 }
                 catch (std::exception &e) 
                 {
+                    std::cerr << e.what() << std::endl;
                     this->graphImage->black(sf::Vector2u(300, 300));
                 }
             }
@@ -204,14 +257,43 @@ namespace owo {
             this->shouldRead = true;
             while (this->shouldRead)
             {
-                this->source.grab();
+                if (!this->source.grab()) continue;
                 this->source.retrieve(this->frame);
+                cv::cvtColor(this->frame, this->frame_gray, cv::COLOR_BGR2GRAY);
+                detectArucoMarkers();
+                getArucoBoardPosition();
             }
+            this->shouldRead = false;
         }
 
         std::string getPath()
         {
             return this->path;
+        }
+
+        void loadCalibration(std::string path)
+        {
+            this->calibrData.loadFromFile(path);
+        }
+
+        void saveCalibration(std::string path)
+        {
+            this->calibrData.saveToFile(path);
+        }
+
+        cv::Vec3d getPosition()
+        {
+            return this->position;
+        }
+
+        cv::Vec3d getRotation()
+        {
+            return this->rotation;
+        }
+
+        void setDebugMode(bool state)
+        {
+            this->debugMode = state;
         }
 
         ~Camera()

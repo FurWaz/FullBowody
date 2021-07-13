@@ -4,13 +4,15 @@
 #include "graphicElement.hpp"
 #include "label.hpp"
 
-namespace owo {
+namespace owo
+{
     class Input : public virtual GraphicElement
     {
     private:
         std::string text;
         Label* label;
         CallbackContainer* cont;
+        std::string highlight;
 
     public:
         static const int LEFT = Label::LEFT;
@@ -25,20 +27,25 @@ namespace owo {
             this->generateTexture();
         }
 
-        Input(std::string text, int fontSize = 16, int placement = Input::CENTER, sf::Color textColor = CONST::COLOR_PRIMARY)
+        Input(std::string text,
+              int fontSize = 16, int placement = Input::CENTER,
+              sf::Color textColor = CONST::COLOR_PRIMARY, std::string highlight = "Input text")
         {
             this->setDimensions(0, 0, 200, 50);
             this->text = text;
+            this->highlight = highlight;
             this->label = new Label(this->text, fontSize, placement, textColor);
             this->generateTexture();
         }
 
         Input(std::string text,
               sf::Vector2i position, sf::Vector2i size = sf::Vector2i(-1, -1),
-              int fontSize = 16, int placement = Input::CENTER, sf::Color textColor = CONST::COLOR_PRIMARY)
+              int fontSize = 16, int placement = Input::CENTER, sf::Color textColor = CONST::COLOR_PRIMARY,
+              std::string highlight = "Input text")
         {
             this->setDimensions(position.x, position.y, size.x, size.y);
             this->text = text;
+            this->highlight = highlight;
             this->label = new Label(this->text, sf::Vector2i(0, 0), size, fontSize, placement, textColor);
             std::cout << this->text.c_str() << std::endl;
             this->generateTexture();
@@ -46,20 +53,32 @@ namespace owo {
 
         void generateTexture()
         {
-            this->label->setText(this->text);
-            this->label->generateTexture();
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
             this->renderTexture.clear(CONST::COLOR_BACKGROUND);
-            this->renderTexture.draw(this->label->getSprite(0));
-            if (this->focused)
+            if (this->text != "" || this->focused)
             {
-                sf::RectangleShape highlightRect(sf::Vector2f(this->dimensions.width-4, this->dimensions.height-4));
-                highlightRect.setPosition(sf::Vector2f(2, 2));
-                highlightRect.setFillColor(CONST::COLOR_TRANS);
-                highlightRect.setOutlineColor(this->label->getTextColor());
-                highlightRect.setOutlineThickness(2);
-                this->renderTexture.draw(highlightRect);
+                this->label->setText(this->text);
+                this->label->generateTexture();
+                this->renderTexture.draw(this->label->getSprite(0));
+            } else
+            {
+                Label l(
+                    this->highlight,
+                    this->label->getPosition(), this->label->getSize(),
+                    this->label->getFontSize(), this->label->getPlacement(),
+                    CONST::COLOR_GREY_DARK
+                );
+                l.generateTexture();
+                this->renderTexture.draw(l.getSprite(0));
             }
+            sf::Color color = CONST::COLOR_WHITE_DARK;
+            if (this->focused) color = this->label->getTextColor();
+            sf::RectangleShape highlightRect(sf::Vector2f(this->dimensions.width-4, this->dimensions.height-4));
+            highlightRect.setPosition(sf::Vector2f(2, 2));
+            highlightRect.setFillColor(CONST::COLOR_TRANS);
+            highlightRect.setOutlineColor(color);
+            highlightRect.setOutlineThickness(2);
+            this->renderTexture.draw(highlightRect);
             this->renderTexture.display();
             this->sprite.setTexture(this->renderTexture.getTexture());
             this->sprite.setPosition(this->dimensions.left, this->dimensions.top);

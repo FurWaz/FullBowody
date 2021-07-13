@@ -3,7 +3,8 @@
 #include "CallbackContainer.hpp"
 #include "graphicElement.hpp"
 
-namespace owo {
+namespace owo
+{
     class Button : public virtual GraphicElement
     {
     private:

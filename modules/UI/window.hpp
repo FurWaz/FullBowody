@@ -4,7 +4,8 @@
 #include <iostream>
 #include <thread>
 
-namespace owo {
+namespace owo
+{
     class Window
     {
     private:

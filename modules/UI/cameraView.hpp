@@ -5,7 +5,8 @@
 #include "input.hpp"
 #include "../engine/camera.hpp"
 
-namespace owo {
+namespace owo
+{
     class CameraView : public virtual GraphicElement
     {
     private:
@@ -20,7 +21,7 @@ namespace owo {
             this->input = new Input(
                 this->cam->getPath(),
                 sf::Vector2i(this->dimensions.left, this->dimensions.top), sf::Vector2i(this->dimensions.width, 40),
-                14, Input::CENTER
+                14, Input::CENTER, CONST::COLOR_PRIMARY, "Enter camera address"
             );
             this->input->setCallback(&CameraView::_update_source, this);
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);

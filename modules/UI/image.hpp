@@ -2,7 +2,8 @@
 #include "../constants.hpp"
 #include "graphicElement.hpp"
 
-namespace owo {
+namespace owo
+{
     class Image : public virtual GraphicElement
     {
     private:

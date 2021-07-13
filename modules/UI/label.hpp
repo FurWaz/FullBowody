@@ -2,7 +2,8 @@
 #include "../constants.hpp"
 #include "graphicElement.hpp"
 
-namespace owo {
+namespace owo
+{
     class Label : public virtual GraphicElement
     {
     private:
@@ -130,6 +131,16 @@ namespace owo {
         sf::Color getTextColor()
         {
             return this->textColor;
+        }
+
+        int getFontSize()
+        {
+            return this->fontSize;
+        }
+
+        int getPlacement()
+        {
+            return this->placement;
         }
 
         ~Label()

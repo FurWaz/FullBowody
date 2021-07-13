@@ -23,17 +23,15 @@ class Camera:
         self.shouldCapture:bool = False
         self.captureThread = Thread(target=self._readFrame)
         self.trackerID = tracker.addTracker()
+        self.rawFrame = np.zeros([720, 1280, 3], dtype=np.uint8)
 
         self.resolution = Dimension()
         self.marker_corners = []
         
     def _readFrame(self) -> None:
         while self.shouldCapture:
-            ret, frame = self.cap.read()
-            self.frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            self.gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-            tracker.setFrame(self.trackerID, self.frame)
-            self.getAruco()
+            ret = self.cap.grab()
+            ret, rawFrame = self.cap.retrieve()
 
     def openDevice(self, deviceID) -> bool:
         self.cap = cv2.VideoCapture(deviceID)
@@ -52,6 +50,10 @@ class Camera:
         self.captureThread.join()
 
     def getFrame(self) -> np.ndarray:
+        self.frame = cv2.cvtColor(self.rawFrame, cv2.COLOR_BGR2RGB)
+        self.gray = cv2.cvtColor(self.rawFrame, cv2.COLOR_RGB2GRAY)
+        tracker.setFrame(self.trackerID, self.frame)
+        self.getAruco()
         pos = tracker.getTracking(self.trackerID)
         if (self.debugMode and pos != None):
             black = np.zeros(self.frame.shape, dtype=np.uint8)

@@ -2,7 +2,8 @@
 #include "../constants.hpp"
 #include "graphicElement.hpp"
 
-namespace owo {
+namespace owo
+{
     class FPSCounter : public virtual GraphicElement
     {
     private:

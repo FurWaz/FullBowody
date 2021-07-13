@@ -1,5 +1,6 @@
 #pragma once
-namespace owo {
+namespace owo
+{
     /**
      * @brief Parent class, contains the [func] callback template
      */

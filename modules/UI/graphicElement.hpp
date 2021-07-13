@@ -1,7 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 
-namespace owo {
+namespace owo
+{
     class GraphicElement
     {
     protected:
@@ -120,6 +121,16 @@ namespace owo {
         sf::IntRect getDimensions()
         {
             return this->dimensions;
+        }
+
+        sf::Vector2i getPosition()
+        {
+            return sf::Vector2i(this->dimensions.left, this->dimensions.top);
+        }
+
+        sf::Vector2i getSize()
+        {
+            return sf::Vector2i(this->dimensions.width, this->dimensions.height);
         }
 
         ~GraphicElement()

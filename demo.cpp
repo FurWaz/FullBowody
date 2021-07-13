@@ -68,14 +68,10 @@ int main(int argc, char const *argv[])
     cv::Ptr<cv::aruco::Dictionary> dict = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
     cv::Ptr<cv::aruco::DetectorParameters> params = cv::aruco::DetectorParameters::create();
     cv::Ptr<cv::aruco::GridBoard> board = cv::aruco::GridBoard::create(3, 2, 0.088, 0.005, dict, 0);
-
-    sf::Vector2f points[4];
     
     cv::Mat distCoeffs(8, 1, CV_64F);
     cv::Mat camMatrix(3, 3, CV_64F);
     loadInfos(distCoeffs, camMatrix);
-    
-    float radToDeg = 180/3.1415926f;
 
     while (win.isOpen())
     {

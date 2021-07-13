@@ -26,7 +26,7 @@ namespace CONST
     sf::Color COLOR_CLEAR = COLOR_BLACK_DARK;
     sf::Color COLOR_BACKGROUND = COLOR_BLACK_LIGHT;
     sf::Color COLOR_FOREGROUND = COLOR_WHITE_LIGHT;
-    sf::Color COLOR_PRIMARY = COLOR_ORANGE_LIGHT;
+    sf::Color COLOR_PRIMARY = COLOR_GREEN_LIGHT;
     sf::Color COLOR_TRANS      (0, 0, 0, 0);
     
     sf::Font FONT;
