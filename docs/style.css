@@ -83,9 +83,12 @@ code {
     border-radius: 4px;
     color: white;
     padding: 3px 6px;
+    width: min-content;
+    height: min-content;
 }
 
 a {
+    font-size: 16px;
     display: inline-block;
     background: var(--gradient);
     background-clip: text;
