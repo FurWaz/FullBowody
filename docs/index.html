@@ -4,18 +4,38 @@
     <meta charset="UTF-8">
     <title>FullBowody documentation</title>
     <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./mobile.css">
+    <script src="./script.js" defer></script>
 </head>
 <body>
     <header class="center-y">
         <div class="centerx">
-            <h1>FullBowody</h1>
+            <h1 id="main-title">FullBowody</h1>
         </div>
     </header>
+    <h2 style="margin: 20px;">A full body tracking for VR using dual cameras</h2>
+    <p class="info">Sorry, the website is still in construction <|°_°|></p>
     <div id="content">
-        <h2>A full body tracking for VR using dual cameras</h2>
-        <br>
-        <br>
-        <p>Sorry, the website is still in construction <|°_°|></p>
+        <h3>Compiling from sources (Windows)</h3>
+        <span class="shift">
+            <p>Download the github repository</p>
+            <p>Install
+                <a href="https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download">MinGW G++</a>
+            </p>
+            <p>Open a terminal in the root folder (where the <code>main.cpp</code> file is located)</p>
+            <p>Type <code>./build.cmd</code> to compile the app</p>
+        </span>
+
+        <h3>Running (Windows)</h3>
+        <span class="shift">
+            <p>Open a terminal in the root folder</p>
+            <p>Type <code>./build/main.exe</code> to run the app</p>
+        </span>
     </div>
+    <footer>
+        <p>Author:
+            <a href="https://github.com/furwaz">FurWaz</a>
+        </p>
+    </footer>
 </body>
 </html>

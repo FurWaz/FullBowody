@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto');
 
+@media screen and (orientation: portrait) {
+
 :root {
     --gradient: linear-gradient(75deg, #43cea2, #185a9d);
 }
@@ -15,12 +17,13 @@ header {
     background-attachment: fixed;
     background-size: 100vw 100vh;
     box-shadow: 0px 0px 14px #0004 inset;
-    height: 180px;
+    height: 250px;
     overflow: hidden;
 }
 
 div#content {
-    padding: 20px 100px;
+    margin-top: 50px;
+    padding: 20px;
 }
 
 .center-x {
@@ -39,38 +42,38 @@ div#content {
 
 span.shift {
     display: block;
-    padding-left: 20px;
+    padding-left: 40px;
 }
 
 h1 {
     color: white;
-    font-size: 60px;
+    font-size: 120px;
     text-shadow: 0px 4px 14px #0004;
 }
 
 h2 {
     color: #333;
-    font-size: 24px;
-    border-left: solid 4px #333;
+    font-size: 60px;
+    border-left: solid 8px #333;
     padding: 0px 14px;
     margin: 0px;
 }
 
 h3 {
     color: #333;
-    font-size: 20px;
+    font-size: 50px;
     text-decoration: underline 2px #333;
     margin: 0px;
 }
 
 p {
-    font-size: 16px;
+    font-size: 40px;
     color: #333;
 }
 
 p.info {
     color: #666;
-    font-size: 20px;
+    font-size: 4.5vw;
     text-align: center;
     padding: 0px 14px;
     margin: 0px;
@@ -78,7 +81,7 @@ p.info {
 
 code {
     font-family: 'Courier New', Courier, monospace;
-    font-size: 16px;
+    font-size: 40px;
     background-color: #333;
     border-radius: 4px;
     color: white;
@@ -98,4 +101,6 @@ footer {
     width: 100%;
     text-align: center;
     white-space: nowrap;
+}
+   
 }
