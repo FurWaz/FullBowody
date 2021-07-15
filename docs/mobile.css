@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto');
+
+@media screen and (orientation: portrait) {
+
+:root {
+    --gradient: linear-gradient(75deg, #43cea2, #185a9d);
+}
+
+body {
+    margin: 0px;
+    padding: 0px;
+    font-family: "Roboto";
+}
+
+header {
+    background: var(--gradient);
+    background-attachment: fixed;
+    background-size: 100vw 100vh;
+    box-shadow: 0px 0px 14px #0004 inset;
+    height: 250px;
+    overflow: hidden;
+}
+
+div#content {
+    margin-top: 20px;
+    padding: 20px;
+}
+
+span.shift {
+    padding-left: 40px;
+}
+
+h1 {
+    font-size: 120px;
+}
+
+h2 {
+    font-size: 50px;
+}
+
+h3 {
+    font-size: 36px;
+    margin-top: 50px;
+}
+
+p {
+    font-size: 40px;
+}
+
+p.info {
+    font-size: 40px;
+}
+
+code {
+    font-size: 24px;
+}
+
+a {
+    font-size: 40px;
+}
+   
+}
