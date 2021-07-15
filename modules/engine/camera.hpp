@@ -5,6 +5,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include "../UI/image.hpp"
+#include "./tracker.hpp"
 #include <SFML/System.hpp>
 #include <thread>
 #include <fstream>
@@ -90,6 +91,7 @@ namespace owo
         cv::Mat frame;
         cv::Mat frame_gray;
         cv::Vec3d rotation, position;
+        Tracker* tracker;
 
         sf::Vector2u dimensions;
         Image* graphImage;
@@ -99,6 +101,8 @@ namespace owo
 
         bool shouldRead;
         std::thread updateThread;
+        float delta;
+        int FPS;
 
         cv::Ptr<cv::aruco::Dictionary> aruco_dict = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
         cv::Ptr<cv::aruco::DetectorParameters> aruco_params = cv::aruco::DetectorParameters::create();
@@ -118,12 +122,15 @@ namespace owo
 
         void init()
         {
+            this->tracker = new Tracker(this->path);
             this->dimensions = sf::Vector2u(300, 300);
-            this->frame = cv::Mat(this->dimensions.x, this->dimensions.y, CV_8UC3);
+            this->frame = cv::Mat(this->dimensions.x, this->dimensions.y, CV_8UC3, cv::Scalar(0, 0, 0));
             this->frame_gray = cv::Mat(this->dimensions.x, this->dimensions.y, CV_8U);
             this->sourceAvailable = false;
             this->shouldRead = false;
             this->debugMode = false;
+            this->delta = 0;
+            this->FPS = 30;
             this->aruco_board = cv::aruco::GridBoard::create(3, 2, 0.088, 0.005, this->aruco_dict, 0);
         }
 
@@ -220,7 +227,7 @@ namespace owo
             return result;
         }
 
-        void updateFrame()
+        void updateFrame(float dt)
         {
             if (this->graphImage != nullptr)
             {
@@ -289,6 +296,11 @@ namespace owo
         cv::Vec3d getRotation()
         {
             return this->rotation;
+        }
+
+        Tracker* getTracker()
+        {
+            return this->tracker;
         }
 
         void setDebugMode(bool state)

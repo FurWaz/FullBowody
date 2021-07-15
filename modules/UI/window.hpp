@@ -35,7 +35,7 @@ namespace owo
                 this->updateDelta = this->updateClock.restart().asSeconds();
                 for (GraphicElement* el: this->elements)
                     el->update(this->updateDelta, this->mousePos);
-                std::this_thread::sleep_for(std::chrono::milliseconds(20));
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
         }
 

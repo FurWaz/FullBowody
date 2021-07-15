@@ -29,19 +29,19 @@ namespace owo
             case Label::CENTER:
                 txt.setPosition(
                     (this->dimensions.width - txtSize.x) / 2,
-                    (this->dimensions.height - txtSize.y) / 2
+                    (this->dimensions.height - txtSize.y) / 2 - 2
                 );
                 break;
             case Label::RIGHT:
                 txt.setPosition(
                     this->dimensions.width - txtSize.x,
-                    (this->dimensions.height - txtSize.y) / 2
+                    (this->dimensions.height - txtSize.y) / 2 - 2
                 );
                 break;
             case Label::LEFT:
                 txt.setPosition(
                     0,
-                    (this->dimensions.height - txtSize.y) / 2
+                    (this->dimensions.height - txtSize.y) / 2 - 2
                 );
                 break;
             default:

@@ -106,6 +106,16 @@ namespace owo {
             }
         }
 
+        void startTracking()
+        {
+            this->startPython();
+        }
+
+        void stopTracking()
+        {
+            this->stopPython();
+        }
+
         ~Tracker()
         {
             if (this->pythonStarted)

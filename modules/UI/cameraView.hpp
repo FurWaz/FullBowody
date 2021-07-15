@@ -3,6 +3,8 @@
 #include "graphicElement.hpp"
 #include "image.hpp"
 #include "input.hpp"
+#include "checkbox.hpp"
+#include "button.hpp"
 #include "../engine/camera.hpp"
 
 namespace owo
@@ -13,47 +15,85 @@ namespace owo
         Camera* cam;
         Image* im;
         Input* input;
+        Checkbox* checkbox;
+        Label* checkbox_text;
+        Button* calibrateBtn;
+        Button* loadBtn;
+        Button* saveBtn;
         std::string cameraSource;
 
         void setupCamView()
         {
-            this->im->setDimensions(this->dimensions.left+10, this->dimensions.top+50, this->dimensions.width - 20, this->dimensions.height - 60);
+            this->renderTexture.create(this->dimensions.width, this->dimensions.height);
+            this->renderTexture.clear(CONST::COLOR_BACKGROUND);
+            this->sprite.setTexture(this->renderTexture.getTexture());
+            this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
+
+            this->im = new Image(
+                sf::Vector2i(this->dimensions.left+4, this->dimensions.top+50),
+                sf::Vector2i(this->dimensions.width-8, this->dimensions.height-200)
+            );
             this->input = new Input(
                 this->cam->getPath(),
                 sf::Vector2i(this->dimensions.left, this->dimensions.top), sf::Vector2i(this->dimensions.width, 40),
                 14, Input::CENTER, CONST::COLOR_PRIMARY, "Enter camera address"
             );
             this->input->setCallback(&CameraView::_update_source, this);
-            this->renderTexture.create(this->dimensions.width, this->dimensions.height);
-            this->renderTexture.clear(CONST::COLOR_BACKGROUND);
-            this->sprite.setTexture(this->renderTexture.getTexture());
-            this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
+            this->calibrateBtn = new Button(
+                "Calibrate",
+                sf::Vector2i(this->dimensions.left, this->dimensions.top+this->dimensions.height-50),
+                sf::Vector2i(this->dimensions.width, 50),
+                CONST::COLOR_BACKGROUND, CONST::COLOR_PRIMARY
+            );
+            this->loadBtn = new Button(
+                "Load",
+                sf::Vector2i(this->dimensions.left, this->dimensions.top+this->dimensions.height-100),
+                sf::Vector2i(this->dimensions.width/2, 50),
+                CONST::COLOR_BACKGROUND, CONST::COLOR_PRIMARY
+            );
+            this->saveBtn = new Button(
+                "Save",
+                sf::Vector2i(this->dimensions.left+this->dimensions.width/2, this->dimensions.top+this->dimensions.height-100),
+                sf::Vector2i(this->dimensions.width/2, 50),
+                CONST::COLOR_BACKGROUND, CONST::COLOR_PRIMARY
+            );
+            this->checkbox = new Checkbox(
+                sf::Vector2i(this->dimensions.left+10, this->dimensions.top+this->dimensions.height-135),
+                sf::Vector2i(20, 20),
+                CONST::COLOR_PRIMARY
+            );
+            this->checkbox_text = new Label(
+                "Debug mode",
+                sf::Vector2i(this->dimensions.left+40, this->dimensions.top+this->dimensions.height-140),
+                sf::Vector2i(this->dimensions.width-50, 30),
+                16, Label::LEFT, CONST::COLOR_FOREGROUND
+            );
+            
+            this->cam->attachImage(this->im);
+            this->checkbox->setCallback(&CameraView::toogleDebugMode, this);
+            this->loadBtn->setCallback(&CameraView::loadCameraCalibration, this);
+            this->saveBtn->setCallback(&CameraView::saveCameraCalibration, this);
+            this->calibrateBtn->setCallback(&CameraView::calibrateCamera, this);
         }
 
     public:
         CameraView()
         {
-            this->im = new Image();
-            this->input = new Input();
-            this->cam = new Camera(this->im);
+            this->cam = new Camera();
             this->setDimensions(0, 0, 120, 200);
             this->setupCamView();
         }
 
         CameraView(Camera* cam)
         {
-            this->im = new Image();
             this->cam = cam;
-            this->cam->attachImage(this->im);
             this->setDimensions(0, 0, 120, 200);
             this->setupCamView();
         }
 
         CameraView(Camera* cam, sf::Vector2i position, sf::Vector2i size)
         {
-            this->im = new Image();
             this->cam = cam;
-            this->cam->attachImage(this->im);
             this->setDimensions(position.x, position.y, size.x, size.y);
             this->setupCamView();
         }
@@ -85,12 +125,11 @@ namespace owo
 
         void update(float dt, sf::Vector2i mousePos)
         {
-            
+            this->cam->updateFrame(dt);
         }
 
         sf::Sprite getSprite(float dt)
         {
-            this->cam->updateFrame();
             return this->sprite;
         }
 
@@ -109,6 +148,19 @@ namespace owo
             return this->input;
         }
 
+        std::vector<GraphicElement*> getElements()
+        {
+            std::vector<GraphicElement*> result;
+            result.push_back(this->im);
+            result.push_back(this->input);
+            result.push_back(this->checkbox);
+            result.push_back(this->checkbox_text);
+            result.push_back(this->calibrateBtn);
+            result.push_back(this->loadBtn);
+            result.push_back(this->saveBtn);
+            return result;
+        }
+
         void setCamera(Camera* cam)
         {
             this->cam = cam;
@@ -121,7 +173,29 @@ namespace owo
 
         void _update_source()
         {
-            this->cam->openSource(this->input->getText());
+            std::string txt = this->input->getText();
+            if (txt != "")
+                this->cam->openSource(txt);
+        }
+
+        void loadCameraCalibration()
+        {
+            std::cout << "this->cam->loadCalibration(path);" << std::endl;
+        }
+
+        void saveCameraCalibration()
+        {
+            std::cout << "this->cam->saveCalibration(path);" << std::endl;
+        }
+
+        void calibrateCamera()
+        {
+            std::cout << "this->cam->calibrate();" << std::endl;
+        }
+
+        void toogleDebugMode()
+        {
+            this->cam->setDebugMode( this->checkbox->isChecked() );
         }
 
         ~CameraView()

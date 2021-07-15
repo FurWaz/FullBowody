@@ -20,9 +20,8 @@ namespace owo
 
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
             this->renderTexture.clear(CONST::COLOR_TRANS);
-
             float scaleFactor = 0;
-            if ((this->dimensions.width / (float)this->dimensions.height) > (imgSize.x / (float)imgSize.y)) // scale on height
+            if ((this->dimensions.width / (float)this->dimensions.height) > (imgSize.x / (float)imgSize.y))
                 scaleFactor = this->dimensions.height / (float) imgSize.y;
             else
                 scaleFactor = this->dimensions.width / (float) imgSize.x;
@@ -45,9 +44,11 @@ namespace owo
             generateTexture();
         }
 
-        Image(int x, int y, int width, int height)
+        Image(sf::Vector2i pos, sf::Vector2i size)
         {
-            setDimensions(x, y, width, height);
+            setDimensions(pos.x, pos.y, size.x, size.y);
+            this->img.create(300, 300, sf::Color::Black);
+            this->path = "";
             generateTexture();
         }
 
@@ -64,7 +65,7 @@ namespace owo
             generateTexture();
         }
 
-        Image(std::string path, int x, int y, int width, int height)
+        Image(std::string path, sf::Vector2i pos, sf::Vector2i size)
         {
             sf::Image img;
             this->path = path;
@@ -73,14 +74,14 @@ namespace owo
                 std::cout << "Couldn't load image at " << path << std::endl;
                 this->img.create(300, 300, sf::Color::Black);
             }
-            setDimensions(x, y, width, height);
+            setDimensions(pos.x, pos.y, size.x, size.y);
             generateTexture();
         }
 
-        void resizeTo(int width, int height)
+        void resizeTo(sf::Vector2i size)
         {
-            this->dimensions.width = width;
-            this->dimensions.height = height;
+            this->dimensions.width = size.x;
+            this->dimensions.height = size.y;
             generateTexture();
         }
 

@@ -76,7 +76,7 @@ namespace owo
             generateTexture();
         }
 
-        Button(std::string text, sf::Vector2i pos, sf::Vector2i size, sf::Color BGColor, sf::Color FGColor)
+        Button(std::string text, sf::Vector2i pos, sf::Vector2i size, sf::Color BGColor = CONST::COLOR_BACKGROUND, sf::Color FGColor = CONST::COLOR_PRIMARY)
         {
             this->bgColor_normal = BGColor;
             this->fgColor_normal = FGColor;
