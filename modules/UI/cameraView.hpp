@@ -125,11 +125,12 @@ namespace owo
 
         void update(float dt, sf::Vector2i mousePos)
         {
-            this->cam->updateFrame(dt);
+            
         }
 
         sf::Sprite getSprite(float dt)
         {
+            this->cam->updateFrame(dt);
             return this->sprite;
         }
 

@@ -102,7 +102,7 @@ namespace owo
         bool shouldRead;
         std::thread updateThread;
         float delta;
-        int FPS;
+        float FPS;
 
         cv::Ptr<cv::aruco::Dictionary> aruco_dict = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
         cv::Ptr<cv::aruco::DetectorParameters> aruco_params = cv::aruco::DetectorParameters::create();
@@ -129,8 +129,8 @@ namespace owo
             this->sourceAvailable = false;
             this->shouldRead = false;
             this->debugMode = false;
-            this->delta = 0;
-            this->FPS = 30;
+            this->delta = 0.f;
+            this->FPS = 30.f;
             this->aruco_board = cv::aruco::GridBoard::create(3, 2, 0.088, 0.005, this->aruco_dict, 0);
         }
 
@@ -229,28 +229,27 @@ namespace owo
 
         void updateFrame(float dt)
         {
-            if (this->graphImage != nullptr)
+            std::cout << "-> update frame" << std::endl;
+            if (this->graphImage == nullptr) return;
+            try
             {
-                try
+                this->source.retrieve(this->frame);
+                if (this->debugMode)
                 {
-                    this->source.retrieve(this->frame);
-                    if (this->debugMode)
-                    {
-                        cv::aruco::drawDetectedMarkers(this->frame, this->aruco_corners, this->aruco_ids);
-                        cv::drawFrameAxes(
-                            this->frame, this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients,
-                            this->aruco_boardRotation, this->aruco_boardPosition, 0.042, 6
-                        );
-                    }
-                    cv::Mat rgba;
-                    cv::cvtColor(this->frame, rgba, cv::COLOR_BGR2RGBA);
-                    this->graphImage->fromArray(rgba.ptr(), this->dimensions);
+                    cv::aruco::drawDetectedMarkers(this->frame, this->aruco_corners, this->aruco_ids);
+                    cv::drawFrameAxes(
+                        this->frame, this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients,
+                        this->aruco_boardRotation, this->aruco_boardPosition, 0.042, 6
+                    );
                 }
-                catch (std::exception &e) 
-                {
-                    std::cerr << e.what() << std::endl;
-                    this->graphImage->black(sf::Vector2u(300, 300));
-                }
+                cv::Mat rgba;
+                cv::cvtColor(this->frame, rgba, cv::COLOR_BGR2RGBA);
+                this->graphImage->fromArray(rgba.ptr(), this->dimensions);
+            }
+            catch (std::exception &e) 
+            {
+                std::cerr << e.what() << std::endl;
+                this->graphImage->black(sf::Vector2u(300, 300));
             }
         }
 
@@ -269,6 +268,7 @@ namespace owo
                 cv::cvtColor(this->frame, this->frame_gray, cv::COLOR_BGR2GRAY);
                 detectArucoMarkers();
                 getArucoBoardPosition();
+                std::cout << "<- retreive frame" << std::endl;
             }
             this->shouldRead = false;
         }

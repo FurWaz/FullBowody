@@ -9,13 +9,14 @@ namespace owo
     private:
         sf::Image img;
         std::string path;
+        bool shouldUpdate;
 
         void generateTexture()
         {
+            this->shouldUpdate = false;
             sf::Vector2u imgSize = this->img.getSize();
             sf::Texture tex;
             tex.loadFromImage(this->img);
-            tex.setSmooth(true);
             sf::Sprite s(tex);
 
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
@@ -87,8 +88,10 @@ namespace owo
 
         void fromArray(const sf::Uint8 *pixels, sf::Vector2u dims)
         {
+            std::cout << "-> fromArray();" << std::endl;
             this->img.create(dims.x, dims.y, pixels);
             this->generateTexture();
+            std::cout << "<- fromArray();" << std::endl;
         }
 
         void black(sf::Vector2u dims)
@@ -129,6 +132,7 @@ namespace owo
 
         sf::Sprite getSprite(float dt)
         {
+            std::cout << "getSprite();" << std::endl;
             return this->sprite;
         }
 
