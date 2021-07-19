@@ -6,6 +6,7 @@
 #include "./label.hpp"
 #include "./input.hpp"
 #include "./cameraView.hpp"
+#include "./view.hpp"
 
 #include "../engine/camera.hpp"
 #include "../engine/cameraManager.hpp"
@@ -17,8 +18,18 @@ namespace SceneGenerator
     void GenerateDefaultScene(Window &win)
     {
         int cameraWidth = 250;
+
+        View* view = new View(
+                sf::Vector2i(cameraWidth, 0),
+                sf::Vector2i(win.getWidth()-cameraWidth*2, win.getHeight())
+        );
+        win.addElement(view);
+
         CameraView* camView = new CameraView(new Camera(), sf::Vector2i(10, 10), sf::Vector2i(cameraWidth, win.getHeight()-20));
         CameraView* camView2 = new CameraView(new Camera(), sf::Vector2i(win.getWidth()-cameraWidth-10, 10), sf::Vector2i(cameraWidth, win.getHeight()-20));
+
+        view->setCameraObj(camView->getCamera());
+        camView->getCamera()->loadCalibration("./out.txt");
 
         win.addElement(camView);
         for(GraphicElement* el: camView->getElements())
@@ -28,7 +39,6 @@ namespace SceneGenerator
         for(GraphicElement* el: camView2->getElements())
             win.addElement(el);
         
-        camView2->getCamera()->openSource("http://192.168.1.39:8080/video");
         Button* btn = new Button(
             "Start tracking",
             sf::Vector2i(win.getWidth()/2-100, 10), sf::Vector2i(200, 50),
@@ -38,5 +48,7 @@ namespace SceneGenerator
 
         CameraManager* camManager = new CameraManager();
         btn->setCallback(&CameraManager::toogleCameraTracking, camManager);
+
+        //win.addElement(new FPSCounter());
     }
 }

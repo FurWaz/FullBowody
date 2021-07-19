@@ -90,7 +90,7 @@ namespace owo
         cv::VideoCapture source;
         cv::Mat frame;
         cv::Mat frame_gray;
-        cv::Vec3d rotation, position;
+        Vec3 rotation, position;
         Tracker* tracker;
 
         sf::Vector2u dimensions;
@@ -139,12 +139,17 @@ namespace owo
             cv::Mat rotMat(3, 3, CV_64F);
             cv::Rodrigues(this->aruco_boardRotation, rotMat);
             rotMat = rotMat.t();
-            cv::Rodrigues(rotMat, this->rotation);
-            cv::Mat position(3, 1, CV_64F);
-            position = -rotMat * this->aruco_boardPosition;
-            this->position[0] = position.at<double>(0, 0);
-            this->position[1] = position.at<double>(1, 0);
-            this->position[2] = position.at<double>(2, 0);
+            cv::Vec3d rot;
+            cv::Rodrigues(rotMat, rot);
+            cv::Mat pos(3, 1, CV_64F);
+            pos = -rotMat * this->aruco_boardPosition;
+
+            this->position.x = pos.at<double>(0, 0);
+            this->position.y = pos.at<double>(1, 0);
+            this->position.z = pos.at<double>(2, 0);
+            this->rotation.x = rot[0];
+            this->rotation.y = rot[1];
+            this->rotation.z = rot[2];
         }
 
         void detectArucoMarkers()
@@ -229,7 +234,6 @@ namespace owo
 
         void updateFrame(float dt)
         {
-            std::cout << "-> update frame" << std::endl;
             if (this->graphImage == nullptr) return;
             try
             {
@@ -268,7 +272,6 @@ namespace owo
                 cv::cvtColor(this->frame, this->frame_gray, cv::COLOR_BGR2GRAY);
                 detectArucoMarkers();
                 getArucoBoardPosition();
-                std::cout << "<- retreive frame" << std::endl;
             }
             this->shouldRead = false;
         }
@@ -288,12 +291,12 @@ namespace owo
             this->calibrData.saveToFile(path);
         }
 
-        cv::Vec3d getPosition()
+        Vec3 getPosition()
         {
             return this->position;
         }
 
-        cv::Vec3d getRotation()
+        Vec3 getRotation()
         {
             return this->rotation;
         }

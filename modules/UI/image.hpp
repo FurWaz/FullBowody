@@ -11,6 +11,9 @@ namespace owo
         std::string path;
         bool shouldUpdate;
 
+        sf::Sprite imgSprite;
+        float scaleFactor;
+
         void generateTexture()
         {
             this->shouldUpdate = false;
@@ -18,22 +21,35 @@ namespace owo
             sf::Texture tex;
             tex.loadFromImage(this->img);
             sf::Sprite s(tex);
+            tex.setSmooth(true);
+            imgSprite = sf::Sprite();
+            imgSprite.setTexture(tex);
 
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
             this->renderTexture.clear(CONST::COLOR_TRANS);
-            float scaleFactor = 0;
             if ((this->dimensions.width / (float)this->dimensions.height) > (imgSize.x / (float)imgSize.y))
-                scaleFactor = this->dimensions.height / (float) imgSize.y;
+                this->scaleFactor = this->dimensions.height / (float) imgSize.y;
             else
-                scaleFactor = this->dimensions.width / (float) imgSize.x;
+                this->scaleFactor = this->dimensions.width / (float) imgSize.x;
                 
-            s.setScale(scaleFactor, scaleFactor);
-            s.setPosition((this->dimensions.width-imgSize.x*scaleFactor)/2, (this->dimensions.height-imgSize.y*scaleFactor)/2);
-            this->renderTexture.draw(s);
+            imgSprite.setScale(scaleFactor, scaleFactor);
+            imgSprite.setPosition((this->dimensions.width-imgSize.x*scaleFactor)/2, (this->dimensions.height-imgSize.y*scaleFactor)/2);
+            this->renderTexture.draw(imgSprite);
             this->renderTexture.display();
             
             this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
             this->sprite.setTexture(this->renderTexture.getTexture(), true);
+        }
+
+        void updateTexture()
+        {
+            sf::Texture tex;
+            tex.loadFromImage(this->img);
+            tex.setSmooth(true);
+            imgSprite.setTexture(tex);
+            this->renderTexture.draw(imgSprite);
+            this->renderTexture.display();
+            this->sprite.setTexture(this->renderTexture.getTexture());
         }
 
     public:
@@ -88,16 +104,20 @@ namespace owo
 
         void fromArray(const sf::Uint8 *pixels, sf::Vector2u dims)
         {
-            std::cout << "-> fromArray();" << std::endl;
+            bool shouldGenerate = false;
+            if (dims != this->img.getSize())
+                shouldGenerate = true;
             this->img.create(dims.x, dims.y, pixels);
-            this->generateTexture();
-            std::cout << "<- fromArray();" << std::endl;
+            shouldGenerate? this->generateTexture() : this->updateTexture();
         }
 
         void black(sf::Vector2u dims)
         {
+            bool shouldGenerate = false;
+            if (dims != this->img.getSize())
+                shouldGenerate = true;
             this->img.create(dims.x, dims.y, sf::Color(0, 0, 0));
-            this->generateTexture();
+            shouldGenerate? this->generateTexture() : this->updateTexture();
         }
 
         void onClick(int btn, bool clicked)
@@ -132,7 +152,6 @@ namespace owo
 
         sf::Sprite getSprite(float dt)
         {
-            std::cout << "getSprite();" << std::endl;
             return this->sprite;
         }
 
