@@ -2,6 +2,7 @@
 #include "../constants.hpp"
 #include "graphicElement.hpp"
 #include "../engine/camera.hpp"
+#include "opencv2/core.hpp"
 
 namespace owo
 {
@@ -11,47 +12,50 @@ namespace owo
         float camDist;
         sf::Vector2f rotation;
         
-        Vec3 camPos;
-        Vec3 camRot;
+        cv::Vec3d camPos;
+        cv::Vec3d camRot;
         float camFOV;
 
         sf::Vector2i lastMousePos;
 
         Camera* camObj;
+        Camera* camObj2;
 
         void init()
         {
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
             this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
-            this->camDist = 4;
-            camFOV = 90;
+            this->camDist = 2;
+            camFOV = 200;
+            this->rotation = sf::Vector2f(0.75, 0.75);
             apply_rotation();
         }
 
         void apply_rotation()
         {
-            this->camRot.x = this->rotation.x;
-            this->camRot.y = this->rotation.y;
-            this->camPos.x = std::cos(this->rotation.x) * -camDist * std::sin(this->rotation.y);
-            this->camPos.y = std::sin(this->rotation.x) *  camDist;
-            this->camPos.z = std::cos(this->rotation.x) *  camDist * std::cos(this->rotation.y);
+            this->camRot[0] = this->rotation.x;
+            this->camRot[1] = this->rotation.y;
+            this->camPos[0] = std::cos(this->rotation.x) * -camDist * std::sin(this->rotation.y);
+            this->camPos[1] = std::cos(this->rotation.x) *  camDist * std::cos(this->rotation.y);
+            this->camPos[2] = std::sin(this->rotation.x) *  camDist;
         }
 
-        sf::Vector2f vec3_vec2(Vec3 coord)
+        sf::Vector2f vec3_vec2(cv::Vec3d coord)
         {
-            if (coord.z - camPos.z == 0)
+            if (coord[2] - camPos[2] == 0)
                 return sf::Vector2f();
-            float distZ = coord.z-camPos.z;
-            float distY = coord.y-camPos.y;
-            float distX = coord.x-camPos.x;
-            float sinRotY = std::sin(camRot.y);
-            float sinRotX = std::sin(camRot.x);
-            float cosRotY = std::cos(camRot.y);
-            float cosRotX = std::cos(camRot.x);
-            float Zresult = (distZ * cosRotY) - (distX * sinRotY);
-            float Zresult2 = (distY * sinRotX) + (Zresult * cosRotX);
-            float Xresult = (distZ * sinRotY) + (distX * cosRotY);
-            float Yresult = (distY * cosRotX) - (Zresult * sinRotX);
+            // Inverted Z and Y axis for visual convinience
+            float distX = coord[0]-camPos[0];
+            float distY = coord[1]-camPos[1];
+            float distZ = coord[2]-camPos[2];
+            float sinRotY = std::sin(camRot[1]);
+            float sinRotX = std::sin(camRot[0]);
+            float cosRotY = std::cos(camRot[1]);
+            float cosRotX = std::cos(camRot[0]);
+            float Zresult = (distY * cosRotY) - (distX * sinRotY);
+            float Zresult2 = (distZ * sinRotX) + (Zresult * cosRotX);
+            float Xresult = (distY * sinRotY) + (distX * cosRotY);
+            float Yresult = (distZ * cosRotX) - (Zresult * sinRotX);
             if (Zresult2 > 0)
                 return sf::Vector2f();
             return sf::Vector2f(camFOV * (Xresult / Zresult2) + this->dimensions.width/2, camFOV * (Yresult / Zresult2) + this->dimensions.height/2);
@@ -68,11 +72,40 @@ namespace owo
             this->renderTexture.draw(line, 2, sf::Lines);
         }
 
-        void draw_origin(float x, float y, float z, float size = 1.f)
+        cv::Vec3d rotate(cv::Vec3d vec, cv::Mat rot)
         {
-            draw_line(vec3_vec2(Vec3(x+size, y+0, z+0)), vec3_vec2(Vec3(x-size, y+0, z+0)), CONST::COLOR_RED_LIGHT);
-            draw_line(vec3_vec2(Vec3(x+0, y+size, z+0)), vec3_vec2(Vec3(x+0, y-size, z+0)), CONST::COLOR_GREEN_LIGHT);
-            draw_line(vec3_vec2(Vec3(x+0, y+0, z+size)), vec3_vec2(Vec3(x+0, y+0, z-size)), CONST::COLOR_BLUE_LIGHT);
+            cv::Mat res = cv::Mat(cv::Size(1, 3), CV_64F);
+            res.at<double>(0, 0) = vec[0];
+            res.at<double>(1, 0) = vec[1];
+            res.at<double>(2, 0) = vec[2];
+            try {
+                res = rot * res;
+            } catch (std::exception &e) {std::cout << e.what() << std::endl;}
+            return res;
+        }
+
+        void draw_origin(cv::Vec3d pos, cv::Mat rot, float size = 1.f)
+        {
+            draw_line(vec3_vec2(rotate(cv::Vec3d(size, 0, 0), rot) + pos), vec3_vec2(rotate(cv::Vec3d(-size, 0, 0), rot) + pos), CONST::COLOR_RED_LIGHT);
+            draw_line(vec3_vec2(rotate(cv::Vec3d(0, size, 0), rot) + pos), vec3_vec2(rotate(cv::Vec3d(0, -size, 0), rot) + pos), CONST::COLOR_GREEN_LIGHT);
+            draw_line(vec3_vec2(rotate(cv::Vec3d(0, 0, size), rot) + pos), vec3_vec2(rotate(cv::Vec3d(0, 0, -size), rot) + pos), CONST::COLOR_BLUE_LIGHT);
+        }
+
+        void draw_camera(cv::Vec3d pos, cv::Mat rot, float size = 1.f)
+        {
+            sf::Vector2f p1 = vec3_vec2(rotate(cv::Vec3d( size*0.2, size*0.4, size*0.5), rot) + pos);
+            sf::Vector2f p2 = vec3_vec2(rotate(cv::Vec3d( size*0.2,-size*0.4, size*0.5), rot) + pos);
+            sf::Vector2f p3 = vec3_vec2(rotate(cv::Vec3d(-size*0.2,-size*0.4, size*0.5), rot) + pos);
+            sf::Vector2f p4 = vec3_vec2(rotate(cv::Vec3d(-size*0.2, size*0.4, size*0.5), rot) + pos);
+            draw_line(vec3_vec2(rotate(cv::Vec3d(0, 0, size), rot) + pos), vec3_vec2(pos), CONST::COLOR_BLUE_LIGHT);
+            draw_line(p1, vec3_vec2(pos), CONST::COLOR_ORANGE_LIGHT);
+            draw_line(p2, vec3_vec2(pos), CONST::COLOR_ORANGE_LIGHT);
+            draw_line(p3, vec3_vec2(pos), CONST::COLOR_ORANGE_LIGHT);
+            draw_line(p4, vec3_vec2(pos), CONST::COLOR_ORANGE_LIGHT);
+            draw_line(p1, p4, CONST::COLOR_ORANGE_LIGHT);
+            draw_line(p2, p1, CONST::COLOR_ORANGE_LIGHT);
+            draw_line(p3, p2, CONST::COLOR_ORANGE_LIGHT);
+            draw_line(p4, p3, CONST::COLOR_ORANGE_LIGHT);
         }
 
         void apply_tex()
@@ -117,12 +150,12 @@ namespace owo
         void onScroll(int delta)
         {
             camDist -= delta * 0.001;
+            std::cout << camFOV << std::endl;
             apply_rotation();
         }
 
         void update(float dt, sf::Vector2i mousePos)
         {
-            this->rotation.y -= dt * 0.5;
             if (clicked)
             {
                 sf::Vector2i delta = mousePos - lastMousePos;
@@ -136,9 +169,13 @@ namespace owo
         sf::Sprite getSprite(float dt)
         {
             clear_tex();
-            draw_origin(0, 0, 0);
-            Vec3 pos = camObj->getPosition();
-            draw_origin(pos.x, pos.y, pos.z, 0.4);
+            draw_origin(cv::Vec3d(0, 0, 0), cv::Mat::eye(cv::Size(3, 3), CV_64F), 0.5);
+            cv::Vec3d pos = camObj->getPosition();
+            cv::Mat rot = camObj->getRotation();
+            draw_camera(pos, rot, 0.4);
+            pos = camObj2->getPosition();
+            rot = camObj2->getRotation();
+            draw_camera(pos, rot, 0.4);
             apply_tex();
             return this->sprite;
         }
@@ -146,6 +183,11 @@ namespace owo
         void setCameraObj(Camera* cam)
         {
             this->camObj = cam;
+        }
+
+        void setCameraObj2(Camera* cam)
+        {
+            this->camObj2 = cam;
         }
 
         ~View()

@@ -90,7 +90,8 @@ namespace owo
         cv::VideoCapture source;
         cv::Mat frame;
         cv::Mat frame_gray;
-        Vec3 rotation, position;
+        cv::Vec3d position;
+        cv::Mat rotation;
         Tracker* tracker;
 
         sf::Vector2u dimensions;
@@ -117,7 +118,7 @@ namespace owo
                 this->source.get(cv::CAP_PROP_FRAME_WIDTH),
                 this->source.get(cv::CAP_PROP_FRAME_HEIGHT)
             );
-            this->sourceAvailable = true;
+            this->source.set(cv::CAP_PROP_BUFFERSIZE, 1);
         }
 
         void init()
@@ -131,6 +132,7 @@ namespace owo
             this->debugMode = false;
             this->delta = 0.f;
             this->FPS = 30.f;
+            this->rotation = cv::Mat::eye(cv::Size(3, 3), CV_64F);
             this->aruco_board = cv::aruco::GridBoard::create(3, 2, 0.088, 0.005, this->aruco_dict, 0);
         }
 
@@ -139,17 +141,13 @@ namespace owo
             cv::Mat rotMat(3, 3, CV_64F);
             cv::Rodrigues(this->aruco_boardRotation, rotMat);
             rotMat = rotMat.t();
-            cv::Vec3d rot;
-            cv::Rodrigues(rotMat, rot);
             cv::Mat pos(3, 1, CV_64F);
             pos = -rotMat * this->aruco_boardPosition;
 
-            this->position.x = pos.at<double>(0, 0);
-            this->position.y = pos.at<double>(1, 0);
-            this->position.z = pos.at<double>(2, 0);
-            this->rotation.x = rot[0];
-            this->rotation.y = rot[1];
-            this->rotation.z = rot[2];
+            this->position[0] = pos.at<double>(0, 0);
+            this->position[1] = pos.at<double>(1, 0);
+            this->position[2] = pos.at<double>(2, 0);
+            this->rotation = rotMat;
         }
 
         void detectArucoMarkers()
@@ -216,6 +214,7 @@ namespace owo
             {
                 result = this->source.open(address);
                 this->setDimensionsFromSource();
+                this->source.grab();
             }
             catch (std::exception &e)
             {
@@ -234,10 +233,14 @@ namespace owo
 
         void updateFrame(float dt)
         {
-            if (this->graphImage == nullptr) return;
+            this->sourceAvailable =
+                this->frame.cols == this->dimensions.x &&
+                this->frame.rows == this->dimensions.y;
+
+            if (this->graphImage == nullptr || !this->shouldRead || !this->sourceAvailable)
+                return;
             try
             {
-                this->source.retrieve(this->frame);
                 if (this->debugMode)
                 {
                     cv::aruco::drawDetectedMarkers(this->frame, this->aruco_corners, this->aruco_ids);
@@ -273,7 +276,6 @@ namespace owo
                 detectArucoMarkers();
                 getArucoBoardPosition();
             }
-            this->shouldRead = false;
         }
 
         std::string getPath()
@@ -291,12 +293,12 @@ namespace owo
             this->calibrData.saveToFile(path);
         }
 
-        Vec3 getPosition()
+        cv::Vec3d getPosition()
         {
             return this->position;
         }
 
-        Vec3 getRotation()
+        cv::Mat getRotation()
         {
             return this->rotation;
         }

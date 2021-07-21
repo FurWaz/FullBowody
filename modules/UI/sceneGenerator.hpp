@@ -29,7 +29,12 @@ namespace SceneGenerator
         CameraView* camView2 = new CameraView(new Camera(), sf::Vector2i(win.getWidth()-cameraWidth-10, 10), sf::Vector2i(cameraWidth, win.getHeight()-20));
 
         view->setCameraObj(camView->getCamera());
+        view->setCameraObj2(camView2->getCamera());
+
         camView->getCamera()->loadCalibration("./out.txt");
+        camView2->getCamera()->loadCalibration("./out.txt");
+        camView->getCamera()->openSource("http://192.168.43.1:8080/video");
+        camView2->getCamera()->openSource("http://192.168.43.163:8080/video");
 
         win.addElement(camView);
         for(GraphicElement* el: camView->getElements())
