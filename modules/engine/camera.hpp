@@ -88,11 +88,12 @@ namespace owo
     private:
         CalibrationData calibrData;
         cv::VideoCapture source;
+        Tracker* tracker;
         cv::Mat frame;             // shown image (with drawings)
         cv::Mat frame_rgb;         // processing image
-        cv::Vec3d position;
+        cv::Vec3d position;        // position in meters
         cv::Mat rotation;
-        Tracker* tracker;
+        cv::Point2d fov;           // half camera fov, in radians
 
         sf::Vector2u dimensions;
         Image* graphImage;
@@ -166,6 +167,16 @@ namespace owo
                 this->aruco_boardRotation, this->aruco_boardPosition, false
             );
             getCamPosRot();
+        }
+
+        void calculateFOV()
+        {
+            double fx = this->calibrData.cameraMatrix.at<double>(0, 0);
+            double fy = this->calibrData.cameraMatrix.at<double>(1, 1);
+            double x = this->calibrData.cameraMatrix.at<double>(0, 2);
+            double y = this->calibrData.cameraMatrix.at<double>(1, 2);
+
+            this->fov = cv::Point2d(std::atan(x / fx), std::atan(y / fy));
         }
 
     public:
@@ -255,10 +266,10 @@ namespace owo
                     {
                         for(int i = 0; i < 35; i++)
                         {
-                            if (tPoints[POSE_CONNECTIONS[i][0]].z < 0.85f || tPoints[POSE_CONNECTIONS[i][1]].z < 0.85f)
+                            if (tPoints[CONSTANT::POSE_CONNECTIONS[i][0]].z < 0.85f || tPoints[CONSTANT::POSE_CONNECTIONS[i][1]].z < 0.85f)
                                 continue;
-                            cv::Point p1(this->frame.cols * tPoints[POSE_CONNECTIONS[i][0]].x, this->frame.rows * tPoints[POSE_CONNECTIONS[i][0]].y);
-                            cv::Point p2(this->frame.cols * tPoints[POSE_CONNECTIONS[i][1]].x, this->frame.rows * tPoints[POSE_CONNECTIONS[i][1]].y);
+                            cv::Point p1(this->frame.cols * tPoints[CONSTANT::POSE_CONNECTIONS[i][0]].x, this->frame.rows * tPoints[CONSTANT::POSE_CONNECTIONS[i][0]].y);
+                            cv::Point p2(this->frame.cols * tPoints[CONSTANT::POSE_CONNECTIONS[i][1]].x, this->frame.rows * tPoints[CONSTANT::POSE_CONNECTIONS[i][1]].y);
                             cv::line(this->frame, p1, p2, cv::Scalar(0, 0, 255), 8);
                         }
                     }
@@ -306,6 +317,9 @@ namespace owo
         void loadCalibration(std::string path)
         {
             this->calibrData.loadFromFile(path);
+            this->calculateFOV();
+
+            std::cout << "Camera calibration loaded: FOV is: <" << this->fov.x << ", " << this->fov.y << ">" << std::endl;
         }
 
         void saveCalibration(std::string path)

@@ -1,3 +1,4 @@
+#pragma once
 #include <SFML/Network.hpp>
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -9,44 +10,6 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include "./ipc.hpp"
-
-unsigned char POSE_CONNECTIONS[35][2] = {
-    {15, 21},
-    {16, 20},
-    {18, 20},
-    { 3,  7},
-    {14, 16},
-    {23, 25},
-    {10, 9},
-    {28, 30},
-    {11, 23},
-    {27, 31},
-    {24, 23},
-    { 6,  8},
-    {15, 17},
-    {24, 26},
-    {16, 22},
-    { 4,  5},
-    { 5,  6},
-    {29, 31},
-    {12, 24},
-    { 0,  1},
-    { 1,  2},
-    { 0,  4},
-    {11, 13},
-    {30, 32},
-    {28, 32},
-    {15, 19},
-    {16, 18},
-    {25, 27},
-    {12, 11},
-    {26, 28},
-    {12, 14},
-    {17, 19},
-    { 2,  3},
-    {27, 29},
-    {13, 15}
-};
 
 float nbDigitDivide(int nbr)
 {
