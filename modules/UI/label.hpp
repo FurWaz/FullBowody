@@ -15,7 +15,7 @@ namespace owo
     public:
         void generateTexture()
         {
-            sf::Text txt(this->text, CONST::FONT, this->fontSize);
+            sf::Text txt(this->text, CONSTANT::FONT, this->fontSize);
             txt.setFillColor(this->textColor);
             sf::Vector2u txtSize(txt.getLocalBounds().width, this->fontSize);
 
@@ -23,7 +23,7 @@ namespace owo
                 this->dimensions = sf::IntRect(this->dimensions.left, this->dimensions.top, txtSize.x, txtSize.y);
             
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
-            this->renderTexture.clear(CONST::COLOR_BACKGROUND);
+            this->renderTexture.clear(CONSTANT::COLOR_BACK);
             switch (this->placement)
             {
             case Label::CENTER:
@@ -65,7 +65,7 @@ namespace owo
             this->generateTexture();
         }
 
-        Label(std::string text, int fontSize = 16, int placement = Label::CENTER, sf::Color textColor = CONST::COLOR_FOREGROUND)
+        Label(std::string text, int fontSize = 16, int placement = Label::CENTER, sf::Color textColor = CONSTANT::COLOR_FORE)
         {
             this->text = text;
             this->fontSize = fontSize;
@@ -77,7 +77,7 @@ namespace owo
 
         Label(std::string text,
               sf::Vector2i position, sf::Vector2i size = sf::Vector2i(-1, -1),
-              int fontSize = 16, int placement = Label::CENTER, sf::Color textColor = CONST::COLOR_FOREGROUND)
+              int fontSize = 16, int placement = Label::CENTER, sf::Color textColor = CONSTANT::COLOR_FORE)
         {
             this->text = text;
             this->fontSize = fontSize;

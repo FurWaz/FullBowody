@@ -2,7 +2,7 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
-namespace CONST
+namespace CONSTANT
 {
     sf::Color COLOR_BLACK_DARK  (44, 62, 80);
     sf::Color COLOR_BLACK_LIGHT (52, 73, 94);
@@ -24,8 +24,8 @@ namespace CONST
     sf::Color COLOR_YELLOW_LIGHT (241, 196, 15);
 
     sf::Color COLOR_CLEAR = COLOR_BLACK_DARK;
-    sf::Color COLOR_BACKGROUND = COLOR_BLACK_LIGHT;
-    sf::Color COLOR_FOREGROUND = COLOR_WHITE_LIGHT;
+    sf::Color COLOR_BACK = COLOR_BLACK_LIGHT;
+    sf::Color COLOR_FORE = COLOR_WHITE_LIGHT;
     sf::Color COLOR_PRIMARY = COLOR_GREEN_LIGHT;
     sf::Color COLOR_TRANS      (0, 0, 0, 0);
     
@@ -39,4 +39,4 @@ namespace CONST
         if (!FONT.loadFromFile("./resources/fonts/Roboto-Regular.ttf"))
             std::cout << "Error loading default font" << std::endl;
     }
-};
+}

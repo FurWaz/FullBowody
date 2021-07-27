@@ -25,7 +25,7 @@ namespace owo
         void setupCamView()
         {
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
-            this->renderTexture.clear(CONST::COLOR_BACKGROUND);
+            this->renderTexture.clear(CONSTANT::COLOR_BACK);
             this->sprite.setTexture(this->renderTexture.getTexture());
             this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
 
@@ -36,37 +36,37 @@ namespace owo
             this->input = new Input(
                 this->cam->getPath(),
                 sf::Vector2i(this->dimensions.left, this->dimensions.top), sf::Vector2i(this->dimensions.width, 40),
-                14, Input::CENTER, CONST::COLOR_PRIMARY, "Enter camera address"
+                14, Input::CENTER, CONSTANT::COLOR_PRIMARY, "Enter camera address"
             );
             this->input->setCallback(&CameraView::_update_source, this);
             this->calibrateBtn = new Button(
                 "Calibrate",
                 sf::Vector2i(this->dimensions.left, this->dimensions.top+this->dimensions.height-50),
                 sf::Vector2i(this->dimensions.width, 50),
-                CONST::COLOR_BACKGROUND, CONST::COLOR_PRIMARY
+                CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
             );
             this->loadBtn = new Button(
                 "Load",
                 sf::Vector2i(this->dimensions.left, this->dimensions.top+this->dimensions.height-100),
                 sf::Vector2i(this->dimensions.width/2, 50),
-                CONST::COLOR_BACKGROUND, CONST::COLOR_PRIMARY
+                CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
             );
             this->saveBtn = new Button(
                 "Save",
                 sf::Vector2i(this->dimensions.left+this->dimensions.width/2, this->dimensions.top+this->dimensions.height-100),
                 sf::Vector2i(this->dimensions.width/2, 50),
-                CONST::COLOR_BACKGROUND, CONST::COLOR_PRIMARY
+                CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
             );
             this->checkbox = new Checkbox(
                 sf::Vector2i(this->dimensions.left+10, this->dimensions.top+this->dimensions.height-135),
                 sf::Vector2i(20, 20),
-                CONST::COLOR_PRIMARY
+                CONSTANT::COLOR_PRIMARY
             );
             this->checkbox_text = new Label(
                 "Debug mode",
                 sf::Vector2i(this->dimensions.left+40, this->dimensions.top+this->dimensions.height-140),
                 sf::Vector2i(this->dimensions.width-50, 30),
-                16, Label::LEFT, CONST::COLOR_FOREGROUND
+                16, Label::LEFT, CONSTANT::COLOR_FORE
             );
             
             this->cam->attachImage(this->im);

@@ -40,7 +40,7 @@ namespace owo
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
             this->renderTexture.clear(this->bgColor);
 
-            sf::Text text(this->text, CONST::FONT, this->textSize);
+            sf::Text text(this->text, CONSTANT::FONT, this->textSize);
             text.setFillColor(this->fgColor);
             text.setPosition(
                 (this->dimensions.width-text.getLocalBounds().width)/2,
@@ -56,8 +56,8 @@ namespace owo
     public:
         Button()
         {
-            this->bgColor_normal = CONST::COLOR_BACKGROUND;
-            this->fgColor_normal = CONST::COLOR_FOREGROUND;
+            this->bgColor_normal = CONSTANT::COLOR_BACK;
+            this->fgColor_normal = CONSTANT::COLOR_FORE;
             this->text = "Button";
             this->textSize = 18;
             this->setDimensions(0, 0, 140, 40);
@@ -67,8 +67,8 @@ namespace owo
 
         Button(std::string text, sf::Vector2i pos, sf::Vector2i size)
         {
-            this->bgColor_normal = CONST::COLOR_BACKGROUND;
-            this->fgColor_normal = CONST::COLOR_FOREGROUND;
+            this->bgColor_normal = CONSTANT::COLOR_BACK;
+            this->fgColor_normal = CONSTANT::COLOR_FORE;
             this->text = text;
             this->textSize = 18;
             this->setDimensions(pos.x, pos.y, size.x, size.y);
@@ -76,7 +76,7 @@ namespace owo
             generateTexture();
         }
 
-        Button(std::string text, sf::Vector2i pos, sf::Vector2i size, sf::Color BGColor = CONST::COLOR_BACKGROUND, sf::Color FGColor = CONST::COLOR_PRIMARY)
+        Button(std::string text, sf::Vector2i pos, sf::Vector2i size, sf::Color BGColor = CONSTANT::COLOR_BACK, sf::Color FGColor = CONSTANT::COLOR_PRIMARY)
         {
             this->bgColor_normal = BGColor;
             this->fgColor_normal = FGColor;

@@ -26,7 +26,7 @@ namespace owo
             imgSprite.setTexture(tex);
 
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
-            this->renderTexture.clear(CONST::COLOR_TRANS);
+            this->renderTexture.clear(CONSTANT::COLOR_TRANS);
             if ((this->dimensions.width / (float)this->dimensions.height) > (imgSize.x / (float)imgSize.y))
                 this->scaleFactor = this->dimensions.height / (float) imgSize.y;
             else

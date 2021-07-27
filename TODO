@@ -1,4 +1,7 @@
-determine parametric lines from camera's pose detection
+- determine parametric lines from camera's pose detection
 - get 3D points from the two cameras' parametric lines
 - move the body points under the VR headset
 - export position in VR
+
+
+-> Make the tracker object use the ipc

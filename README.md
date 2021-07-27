@@ -14,4 +14,10 @@ A full body tracking for VR using dual cameras
 ## Documentation
 - The documentation website can be found [here](https://furwaz.github.io/FullBowody)
 
+## Dependencies
+The dependencies used in this project are:
+- OpenCV
+- SFML
+- Mediapipe Pose
+
 Author: [FurWaz](https://github.com/furwaz)

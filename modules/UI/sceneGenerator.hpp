@@ -17,7 +17,7 @@ namespace SceneGenerator
 {
     void GenerateDefaultScene(Window &win)
     {
-        int cameraWidth = 250;
+        int cameraWidth = 300;
 
         View* view = new View(
                 sf::Vector2i(cameraWidth, 0),
@@ -47,11 +47,13 @@ namespace SceneGenerator
         Button* btn = new Button(
             "Start tracking",
             sf::Vector2i(win.getWidth()/2-100, 10), sf::Vector2i(200, 50),
-            CONST::COLOR_BACKGROUND, CONST::COLOR_PRIMARY
+            CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
         );
         win.addElement(btn);
 
         CameraManager* camManager = new CameraManager();
+        camManager->addCamera(camView->getCamera());
+        camManager->addCamera(camView2->getCamera());
         btn->setCallback(&CameraManager::toogleCameraTracking, camManager);
 
         //win.addElement(new FPSCounter());

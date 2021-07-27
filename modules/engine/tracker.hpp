@@ -1,128 +1,210 @@
 #include <SFML/Network.hpp>
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <string>
 #include <sstream>
 #include <vector>
 #include <thread>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include "./ipc.hpp"
 
-ushort _port_counter = 5621;
+unsigned char POSE_CONNECTIONS[35][2] = {
+    {15, 21},
+    {16, 20},
+    {18, 20},
+    { 3,  7},
+    {14, 16},
+    {23, 25},
+    {10, 9},
+    {28, 30},
+    {11, 23},
+    {27, 31},
+    {24, 23},
+    { 6,  8},
+    {15, 17},
+    {24, 26},
+    {16, 22},
+    { 4,  5},
+    { 5,  6},
+    {29, 31},
+    {12, 24},
+    { 0,  1},
+    { 1,  2},
+    { 0,  4},
+    {11, 13},
+    {30, 32},
+    {28, 32},
+    {15, 19},
+    {16, 18},
+    {25, 27},
+    {12, 11},
+    {26, 28},
+    {12, 14},
+    {17, 19},
+    { 2,  3},
+    {27, 29},
+    {13, 15}
+};
+
+float nbDigitDivide(int nbr)
+{
+    int i = 1;
+    while ( !(nbr < i) )
+    {
+        i *= 10;
+    }
+    return i;
+}
+
+std::string displayPoints(std::vector<cv::Point3f> pts)
+{
+    std::string res = ">> number of points: ";
+    res += std::to_string(pts.size()) + "\n";
+    for(cv::Point3f p: pts)
+    {
+        res += "    <";
+        res += std::to_string(p.x);
+        res += ", ";
+        res += std::to_string(p.y);
+        res += " - ";
+        res += std::to_string((int)std::round(p.z * 100)) + "%";
+        res += ">\n";
+    }
+    return res;
+}
 
 namespace owo {
     class Tracker
     {
     private:
-        bool pythonStarted;
-        sf::UdpSocket socket;
         std::string camAddress;
-        std::thread pythonThread;
-        std::thread connectionThread;
-        ushort pythonPort;
+        IPC ipc;
+        int FPS = 20;
+        bool dataAvailable;
+        std::thread sendingThread;
+        bool running;
+        cv::Mat dataToSend;
+        std::vector<cv::Point3f>* points; // z is visibility
         
     public:
         Tracker(std::string cameraAddress)
         {
-            this->pythonPort = _port_counter++;
             this->camAddress = cameraAddress;
-            startPython();
+            dataAvailable = false;
+            this->points = new std::vector<cv::Point3f>();
         }
 
-        void _start_subscript()
+        void _check_for_input_data()
         {
-            std::string cmd = "python ./modules/engine/tracker.py ";
-            std::string port = std::to_string(pythonPort);
-            system( (cmd+port).c_str() );
-        }
-
-        void startPython()
-        {
-            if (pythonStarted) return;
-            this->pythonThread = std::thread(&Tracker::_start_subscript, this);
-            this->connectionThread = std::thread(&Tracker::_retrieve_positions, this);
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            if (socket.send(this->camAddress.c_str(), this->camAddress.size(), "localhost", pythonPort) != sf::Socket::Done)
-                std::cout << "Error sending UDP data" << std::endl;
-            else
-                std::cout << "Succesfully sent UDP data" << std::endl;
-        }
-
-        void stopPython()
-        {
-            if (socket.send("STOP", 4, "localhost", pythonPort) != sf::Socket::Done)
-                std::cout << "Error sending UDP data" << std::endl;
-            else
-                std::cout << "Succesfully sent UDP data" << std::endl;
-            this->pythonThread.join();
-            this->connectionThread.join();
-            this->pythonStarted = false;
-        }
-
-        void _retrieve_positions()
-        {
-            while (this->pythonStarted)
+            while (this->running)
             {
-                char str[400];
-                sf::IpAddress sender;
-                unsigned short port;
-                std::size_t received;
-                if (this->socket.receive(str, 400, received, sender, port) != sf::Socket::Done)
-                    std::cout << "Error receiving data" << std::endl;
-                else
-                    std::cout << "Data received: " << str << " on port " << port << std::endl;
-                this->getPointsFromData(str, 400);
+                if (!this->dataToSend.empty())
+                {
+                    std::vector<unsigned char> buffer;
+                    cv::imencode(".png", this->dataToSend, buffer);
+                    unsigned char* a = new unsigned char[buffer.size()];
+                    std::copy(buffer.begin(), buffer.end(), a);
+                    std::string str = std::to_string(buffer.size()); str += "\n";
+                    this->ipc.writeToChild(str.c_str(), str.size());
+                    this->ipc.writeToChild(a, buffer.size());
+                    delete[] a;
+                    this->dataToSend = cv::Mat();
+                } else
+                {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+                }
             }
         }
 
-        void getPointsFromData(char* data, ushort length)
+        void _retrieve_positions(char* data, unsigned short length)
         {
-            std::vector<cv::Point2i> points;
+            std::string str(data, length);
+
+            if (!this->dataAvailable)
+                std::cout << ">>> New input from Python: \n" << str << std::endl;
+            else
+                getPointsFromData(data, length);
+
+            if (str == "READY")
+                this->dataAvailable = true;
+        }
+
+        void sendImage(cv::Mat img)
+        {
+            if (!this->running) return;
+            this->dataToSend = img;
+        }
+
+        void getPointsFromData(char* data, unsigned short length)
+        {
+            this->points->clear();
             ushort cursor = 0;
-            while (cursor < length)
+            while (cursor < length && this->points->size() < 33)
             {
-                ushort lastPos = cursor;
+                try 
+                {
+                    // get x coordonnate
+                    std::string nbrX = "";
+                    while (data[cursor] != '|')
+                        nbrX += data[cursor++];
+                    cursor++;
 
-                // get x coordonnate
-                char nbrX[5];
-                ushort index = 0;
-                while (data[cursor] != '|')
-                    nbrX[index++] = data[cursor++];
-                cursor++;
-                std::cout << "coord X: " << nbrX << " cursorIndex: " << cursor << std::endl;
+                    // get y coordonnate
+                    std::string nbrY = "";
+                    while (data[cursor] != '|')
+                        nbrY += data[cursor++];
+                    cursor++;
 
-                // get y coordonnate
-                char nbrY[5];
-                index = 0;
-                while (data[cursor] != '\n')
-                    nbrY[index++] = data[cursor++];
-                cursor++;
-                std::cout << "coord Y: " << nbrY << " cursorIndex: " << cursor << std::endl;
+                    // get visibility
+                    std::string vs = "";
+                    while (data[cursor] != '\n')
+                        vs += data[cursor++];
+                    cursor++;
 
-                // add coordonnates to vector
-                int coordX = std::stoi(nbrX);
-                int coordY = std::stoi(nbrY);
-                points.push_back( cv::Point2i(coordX, coordY) );
-                std::cout << "Added point: " << coordX << ", " << coordY << std::endl;
+                    // add coordonnates to vector
+                    int coordX = std::stoi(nbrX.c_str());
+                    int coordY = std::stoi(nbrY.c_str());
+                    int visibility = std::stoi(vs.c_str());
+                    cv::Point3f p(
+                        coordX / nbDigitDivide(coordX), 
+                        coordY / nbDigitDivide(coordY), 
+                        visibility / nbDigitDivide(visibility)
+                    );
+                    this->points->push_back( p );
+                } catch (std::exception &e) {break;}
             }
         }
 
         void startTracking()
         {
-            this->startPython();
+            this->ipc.setReadCallback(&Tracker::_retrieve_positions, this);
+            this->ipc.startChild();
+            this->running = true;
+            this->sendingThread = std::thread(&Tracker::_check_for_input_data, this);
         }
 
         void stopTracking()
         {
-            this->stopPython();
+            this->ipc.stopChild();
+            this->running = false;
+            this->sendingThread.join();
+        }
+
+        void setCameraAddress(std::string address)
+        {
+            this->camAddress = address;
+        }
+
+        std::vector<cv::Point3f> getPoints()
+        {
+            return *this->points;
         }
 
         ~Tracker()
         {
-            if (this->pythonStarted)
-            {
-                this->pythonThread.join();
-                this->connectionThread.join();
-            }
+            
         }
     };
 }

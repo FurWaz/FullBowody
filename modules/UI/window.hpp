@@ -69,7 +69,7 @@ namespace owo
         void refresh()
         {
             this->refreshDelta = this->refreshClock.restart().asSeconds();
-            screen.clear(CONST::COLOR_CLEAR);
+            screen.clear(CONSTANT::COLOR_CLEAR);
             int index = 0;
             for (GraphicElement* el: this->elements)
                 this->screen.draw(el->getSprite(this->refreshDelta));
@@ -132,7 +132,7 @@ namespace owo
                 this->screen.pollEvent(this->event);
                 if (event.type == sf::Event::TextEntered)
                     this->focused->onKey(key, event.text.unicode, true);
-                else this->focused->onKey(key, CONST::NO_CHAR, true);
+                else this->focused->onKey(key, CONSTANT::NO_CHAR, true);
                 break;
             case sf::Event::KeyReleased:
                 if (this->focused == nullptr) return;
@@ -140,7 +140,7 @@ namespace owo
                 this->screen.pollEvent(this->event);
                 if (event.type == sf::Event::TextEntered)
                     this->focused->onKey(key, event.text.unicode, false);
-                else this->focused->onKey(key, CONST::NO_CHAR, false);
+                else this->focused->onKey(key, CONSTANT::NO_CHAR, false);
                 break;
             default:
                 break;

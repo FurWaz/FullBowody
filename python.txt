@@ -1,0 +1,162 @@
+Help on NormalizedLandmark in module mediapipe.framework.formats.landmark_pb2 object
+
+class NNoorrmmaalliizzeeddLLaannddmmaarrkk(google.protobuf.pyext._message.CMessage, google.protobuf.message.Message)
+ |  Method resolution order:
+ |      NormalizedLandmark
+ |      google.protobuf.pyext._message.CMessage
+ |      google.protobuf.message.Message
+ |      builtins.object
+ |  
+ |  Data descriptors defined here:
+ |  
+ |  pprreesseennccee
+ |      Field mediapipe.NormalizedLandmark.presence
+ |  
+ |  vviissiibbiilliittyy
+ |      Field mediapipe.NormalizedLandmark.visibility
+ |  
+ |  xx
+ |      Field mediapipe.NormalizedLandmark.x
+ |  
+ |  yy
+ |      Field mediapipe.NormalizedLandmark.y
+ |  
+ |  zz
+ |      Field mediapipe.NormalizedLandmark.z
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes defined here:
+ |  
+ |  DDEESSCCRRIIPPTTOORR = <google.protobuf.pyext._message.MessageDescriptor object>
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from google.protobuf.pyext._message.CMessage:
+ |  
+ |  BByytteeSSiizzee(...)
+ |      Returns the size of the message in bytes.
+ |  
+ |  CClleeaarr(...)
+ |      Clears the message.
+ |  
+ |  CClleeaarrEExxtteennssiioonn(...)
+ |      Clears a message field.
+ |  
+ |  CClleeaarrFFiieelldd(...)
+ |      Clears a message field.
+ |  
+ |  CCooppyyFFrroomm(...)
+ |      Copies a protocol message into the current message.
+ |  
+ |  DDiissccaarrddUUnnkknnoowwnnFFiieellddss(...)
+ |      Discards the unknown fields.
+ |  
+ |  FFiinnddIInniittiiaalliizzaattiioonnEErrrroorrss(...)
+ |      Finds unset required fields.
+ |  
+ |  HHaassEExxtteennssiioonn(...)
+ |      Checks if a message field is set.
+ |  
+ |  HHaassFFiieelldd(...)
+ |      Checks if a message field is set.
+ |  
+ |  IIssIInniittiiaalliizzeedd(...)
+ |      Checks if all required fields of a protocol message are set.
+ |  
+ |  LLiissttFFiieellddss(...)
+ |      Lists all set fields of a message.
+ |  
+ |  MMeerrggeeFFrroomm(...)
+ |      Merges a protocol message into the current message.
+ |  
+ |  MMeerrggeeFFrroommSSttrriinngg(...)
+ |      Merges a serialized message into the current message.
+ |  
+ |  PPaarrsseeFFrroommSSttrriinngg(...)
+ |      Parses a serialized message into the current message.
+ |  
+ |  SSeerriiaalliizzeePPaarrttiiaallTTooSSttrriinngg(...)
+ |      Serializes the message to a string, even if it isn't initialized.
+ |  
+ |  SSeerriiaalliizzeeTTooSSttrriinngg(...)
+ |      Serializes the message to a string, only for initialized messages.
+ |  
+ |  SSeettIInnPPaarreenntt(...)
+ |      Sets the has bit of the given field in its parent message.
+ |  
+ |  UUnnkknnoowwnnFFiieellddss(...)
+ |      Parse unknown field set
+ |  
+ |  WWhhiicchhOOnneeooff(...)
+ |      Returns the name of the field set inside a oneof, or None if no field is set.
+ |  
+ |  ____ddeeeeppccooppyy____(...)
+ |      Makes a deep copy of the class.
+ |  
+ |  ____eeqq____(self, value, /)
+ |      Return self==value.
+ |  
+ |  ____ggee____(self, value, /)
+ |      Return self>=value.
+ |  
+ |  ____ggeettaattttrriibbuuttee____(self, name, /)
+ |      Return getattr(self, name).
+ |  
+ |  ____ggtt____(self, value, /)
+ |      Return self>value.
+ |  
+ |  ____hhaasshh____(self, /)
+ |      Return hash(self).
+ |  
+ |  ____iinniitt____(self, /, *args, **kwargs)
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |  
+ |  ____llee____(self, value, /)
+ |      Return self<=value.
+ |  
+ |  ____lltt____(self, value, /)
+ |      Return self<value.
+ |  
+ |  ____nnee____(self, value, /)
+ |      Return self!=value.
+ |  
+ |  ____rreepprr____(self, /)
+ |      Return repr(self).
+ |  
+ |  ____ssttrr____(self, /)
+ |      Return str(self).
+ |  
+ |  ____uunniiccooddee____(...)
+ |      Outputs a unicode representation of the message.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Class methods inherited from google.protobuf.pyext._message.CMessage:
+ |  
+ |  FFrroommSSttrriinngg(...) from google.protobuf.pyext.cpp_message.GeneratedProtocolMessageType
+ |      Creates new method instance from given serialized data.
+ |  
+ |  RReeggiisstteerrEExxtteennssiioonn(...) from google.protobuf.pyext.cpp_message.GeneratedProtocolMessageType
+ |      Registers an extension with the current message.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Static methods inherited from google.protobuf.pyext._message.CMessage:
+ |  
+ |  ____nneeww____(*args, **kwargs) from google.protobuf.pyext._message.MessageMeta
+ |      Create and return a new object.  See help(type) for accurate signature.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from google.protobuf.pyext._message.CMessage:
+ |  
+ |  EExxtteennssiioonnss
+ |      Extension dict
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from google.protobuf.message.Message:
+ |  
+ |  ____ggeettssttaattee____(self)
+ |      Support the pickle protocol.
+ |  
+ |  ____rreedduuccee____(self)
+ |      Helper for pickle.
+ |  
+ |  ____sseettssttaattee____(self, state)
+ |      Support the pickle protocol.

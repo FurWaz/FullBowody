@@ -1,58 +1,35 @@
-import socket, cv2, sys
+import cv2, sys,time
 import numpy as np
 import mediapipe as mp
-from threading import Thread
+import pydoc
 mpPose = mp.solutions.pose
 pose = mpPose.Pose()
 
-port = int(sys.argv[1])
+time.sleep(1)
+sys.stdout.write("READY")
+sys.stdout.flush()
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.bind(("localhost", port))
-link, addr = sock.recvfrom(100)
 
-run = True
-
-class VideoCapture:
-
-    def __init__(self, name):
-        self.cap = cv2.VideoCapture(name)
-        self.q = np.zeros((1280, 720, 3), np.uint8)
-        self.t = Thread(target=self._reader)
-        self.t.daemon = True
-        self.t.start()
-
-    def _reader(self):
-        while run:
-            ret, frame = self.cap.read()
-            if not ret: break
-            self.q = frame
-
-    def read(self):
-        return self.q
-
-    def release(self):
-        self.t.join()
-
-cap = VideoCapture(link.decode('utf-8'))
-
-while run:
-    frame = cap.read()
-    result = pose.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+while True:
+    word = sys.stdin.buffer.readline()
+    if (str(word) == "STOP\n"):
+        break
+    size = int(word)
+    data = sys.stdin.buffer.read(size)
+    img = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
+    result = pose.process(img)
     if (result.pose_landmarks):
-        try:
-            string = ""
-            index = 0
-            for ld in result.pose_landmarks.landmark:
-                string += str(round(ld.id, 5))
+        open("python.txt", "w").write(pydoc.render_doc(result.pose_landmarks.landmark[0], "Help on %s"))
+        string = ""
+        for ld in result.pose_landmarks.landmark:
+            try:
+                string += str(round(ld.x, 5)).split(".")[1]
                 string += "|"
-                string += str(round(ld.x, 5))
+                string += str(round(ld.y, 5)).split(".")[1]
                 string += "|"
-                string += str(round(ld.y, 5))
+                string += str(round(ld.visibility, 5)).split(".")[1]
                 string += "\n"
-                index += 1
-            print(index)
-            sock.sendto(string.encode("utf-8"), ("localhost", addr[1]))
-        except: pass
-
-cap.release()
+            except: pass
+        sys.stdout.write(string)
+        sys.stdout.flush()
+quit()

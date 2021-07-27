@@ -15,17 +15,17 @@ namespace owo
         void generateTexture()
         {
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
-            this->renderTexture.clear(CONST::COLOR_BACKGROUND);
+            this->renderTexture.clear(CONSTANT::COLOR_BACK);
 
             int oulineThickness = 2;
             sf::RectangleShape rect(sf::Vector2f(this->dimensions.width-oulineThickness*2, this->dimensions.height-oulineThickness*2));
             rect.setPosition(oulineThickness, oulineThickness);
             rect.setOutlineThickness(oulineThickness);
-            rect.setOutlineColor(CONST::COLOR_FOREGROUND);
+            rect.setOutlineColor(CONSTANT::COLOR_FORE);
             if (this->checked)
                 rect.setFillColor(this->color);
             else
-                rect.setFillColor(CONST::COLOR_TRANS);
+                rect.setFillColor(CONSTANT::COLOR_TRANS);
             this->renderTexture.draw(rect);
             this->sprite.setTexture(this->renderTexture.getTexture());
             this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
@@ -36,11 +36,11 @@ namespace owo
         {
             this->checked = false;
             this->setDimensions(0, 0, 100, 100);
-            this->color = CONST::COLOR_PRIMARY;
+            this->color = CONSTANT::COLOR_PRIMARY;
             this->generateTexture();
         }
 
-        Checkbox(sf::Vector2i pos, sf::Vector2i size, sf::Color color = CONST::COLOR_PRIMARY)
+        Checkbox(sf::Vector2i pos, sf::Vector2i size, sf::Color color = CONSTANT::COLOR_PRIMARY)
         {
             this->checked = false;
             this->setDimensions(pos.x, pos.y, size.x, size.y);

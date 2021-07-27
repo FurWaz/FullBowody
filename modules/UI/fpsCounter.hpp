@@ -52,9 +52,9 @@ namespace owo
             std::string txt = std::to_string((int)(1 / this->avgDelta)) + " FPS";
 
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
-            this->renderTexture.clear(CONST::COLOR_TRANS);
+            this->renderTexture.clear(CONSTANT::COLOR_TRANS);
 
-            sf::Text text(txt, CONST::FONT, 16);
+            sf::Text text(txt, CONSTANT::FONT, 16);
             text.setFillColor(sf::Color::White);
             this->renderTexture.draw(text);
             this->renderTexture.display();

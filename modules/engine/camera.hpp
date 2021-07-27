@@ -88,8 +88,8 @@ namespace owo
     private:
         CalibrationData calibrData;
         cv::VideoCapture source;
-        cv::Mat frame;
-        cv::Mat frame_gray;
+        cv::Mat frame;             // shown image (with drawings)
+        cv::Mat frame_rgb;         // processing image
         cv::Vec3d position;
         cv::Mat rotation;
         Tracker* tracker;
@@ -126,7 +126,7 @@ namespace owo
             this->tracker = new Tracker(this->path);
             this->dimensions = sf::Vector2u(300, 300);
             this->frame = cv::Mat(this->dimensions.x, this->dimensions.y, CV_8UC3, cv::Scalar(0, 0, 0));
-            this->frame_gray = cv::Mat(this->dimensions.x, this->dimensions.y, CV_8U);
+            this->frame_rgb = cv::Mat(this->dimensions.x, this->dimensions.y, CV_8UC3, cv::Scalar(0, 0, 0));
             this->sourceAvailable = false;
             this->shouldRead = false;
             this->debugMode = false;
@@ -153,7 +153,7 @@ namespace owo
         void detectArucoMarkers()
         {
             cv::aruco::detectMarkers(
-                this->frame_gray, this->aruco_dict,
+                this->frame_rgb, this->aruco_dict,
                 this->aruco_corners, this->aruco_ids, this->aruco_params, this->aruco_rejected
             );
         }
@@ -203,6 +203,7 @@ namespace owo
                 this->sourceAvailable = false;
                 this->graphImage->black(sf::Vector2u(300, 300));
             }
+            this->tracker->setCameraAddress(this->path);
             return result;
         }
         
@@ -228,6 +229,7 @@ namespace owo
                 this->sourceAvailable = false;
                 this->graphImage->black(sf::Vector2u(300, 300));
             }
+            this->tracker->setCameraAddress(this->path);
             return result;
         }
 
@@ -248,6 +250,18 @@ namespace owo
                         this->frame, this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients,
                         this->aruco_boardRotation, this->aruco_boardPosition, 0.042, 6
                     );
+                    std::vector<cv::Point3f> tPoints = this->tracker->getPoints();
+                    if (tPoints.size() > 32)
+                    {
+                        for(int i = 0; i < 35; i++)
+                        {
+                            if (tPoints[POSE_CONNECTIONS[i][0]].z < 0.85f || tPoints[POSE_CONNECTIONS[i][1]].z < 0.85f)
+                                continue;
+                            cv::Point p1(this->frame.cols * tPoints[POSE_CONNECTIONS[i][0]].x, this->frame.rows * tPoints[POSE_CONNECTIONS[i][0]].y);
+                            cv::Point p2(this->frame.cols * tPoints[POSE_CONNECTIONS[i][1]].x, this->frame.rows * tPoints[POSE_CONNECTIONS[i][1]].y);
+                            cv::line(this->frame, p1, p2, cv::Scalar(0, 0, 255), 8);
+                        }
+                    }
                 }
                 cv::Mat rgba;
                 cv::cvtColor(this->frame, rgba, cv::COLOR_BGR2RGBA);
@@ -270,9 +284,10 @@ namespace owo
             this->shouldRead = true;
             while (this->shouldRead)
             {
-                if (!this->source.grab()) continue;
+                if(!this->source.grab()) continue;
                 this->source.retrieve(this->frame);
-                cv::cvtColor(this->frame, this->frame_gray, cv::COLOR_BGR2GRAY);
+                cv::cvtColor(this->frame, this->frame_rgb, cv::COLOR_BGR2RGB);
+                this->tracker->sendImage(this->frame_rgb);
                 detectArucoMarkers();
                 getArucoBoardPosition();
             }
@@ -281,6 +296,11 @@ namespace owo
         std::string getPath()
         {
             return this->path;
+        }
+
+        void sendPic()
+        {
+            this->tracker->sendImage(this->frame);
         }
 
         void loadCalibration(std::string path)

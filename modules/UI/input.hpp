@@ -29,7 +29,7 @@ namespace owo
 
         Input(std::string text,
               int fontSize = 16, int placement = Input::CENTER,
-              sf::Color textColor = CONST::COLOR_PRIMARY, std::string highlight = "Input text")
+              sf::Color textColor = CONSTANT::COLOR_PRIMARY, std::string highlight = "Input text")
         {
             this->setDimensions(0, 0, 200, 50);
             this->text = text;
@@ -40,7 +40,7 @@ namespace owo
 
         Input(std::string text,
               sf::Vector2i position, sf::Vector2i size = sf::Vector2i(-1, -1),
-              int fontSize = 16, int placement = Input::CENTER, sf::Color textColor = CONST::COLOR_PRIMARY,
+              int fontSize = 16, int placement = Input::CENTER, sf::Color textColor = CONSTANT::COLOR_PRIMARY,
               std::string highlight = "Input text")
         {
             this->setDimensions(position.x, position.y, size.x, size.y);
@@ -54,7 +54,7 @@ namespace owo
         void generateTexture()
         {
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
-            this->renderTexture.clear(CONST::COLOR_BACKGROUND);
+            this->renderTexture.clear(CONSTANT::COLOR_BACK);
             if (this->text != "" || this->focused)
             {
                 this->label->setText(this->text);
@@ -66,16 +66,16 @@ namespace owo
                     this->highlight,
                     this->label->getPosition(), this->label->getSize(),
                     this->label->getFontSize(), this->label->getPlacement(),
-                    CONST::COLOR_GREY_DARK
+                    CONSTANT::COLOR_GREY_DARK
                 );
                 l.generateTexture();
                 this->renderTexture.draw(l.getSprite(0));
             }
-            sf::Color color = CONST::COLOR_WHITE_DARK;
+            sf::Color color = CONSTANT::COLOR_WHITE_DARK;
             if (this->focused) color = this->label->getTextColor();
             sf::RectangleShape highlightRect(sf::Vector2f(this->dimensions.width-4, this->dimensions.height-4));
             highlightRect.setPosition(sf::Vector2f(2, 2));
-            highlightRect.setFillColor(CONST::COLOR_TRANS);
+            highlightRect.setFillColor(CONSTANT::COLOR_TRANS);
             highlightRect.setOutlineColor(color);
             highlightRect.setOutlineThickness(2);
             this->renderTexture.draw(highlightRect);
@@ -111,7 +111,7 @@ namespace owo
                     this->text = this->text.substr(0, this->text.size()-1);
             }
             else
-                if (c != CONST::NO_CHAR)
+                if (c != CONSTANT::NO_CHAR)
                     this->text += c;
             this->generateTexture();
         }
