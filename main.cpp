@@ -5,16 +5,6 @@
 
 using namespace owo;
 
-class H
-{
-    public:
-        void callback(char* data, unsigned short length)
-        {
-            std::string a(data, length);
-            std::cout << "DATA: " << a << std::endl;
-        }
-};
-
 int main(int argc, char const *argv[])
 {
     CONSTANT::init();
