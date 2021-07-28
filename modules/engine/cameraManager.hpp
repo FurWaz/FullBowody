@@ -3,6 +3,9 @@
 
 namespace owo
 {
+    /**
+     * @brief CameraManager class, only toogle the camera's body trackers for the moment
+     */
     class CameraManager
     {
     private:
@@ -15,21 +18,26 @@ namespace owo
             this->tracking = false;
         }
 
+        /**
+         * @brief Adds the given camera to the CameraManager's camera list
+         * @param cam The camera to add
+         */
         void addCamera(Camera* cam)
         {
             this->cameras.push_back(cam);
         }
 
-        void toogleCameraTracking()
+        /**
+         * @brief Toogle all the CameraManager's cameras body trackers for body tracking
+         * @return If the cameras' trackers are now on or off
+         */
+        bool toogleCameraTracking()
         {
             bool possible = true;
             for (Camera* c: this->cameras)
                 possible = possible & c->getPath() != "";
             if (!possible)
-            {
-                std::cout << "A camera does not have video source" << std::endl;
-                return;
-            }
+                return this->tracking;
 
             if (this->tracking)
                 for (Camera* c: this->cameras)
@@ -39,8 +47,7 @@ namespace owo
                     c->getTracker()->startTracking();
 
             this->tracking = !this->tracking;
-            std::cout << (this->tracking? "Starting": "Stopping") << " camera position tracking" << std::endl;
-            this->tracking = !this->tracking;
+            return this->tracking;
         }
 
         ~CameraManager()

@@ -13,11 +13,21 @@
 
 namespace owo
 {
+    /**
+     * @brief CalibrationData class, contains the calibration data of a camera such as
+     * the camera matrix and the distance coefficients
+     */
     struct CalibrationData
     {
         cv::Mat cameraMatrix = cv::Mat(3, 3, CV_64F);
         cv::Mat distanceCoefficients = cv::Mat(8, 1, CV_64F);
 
+        /**
+         * @brief Loads the calibration data from a given file
+         * 
+         * @param path The path of the data file
+         * @return If the data as been loaded successfully or not
+         */
         bool loadFromFile(std::string path)
         {
             bool result = true;
@@ -42,15 +52,18 @@ namespace owo
                         this->distanceCoefficients.at<double>(x, y) = value;
                     }
                 }
-            } else 
-            {
-                std::cerr << "Error opening camera calibration data at " << path << std::endl;
-                result = false;
-            }
+            } else result = false;
+
             inStream.close();
             return result;
         }
 
+        /**
+         * @brief Saves the calibration data to a given file
+         * 
+         * @param path The path of the data file to save
+         * @return If the data as been saved successfully or not
+         */
         bool saveToFile(std::string path)
         {
             bool result = true;
@@ -73,70 +86,76 @@ namespace owo
                         outStream << value;
                     }
                 }
-            } else 
-            {
-                std::cerr << "Error writing camera calibration data at " << path << std::endl;
-                result = false;
-            }
+            } else result = false;
+
             outStream.close();
             return result;
         }
     };
 
+    /**
+     * @brief Camera class, can read a video stream and detect his position from aruco marker board.
+     * Contains a tracker object for body position estimation.
+     */
     class Camera
     {
     private:
         CalibrationData calibrData;
-        cv::VideoCapture source;
-        Tracker* tracker;
+        cv::VideoCapture source;   // camera's video source path
+        Tracker* tracker;          // camera's body position tracker
         cv::Mat frame;             // shown image (with drawings)
-        cv::Mat frame_rgb;         // processing image
-        cv::Vec3d position;        // position in meters
-        cv::Mat rotation;
-        cv::Point2d fov;           // half camera fov, in radians
+        cv::Mat frame_rgb;         // processing image (without drawings)
+        cv::Vec3d position;        // position in meters relative to the marker board's origin
+        cv::Mat rotation;          // rotation matrix, relative to the markers board's rotation
+        cv::Point2d fov;           // half of the camera field of view, in radians
 
-        sf::Vector2u dimensions;
-        Image* graphImage;
-        std::string path;
-        bool sourceAvailable;
-        bool debugMode;
+        sf::Vector2u dimensions;   // dimensions of the camera video stream
+        Image* graphImage;         // graphical image associated with the camera
+        std::string path;          // path to the camera stream
+        bool sourceAvailable;      // is the source of the camera ready
+        bool debugMode;            // is the camera in debug mode (for visual hints)
 
-        bool shouldRead;
-        std::thread updateThread;
-        float delta;
-        float FPS;
+        bool shouldRead;           // should the camera thread read the vide stream
+        std::thread updateThread;  // video stream reading thread
 
-        cv::Ptr<cv::aruco::Dictionary> aruco_dict = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
-        cv::Ptr<cv::aruco::DetectorParameters> aruco_params = cv::aruco::DetectorParameters::create();
-        cv::Ptr<cv::aruco::GridBoard> aruco_board;
+        cv::Ptr<cv::aruco::Dictionary> aruco_dict = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50); // aruco dictionnary (aruco x4 models)
+        cv::Ptr<cv::aruco::DetectorParameters> aruco_params = cv::aruco::DetectorParameters::create();          // empty parameters for aruco detection
+        cv::Ptr<cv::aruco::GridBoard> aruco_board;                                                              // representation of the aruco marker board
         std::vector<std::vector<cv::Point2f>> aruco_corners, aruco_rejected;
         std::vector<int> aruco_ids;
         cv::Vec3d aruco_boardPosition, aruco_boardRotation;
 
+        /**
+         * @brief Set the camera dimensions from source stream
+         */
         void setDimensionsFromSource()
         {
+            this->source.set(cv::CAP_PROP_BUFFERSIZE, 1);
             this->dimensions = sf::Vector2u(
                 this->source.get(cv::CAP_PROP_FRAME_WIDTH),
                 this->source.get(cv::CAP_PROP_FRAME_HEIGHT)
             );
-            this->source.set(cv::CAP_PROP_BUFFERSIZE, 1);
         }
 
+        /**
+         * @brief Initialises the camera's attributes
+         */
         void init()
         {
-            this->tracker = new Tracker(this->path);
+            this->tracker = new Tracker();
             this->dimensions = sf::Vector2u(300, 300);
             this->frame = cv::Mat(this->dimensions.x, this->dimensions.y, CV_8UC3, cv::Scalar(0, 0, 0));
             this->frame_rgb = cv::Mat(this->dimensions.x, this->dimensions.y, CV_8UC3, cv::Scalar(0, 0, 0));
             this->sourceAvailable = false;
             this->shouldRead = false;
             this->debugMode = false;
-            this->delta = 0.f;
-            this->FPS = 30.f;
             this->rotation = cv::Mat::eye(cv::Size(3, 3), CV_64F);
             this->aruco_board = cv::aruco::GridBoard::create(3, 2, 0.088, 0.005, this->aruco_dict, 0);
         }
 
+        /**
+         * @brief Calculates the camera position and rotation from aruco marker board rotation and position
+         */
         void getCamPosRot()
         {
             cv::Mat rotMat(3, 3, CV_64F);
@@ -151,6 +170,9 @@ namespace owo
             this->rotation = rotMat;
         }
 
+        /**
+         * @brief Detects the aruco markers in the current frame
+         */
         void detectArucoMarkers()
         {
             cv::aruco::detectMarkers(
@@ -159,6 +181,10 @@ namespace owo
             );
         }
 
+        /**
+         * @brief Calculates the aruco markers board position and rotation from the detected aruco markers
+         * 
+         */
         void getArucoBoardPosition()
         {
             cv::aruco::estimatePoseBoard(
@@ -169,6 +195,10 @@ namespace owo
             getCamPosRot();
         }
 
+        /**
+         * @brief Calculates the current FOV of the camera from the camera matrix
+         * 
+         */
         void calculateFOV()
         {
             double fx = this->calibrData.cameraMatrix.at<double>(0, 0);
@@ -191,6 +221,12 @@ namespace owo
             this->init();
         }
         
+        /**
+         * @brief Opens a video device
+         * 
+         * @param index Index of the video device (default is 0)
+         * @return If the source as been opened successfully or not
+         */
         bool openSource(int index)
         {
             char* str;
@@ -214,10 +250,15 @@ namespace owo
                 this->sourceAvailable = false;
                 this->graphImage->black(sf::Vector2u(300, 300));
             }
-            this->tracker->setCameraAddress(this->path);
             return result;
         }
         
+        /**
+         * @brief Opens a video stream
+         * 
+         * @param index URL of the video stream (mjpeg stream)
+         * @return If the source as been opened successfully or not
+         */
         bool openSource(std::string address)
         {
             this->path = address;
@@ -240,10 +281,14 @@ namespace owo
                 this->sourceAvailable = false;
                 this->graphImage->black(sf::Vector2u(300, 300));
             }
-            this->tracker->setCameraAddress(this->path);
             return result;
         }
 
+        /**
+         * @brief Updates the displayed frame on the attached image
+         * 
+         * @param dt Visual delta time
+         */
         void updateFrame(float dt)
         {
             this->sourceAvailable =
@@ -285,11 +330,19 @@ namespace owo
             }
         }
 
+        /**
+         * @brief Attaches the given image to the camera preview
+         * 
+         * @param im The image to attach to the camera
+         */
         void attachImage(Image* im)
         {
             this->graphImage = im;
         }
         
+        /**
+         * @brief [INTERNAL] Reads frames from the video device/stream 
+         */
         void _read_frame()
         {
             this->shouldRead = true;
@@ -304,47 +357,93 @@ namespace owo
             }
         }
 
+        /**
+         * @brief Returns the camera current video device index or video stream URL
+         * @return A string of the url or device index
+         */
         std::string getPath()
         {
             return this->path;
         }
 
+        /**
+         * @brief Sends an image to the tracker for body position detection
+         */
         void sendPic()
         {
             this->tracker->sendImage(this->frame);
         }
 
+        /**
+         * @brief Loads the calibration data of the given file
+         * 
+         * @param path Path to the data file
+         */
         void loadCalibration(std::string path)
         {
             this->calibrData.loadFromFile(path);
             this->calculateFOV();
         }
 
+        /**
+         * @brief Saves the calibration data to the given file
+         * 
+         * @param path Path to the data file
+         */
         void saveCalibration(std::string path)
         {
             this->calibrData.saveToFile(path);
         }
 
+        /**
+         * @brief Returns the position of the camera
+         * @return A 3D point corresponding to the camera's position
+         */
         cv::Vec3d getPosition()
         {
             return this->position;
         }
 
+        /**
+         * @brief Returns the rotation of the camera
+         * @return A rotation matrix correponding to the camera's rotation
+         */
         cv::Mat getRotation()
         {
             return this->rotation;
         }
 
+        /**
+         * @brief Returns the camera's tracker object
+         * @return The tracker of the camera
+         */
         Tracker* getTracker()
         {
             return this->tracker;
         }
 
+        /**
+         * @brief Returns the current FOV of the camera according to it's calibration data
+         * @return A 2D point correponding to the camera's FOV in radians (dividec by 2)
+         */
         cv::Point2d getFOV()
         {
             return this->fov;
         }
 
+        /**
+         * @brief Returns if the camera is in debug mode
+         * @return If the camera is in debug mode or not
+         */
+        bool isDebugMode()
+        {
+            return this->debugMode;
+        }
+
+        /**
+         * @brief Sets the camera's debug mode to the given state
+         * @param state The new state of the camera's debug mode
+         */
         void setDebugMode(bool state)
         {
             this->debugMode = state;

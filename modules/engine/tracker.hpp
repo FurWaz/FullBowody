@@ -11,6 +11,12 @@
 #include <opencv2/imgcodecs.hpp>
 #include "./ipc.hpp"
 
+/**
+ * @brief Returns the number to divide a float by to get a number between 0 and 1
+ * 
+ * @param nbr The target number
+ * @return The number to divide by
+ */
 float nbDigitDivide(int nbr)
 {
     int i = 1;
@@ -21,6 +27,12 @@ float nbDigitDivide(int nbr)
     return i;
 }
 
+/**
+ * @brief Returns a text representation of the given points
+ * 
+ * @param pts The Points to display
+ * @return A string representation of the given Points list
+ */
 std::string displayPoints(std::vector<cv::Point3f> pts)
 {
     std::string res = ">> number of points: ";
@@ -38,68 +50,27 @@ std::string displayPoints(std::vector<cv::Point3f> pts)
     return res;
 }
 
-namespace owo {
+namespace owo
+{
+    /**
+     * @brief Tracker class, uses the IPC class to get the body position of a given frame
+     */
     class Tracker
     {
     private:
-        std::string camAddress;
         IPC ipc;
-        int FPS = 20;
         bool dataAvailable;
         std::thread sendingThread;
         bool running;
         cv::Mat dataToSend;
         std::vector<cv::Point3f>* points; // z is visibility
-        
-    public:
-        Tracker(std::string cameraAddress)
-        {
-            this->camAddress = cameraAddress;
-            dataAvailable = false;
-            this->points = new std::vector<cv::Point3f>();
-        }
 
-        void _check_for_input_data()
-        {
-            while (this->running)
-            {
-                if (!this->dataToSend.empty())
-                {
-                    std::vector<unsigned char> buffer;
-                    cv::imencode(".png", this->dataToSend, buffer);
-                    unsigned char* a = new unsigned char[buffer.size()];
-                    std::copy(buffer.begin(), buffer.end(), a);
-                    std::string str = std::to_string(buffer.size()); str += "\n";
-                    this->ipc.writeToChild(str.c_str(), str.size());
-                    this->ipc.writeToChild(a, buffer.size());
-                    delete[] a;
-                    this->dataToSend = cv::Mat();
-                } else
-                {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(2));
-                }
-            }
-        }
-
-        void _retrieve_positions(char* data, unsigned short length)
-        {
-            std::string str(data, length);
-
-            if (!this->dataAvailable)
-                std::cout << ">>> New input from Python: \n" << str << std::endl;
-            else
-                getPointsFromData(data, length);
-
-            if (str == "READY")
-                this->dataAvailable = true;
-        }
-
-        void sendImage(cv::Mat img)
-        {
-            if (!this->running) return;
-            this->dataToSend = img;
-        }
-
+        /**
+         * @brief Parses the raw text data to fill the points list the the actual joints positions
+         * 
+         * @param data The data to parse
+         * @param length The length of the data to parse
+         */
         void getPointsFromData(char* data, unsigned short length)
         {
             this->points->clear();
@@ -139,7 +110,75 @@ namespace owo {
                 } catch (std::exception &e) {break;}
             }
         }
+        
+    public:
+        /**
+         * @brief Default constructor
+         */
+        Tracker()
+        {
+            this->points = new std::vector<cv::Point3f>();
+        }
 
+        /**
+         * @brief [INTERNAL] Checks for a new image from the camera to process
+         */
+        void _check_for_input_data()
+        {
+            while (this->running)
+            {
+                if (!this->dataToSend.empty())
+                {
+                    std::vector<unsigned char> buffer;
+                    cv::imencode(".png", this->dataToSend, buffer);
+                    unsigned char* a = new unsigned char[buffer.size()];
+                    std::copy(buffer.begin(), buffer.end(), a);
+                    std::string str = std::to_string(buffer.size()); str += "\n";
+                    this->ipc.writeToChild(str.c_str(), str.size());
+                    this->ipc.writeToChild(a, buffer.size());
+                    delete[] a;
+                    this->dataToSend = cv::Mat();
+                } else
+                {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+                }
+            }
+        }
+
+        /**
+         * @brief [INTERNAL] Retrieves the positions of the body joints.
+         * Used as callback in the IPC
+         * @param data The data sent from the child process
+         * @param length The length of the data
+         */
+        void _retrieve_positions(char* data, unsigned short length)
+        {
+            std::string str(data, length);
+
+            if (!this->dataAvailable)
+                std::cout << ">>> New input from Python: \n" << str << std::endl;
+            else
+                getPointsFromData(data, length);
+
+            if (str == "READY")
+                this->dataAvailable = true;
+        }
+
+        /**
+         * @brief Sends the given image to the child process
+         * for body position detection
+         * @param img The image to send to the child process
+         */
+        void sendImage(cv::Mat img)
+        {
+            if (!this->running) return;
+            this->dataToSend = img;
+        }
+
+        /**
+         * @brief Starts the IPC and the tracker's threads to track the body position
+         * from the given images
+         */
         void startTracking()
         {
             this->ipc.setReadCallback(&Tracker::_retrieve_positions, this);
@@ -148,6 +187,9 @@ namespace owo {
             this->sendingThread = std::thread(&Tracker::_check_for_input_data, this);
         }
 
+        /**
+         * @brief Stops the tracker's threads and the IPC connection
+         */
         void stopTracking()
         {
             this->ipc.stopChild();
@@ -155,11 +197,10 @@ namespace owo {
             this->sendingThread.join();
         }
 
-        void setCameraAddress(std::string address)
-        {
-            this->camAddress = address;
-        }
-
+        /**
+         * @brief Returns the 2D points of the detected body position (between 0 and 1)
+         * @return a 2D point list corresponding to the positions of the body joints (z axis is the visibility of the point)
+         */
         std::vector<cv::Point3f> getPoints()
         {
             return *this->points;

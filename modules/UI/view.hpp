@@ -19,8 +19,8 @@ namespace owo
 
         sf::Vector2i lastMousePos;
 
-        Camera* camObj;
-        Camera* camObj2;
+        Camera* cam1;
+        Camera* cam2;
 
         BodyPos bp;
 
@@ -94,8 +94,11 @@ namespace owo
             draw_line(vec3_vec2(rotate(cv::Vec3d(0, 0, size), rot) + pos), vec3_vec2(rotate(cv::Vec3d(0, 0, -size), rot) + pos), CONSTANT::COLOR_BLUE_LIGHT);
         }
 
-        void draw_camera(cv::Vec3d pos, cv::Mat rot, float size = 1.f)
+        void draw_camera(Camera* cam, cv::Vec3d* rays)
         {
+            cv::Vec3d pos = cam->getPosition();
+            cv::Mat rot = cam->getRotation();
+            float size = 0.4;
             sf::Vector2f p1 = vec3_vec2(rotate(cv::Vec3d( size*0.2, size*0.4, size*0.5), rot) + pos);
             sf::Vector2f p2 = vec3_vec2(rotate(cv::Vec3d( size*0.2,-size*0.4, size*0.5), rot) + pos);
             sf::Vector2f p3 = vec3_vec2(rotate(cv::Vec3d(-size*0.2,-size*0.4, size*0.5), rot) + pos);
@@ -109,6 +112,16 @@ namespace owo
             draw_line(p2, p1, CONSTANT::COLOR_ORANGE_LIGHT);
             draw_line(p3, p2, CONSTANT::COLOR_ORANGE_LIGHT);
             draw_line(p4, p3, CONSTANT::COLOR_ORANGE_LIGHT);
+
+            if (cam->isDebugMode())
+            {
+                for(int i = 0; i < 35; i++)
+                    draw_line(
+                        vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][0]], rot) + pos),
+                        vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][1]], rot) + pos),
+                        CONSTANT::COLOR_PURPLE_LIGHT
+                    );
+            }
         }
 
         void draw_body()
@@ -169,7 +182,7 @@ namespace owo
 
         void update(float dt, sf::Vector2i mousePos)
         {
-            this->rotation.y += dt;
+            this->rotation.y += dt*0.2;
             if (clicked)
             {
                 sf::Vector2i delta = mousePos - lastMousePos;
@@ -185,41 +198,23 @@ namespace owo
         {
             clear_tex();
             draw_origin(cv::Vec3d(0, 0, 0), cv::Mat::eye(cv::Size(3, 3), CV_64F), 0.5);
-            cv::Vec3d pos = camObj->getPosition();
-            cv::Mat rot = camObj->getRotation();
-            draw_camera(pos, rot, 0.4);
-            cv::Vec3d* rays = this->bp.getCamRays1();
-            for(int i = 0; i < 35; i++)
-                draw_line(
-                    vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][0]], rot) + pos),
-                    vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][1]], rot) + pos),
-                    CONSTANT::COLOR_PURPLE_LIGHT
-                );
-            pos = camObj2->getPosition();
-            rot = camObj2->getRotation();
-            draw_camera(pos, rot, 0.4);
-            rays = this->bp.getCamRays2();
-            for(int i = 0; i < 35; i++)
-                draw_line(
-                    vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][0]], rot) + pos),
-                    vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][1]], rot) + pos),
-                    CONSTANT::COLOR_PURPLE_LIGHT
-                );
+            draw_camera(cam1, this->bp.getCamRays1());
+            draw_camera(cam2, this->bp.getCamRays2());
             draw_body();
 
             apply_tex();
             return this->sprite;
         }
 
-        void setCameraObj(Camera* cam)
+        void setCamera1(Camera* cam)
         {
-            this->camObj = cam;
+            this->cam1 = cam;
             this->bp.setCamera1(cam);
         }
 
-        void setCameraObj2(Camera* cam)
+        void setCamera2(Camera* cam)
         {
-            this->camObj2 = cam;
+            this->cam2 = cam;
             this->bp.setCamera2(cam);
         }
 

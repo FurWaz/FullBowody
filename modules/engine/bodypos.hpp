@@ -6,10 +6,13 @@
 
 namespace owo
 {
+    /**
+     * @brief BodyPos class, calculates all the camera body rays based on the camera's tracker's detected points.
+     * Also calculates the final 3D body position based on the camera's rays
+     */
     class BodyPos
     {
     private:
-
         Camera* cam1;
         Camera* cam2;
 
@@ -18,6 +21,13 @@ namespace owo
 
         cv::Vec3d body[CONSTANT::NB_JOINTS];
 
+        /**
+         * @brief Returns a new rotated point based on the point's position and a rotation matrix
+         * 
+         * @param vec the point's original position
+         * @param rot the rotation matrix
+         * @return A new rotated 3D point
+         */
         cv::Vec3d rotate(cv::Vec3d vec, cv::Mat rot)
         {
             cv::Mat res = cv::Mat(cv::Size(1, 3), CV_64F);
@@ -30,6 +40,16 @@ namespace owo
             return res;
         }
 
+        /**
+         * @brief Calculates the intersection between two 3D vectors (from top view) into [r]
+         * 
+         * @param o1 first vector origin
+         * @param p1 first vector direction
+         * @param o2 second vector origin
+         * @param p2 second vection direction
+         * @param r the calculated intersection point
+         * @return If the intersection has been found or not
+         */
         bool intersection(cv::Vec3d o1, cv::Vec3d p1, cv::Vec3d o2, cv::Vec3d p2,
                       cv::Vec3d &r)
         {
@@ -38,7 +58,7 @@ namespace owo
             cv::Vec3d d2 = p2 - o2;
 
             double cross = d1[0]*d2[1] - d1[1]*d2[0];
-            if (abs(cross) < 1e-8) /*EPS*/
+            if (abs(cross) < 1e-8)
                 return false;
 
             double t1 = (x[0] * d2[1] - x[1] * d2[0])/cross;
@@ -46,9 +66,15 @@ namespace owo
             return true;
         }
 
+        /**
+         * @brief Calculated the camera's body joint rays based on the camera's informations and camera's tracker
+         * 
+         * @param cam The targeted camera for rays calculation
+         * @param rays The calculaterd rays array
+         */
         void calculateCamRays(Camera* cam, cv::Vec3d* rays)
         {
-            std::vector<cv::Point3f> points = cam->getTracker()->getPoints(); // x, y, visibility (from 0 to 1)
+            std::vector<cv::Point3f> points = cam->getTracker()->getPoints();
             cv::Mat rot = cam->getRotation();
             cv::Point2d fov = cam->getFOV();
             for(int i = 0; i < points.size(); i++)
@@ -60,6 +86,9 @@ namespace owo
             }
         }
 
+        /**
+         * @brief Calculates the body's final 3D position based on the two camera's rays arrays
+         */
         void calculateBodyPosition()
         {
             cv::Vec3d c1 = this->cam1->getPosition();
@@ -73,6 +102,9 @@ namespace owo
         }
 
     public:
+        /**
+         * @brief Default constructor
+         */
         BodyPos()
         {
             for(int i = 0; i < 33; i++)
@@ -83,16 +115,29 @@ namespace owo
             }
         }
 
+        /**
+         * @brief Set the Camera1 object
+         * 
+         * @param cam The targeted camera
+         */
         void setCamera1(Camera* cam)
         {
             this->cam1 = cam;
         }
-
+        
+        /**
+         * @brief Set the Camera2 object
+         * 
+         * @param cam The targeted camera
+         */
         void setCamera2(Camera* cam)
         {
             this->cam2 = cam;
         }
 
+        /**
+         * @brief Updates the two camera's rays and calculates a new body position
+         */
         void update()
         {
             this->calculateCamRays(this->cam1, this->cam1_rays);
@@ -100,16 +145,28 @@ namespace owo
             this->calculateBodyPosition();
         }
 
+        /**
+         * @brief Returns the body's 3D joints array
+         * @return An array of 3D points
+         */
         cv::Vec3d* getBody()
         {
             return this->body;
         }
 
+        /**
+         * @brief Returns the first camera's joints rays
+         * @return An array of 3D vectors directions
+         */
         cv::Vec3d* getCamRays1()
         {
             return this->cam1_rays;
         }
 
+        /**
+         * @brief Returns the second camera's joints rays
+         * @return An array of 3D vectors directions
+         */
         cv::Vec3d* getCamRays2()
         {
             return this->cam2_rays;
@@ -119,6 +176,5 @@ namespace owo
         {
 
         }
-
     };
 }

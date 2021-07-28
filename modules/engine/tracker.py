@@ -1,3 +1,12 @@
+############################################################
+#                                                          #
+#        Python script for body position estimation        #
+#        This script uses google's mediapipe pose          #
+#        solution to estimate the body position of         #
+#        the given frame.                                  #
+#                                                          #
+############################################################
+
 import cv2, sys,time
 import numpy as np
 import mediapipe as mp

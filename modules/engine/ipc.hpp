@@ -11,6 +11,12 @@ namespace owo
     class IPCCall
     {
     public:
+    /**
+     * @brief The callback function
+     * 
+     * @param data The data to send
+     * @param length The length of the data
+     */
         virtual void func(char* data, unsigned short length) = 0;
     };
 
@@ -38,6 +44,9 @@ namespace owo
         }
     };
 
+    /**
+     * @brief IPC class, takes care of IPC communication between the child processes (Python) and this process (C++)
+     */
     class IPC
     {
     private:
@@ -51,6 +60,9 @@ namespace owo
         std::thread readingThread;
         bool running;
 
+        /**
+         * @brief Initialises the IPC's attributes
+         */
         void init()
         {
             saAttr.nLength = sizeof(SECURITY_ATTRIBUTES); 
@@ -69,11 +81,18 @@ namespace owo
         }
 
     public:
+        /**
+         * @brief Default constructor
+         */
         IPC()
         {
             init();
         }
 
+        /**
+         * @brief Starts the child process (Python)
+         * @return If the process as been successfully started or not
+         */
         bool startChild()
         {
             // Create the child process
@@ -101,18 +120,14 @@ namespace owo
                 &siStartInfo,  // STARTUPINFO pointer 
                 &piProcInfo);  // receives PROCESS_INFORMATION 
             
-            if ( ! bSuccess ) 
-            {
-                std::cout << "Error: Error creating the child process" << std::endl;
-                return false;
-            }
-            else 
+            if ( bSuccess )
             {
                 CloseHandle(piProcInfo.hProcess);
                 CloseHandle(piProcInfo.hThread);
                 CloseHandle(g_hChildStd_OUT_Wr);
                 CloseHandle(g_hChildStd_IN_Rd);
             }
+            else return false;
 
             this->running = true;
 
@@ -121,6 +136,10 @@ namespace owo
             return true;
         }
 
+        /**
+         * @brief [INTERNAL] Reads the child's stdout and calls the read callback
+         * if new data is available
+         */
         void _read_output()
         {
             DWORD dwRead, dwWritten; 
@@ -138,11 +157,23 @@ namespace owo
             }
         }
 
+        /**
+         * @brief Sets the read callback method, called when new data from the child's output is detected
+         * @tparam T The method's class
+         * @param callback The read callback
+         * @param c The class instance
+         */
         template<class T> void setReadCallback(void (T::*callback)(char* data, unsigned short length), T *c)
         {
             this->call = new TypedIPCCall<T>(callback, c);
         }
 
+        /**
+         * @brief Writes to the child's stdin the given data
+         * 
+         * @param data Data to write to the child
+         * @param length Length of the data to write
+         */
         void writeToChild(const char* data, unsigned int length)
         {
             if (!running) return;
@@ -150,6 +181,12 @@ namespace owo
             WriteFile(g_hChildStd_IN_Wr, (LPCVOID)data, length, &dwWritten, 0);
         }
 
+        /**
+         * @brief Writes to the child's stdin the given data
+         * 
+         * @param data Data to write to the child
+         * @param length Length of the data to write
+         */
         void writeToChild(unsigned char* data, unsigned int length)
         {
             if (!running) return;
@@ -157,6 +194,10 @@ namespace owo
             WriteFile(g_hChildStd_IN_Wr, (LPCVOID)data, length, &dwWritten, 0);
         }
 
+        /**
+         * @brief Sends a STOP signal to the child process to stop it
+         * and stops the child's stdout reading thread
+         */
         void stopChild()
         {
             writeToChild("STOP\n", 6);

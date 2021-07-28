@@ -17,7 +17,7 @@ namespace SceneGenerator
 {
     void GenerateDefaultScene(Window &win)
     {
-        int cameraWidth = 300;
+        int cameraWidth = win.getWidth()*0.25;
 
         View* view = new View(
                 sf::Vector2i(cameraWidth, 0),
@@ -28,8 +28,8 @@ namespace SceneGenerator
         CameraView* camView = new CameraView(new Camera(), sf::Vector2i(10, 10), sf::Vector2i(cameraWidth, win.getHeight()-20));
         CameraView* camView2 = new CameraView(new Camera(), sf::Vector2i(win.getWidth()-cameraWidth-10, 10), sf::Vector2i(cameraWidth, win.getHeight()-20));
 
-        view->setCameraObj(camView->getCamera());
-        view->setCameraObj2(camView2->getCamera());
+        view->setCamera1(camView->getCamera());
+        view->setCamera2(camView2->getCamera());
 
         camView->getCamera()->loadCalibration("./out.txt");
         camView2->getCamera()->loadCalibration("./out.txt");

@@ -2,6 +2,10 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
+/**
+ * @brief Constant namespace, contains all the common variables of the program 
+ * such as the colors, etc.
+ */
 namespace CONSTANT
 {
     sf::Color COLOR_BLACK_DARK  (44, 62, 80);
@@ -23,13 +27,22 @@ namespace CONSTANT
     sf::Color COLOR_YELLOW_DARK  (243, 156, 18);
     sf::Color COLOR_YELLOW_LIGHT (241, 196, 15);
 
+    /** @brief App clear color for background */
     sf::Color COLOR_CLEAR = COLOR_BLACK_DARK;
+    /** @brief App's widgets background color */
     sf::Color COLOR_BACK = COLOR_BLACK_LIGHT;
+    /** @brief App's foreground color*/
     sf::Color COLOR_FORE = COLOR_WHITE_LIGHT;
+    /** @brief App's primary color*/
     sf::Color COLOR_PRIMARY = COLOR_GREEN_LIGHT;
-    sf::Color COLOR_TRANS      (0, 0, 0, 0);
+    /** @brief App transparent color*/
+    sf::Color COLOR_TRANS(0, 0, 0, 0);
 
+    /** @brief Number of body joints */
     const unsigned char NB_JOINTS = 33;
+    /** @brief Number of connections between body joints */
+    const unsigned char NB_CONNECIONS = 35;
+    /** @brief Connections between each joint of the body for a wired representation */
     const unsigned char POSE_CONNECTIONS[35][2] = {
         {15, 21},
         {16, 20},
@@ -68,11 +81,13 @@ namespace CONSTANT
         {13, 15}
     };
     
+    /** @brief App's main font */
     sf::Font FONT;
-    
     char NO_CHAR = '~';
-    int CAMERA_FPS = 15;
 
+    /**
+     * @brief Initialises the common variables such as the fonts
+     */
     void init()
     {
         if (!FONT.loadFromFile("./resources/fonts/Roboto-Regular.ttf"))
