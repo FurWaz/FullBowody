@@ -34,7 +34,9 @@ namespace SceneGenerator
         camView->getCamera()->loadCalibration("./out.txt");
         camView2->getCamera()->loadCalibration("./out.txt");
         camView->getCamera()->openSource("http://192.168.43.1:8080/video");
-        camView2->getCamera()->openSource("http://192.168.43.163:8080/video");
+        camView2->getCamera()->openSource("http://192.168.43.1:8080/video");
+        //camView->getCamera()->openSource("http://192.168.43.1:8080/video");
+        //camView2->getCamera()->openSource("http://192.168.43.163:8080/video");
 
         win.addElement(camView);
         for(GraphicElement* el: camView->getElements())

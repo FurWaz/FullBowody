@@ -2,6 +2,7 @@
 #include "../constants.hpp"
 #include "graphicElement.hpp"
 #include "../engine/camera.hpp"
+#include "../engine/bodypos.hpp"
 #include "opencv2/core.hpp"
 
 namespace owo
@@ -20,6 +21,8 @@ namespace owo
 
         Camera* camObj;
         Camera* camObj2;
+
+        BodyPos bp;
 
         void init()
         {
@@ -108,6 +111,17 @@ namespace owo
             draw_line(p4, p3, CONSTANT::COLOR_ORANGE_LIGHT);
         }
 
+        void draw_body()
+        {
+            cv::Vec3d* points = this->bp.getBody();
+            for(int i = 0; i < 35; i++)
+                draw_line(
+                    vec3_vec2(rotate(points[CONSTANT::POSE_CONNECTIONS[i][0]], rot) + pos),
+                    vec3_vec2(rotate(points[CONSTANT::POSE_CONNECTIONS[i][1]], rot) + pos),
+                    CONSTANT::COLOR_PURPLE_LIGHT
+                );
+        }
+
         void apply_tex()
         {
             this->renderTexture.display();
@@ -162,6 +176,7 @@ namespace owo
                 this->rotation.y -= delta.x * 0.01;
             }
             apply_rotation();
+            this->bp.update();
             lastMousePos = mousePos;
         }
 
@@ -172,9 +187,18 @@ namespace owo
             cv::Vec3d pos = camObj->getPosition();
             cv::Mat rot = camObj->getRotation();
             draw_camera(pos, rot, 0.4);
+            // cv::Vec3d* rays = this->bp.getCamRays1();
+            // for(int i = 0; i < 35; i++)
+            //     draw_line(
+            //         vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][0]], rot) + pos),
+            //         vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][1]], rot) + pos),
+            //         CONSTANT::COLOR_PURPLE_LIGHT
+            //     );
             pos = camObj2->getPosition();
             rot = camObj2->getRotation();
             draw_camera(pos, rot, 0.4);
+            draw_body();
+
             apply_tex();
             return this->sprite;
         }
@@ -182,11 +206,13 @@ namespace owo
         void setCameraObj(Camera* cam)
         {
             this->camObj = cam;
+            this->bp.setCamera1(cam);
         }
 
         void setCameraObj2(Camera* cam)
         {
             this->camObj2 = cam;
+            this->bp.setCamera2(cam);
         }
 
         ~View()

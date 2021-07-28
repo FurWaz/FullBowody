@@ -342,6 +342,11 @@ namespace owo
             return this->tracker;
         }
 
+        cv::Point2d getFOV()
+        {
+            return this->fov;
+        }
+
         void setDebugMode(bool state)
         {
             this->debugMode = state;
