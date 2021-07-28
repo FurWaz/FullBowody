@@ -318,8 +318,6 @@ namespace owo
         {
             this->calibrData.loadFromFile(path);
             this->calculateFOV();
-
-            std::cout << "Camera calibration loaded: FOV is: <" << this->fov.x << ", " << this->fov.y << ">" << std::endl;
         }
 
         void saveCalibration(std::string path)

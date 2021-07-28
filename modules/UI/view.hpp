@@ -116,8 +116,8 @@ namespace owo
             cv::Vec3d* points = this->bp.getBody();
             for(int i = 0; i < 35; i++)
                 draw_line(
-                    vec3_vec2(rotate(points[CONSTANT::POSE_CONNECTIONS[i][0]], rot) + pos),
-                    vec3_vec2(rotate(points[CONSTANT::POSE_CONNECTIONS[i][1]], rot) + pos),
+                    vec3_vec2(points[CONSTANT::POSE_CONNECTIONS[i][0]]),
+                    vec3_vec2(points[CONSTANT::POSE_CONNECTIONS[i][1]]),
                     CONSTANT::COLOR_PURPLE_LIGHT
                 );
         }
