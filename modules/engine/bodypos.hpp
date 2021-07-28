@@ -30,20 +30,33 @@ namespace owo
             return res;
         }
 
+        bool intersection(cv::Vec3d o1, cv::Vec3d p1, cv::Vec3d o2, cv::Vec3d p2,
+                      cv::Vec3d &r)
+        {
+            cv::Vec3d x = o2 - o1;
+            cv::Vec3d d1 = p1 - o1;
+            cv::Vec3d d2 = p2 - o2;
+
+            double cross = d1[0]*d2[1] - d1[1]*d2[0];
+            if (abs(cross) < 1e-8) /*EPS*/
+                return false;
+
+            double t1 = (x[0] * d2[1] - x[1] * d2[0])/cross;
+            r = o1 + d1 * t1;
+            return true;
+        }
+
         void calculateCamRays(Camera* cam, cv::Vec3d* rays)
         {
             std::vector<cv::Point3f> points = cam->getTracker()->getPoints(); // x, y, visibility (from 0 to 1)
+            cv::Mat rot = cam->getRotation();
             cv::Point2d fov = cam->getFOV();
             for(int i = 0; i < points.size(); i++)
             {
                 const cv::Point3f p = points[i];
                 double rotX = ((p.y - 0.5) * 2) * fov.y;
                 double rotY = ((p.x - 0.5) * 2) * fov.x;
-                rays[i] = cv::Vec3d(
-                    -std::sin(rotY),
-                    std::sin(rotX),
-                    std::cos(rotX) * std::cos(rotY)
-                );
+                rays[i] = this->rotate(cv::Vec3d(-std::sin(rotY), std::sin(rotX), std::cos(rotX) * std::cos(rotY)), rot);
             }
         }
 
@@ -55,10 +68,7 @@ namespace owo
             {
                 cv::Vec3d v1 = cam1_rays[i];
                 cv::Vec3d v2 = cam2_rays[i];
-                double x = ( c2[1] - c1[1] ) / ( v1[1]/v1[0] - v2[1]/v2[0] );
-                double y = v1[1]/v1[0] * x + c1[1];
-                double z = ((v1[2]/v1[0] * x + c1[2]) + (v2[2]/v2[0] * x + c2[2])) / 2.d;
-                this->body[i] = cv::Vec3d(x, y, z);
+                this->intersection(c1, v1, c2, v2, this->body[i]);
             }
         }
 

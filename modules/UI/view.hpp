@@ -169,6 +169,7 @@ namespace owo
 
         void update(float dt, sf::Vector2i mousePos)
         {
+            this->rotation.y += dt;
             if (clicked)
             {
                 sf::Vector2i delta = mousePos - lastMousePos;
@@ -187,16 +188,23 @@ namespace owo
             cv::Vec3d pos = camObj->getPosition();
             cv::Mat rot = camObj->getRotation();
             draw_camera(pos, rot, 0.4);
-            // cv::Vec3d* rays = this->bp.getCamRays1();
-            // for(int i = 0; i < 35; i++)
-            //     draw_line(
-            //         vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][0]], rot) + pos),
-            //         vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][1]], rot) + pos),
-            //         CONSTANT::COLOR_PURPLE_LIGHT
-            //     );
+            cv::Vec3d* rays = this->bp.getCamRays1();
+            for(int i = 0; i < 35; i++)
+                draw_line(
+                    vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][0]], rot) + pos),
+                    vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][1]], rot) + pos),
+                    CONSTANT::COLOR_PURPLE_LIGHT
+                );
             pos = camObj2->getPosition();
             rot = camObj2->getRotation();
             draw_camera(pos, rot, 0.4);
+            rays = this->bp.getCamRays2();
+            for(int i = 0; i < 35; i++)
+                draw_line(
+                    vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][0]], rot) + pos),
+                    vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][1]], rot) + pos),
+                    CONSTANT::COLOR_PURPLE_LIGHT
+                );
             draw_body();
 
             apply_tex();
