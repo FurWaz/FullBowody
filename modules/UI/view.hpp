@@ -69,10 +69,20 @@ namespace owo
             this->renderTexture.clear(CONSTANT::COLOR_CLEAR);
         }
 
-        void draw_line(sf::Vector2f p1, sf::Vector2f p2, sf::Color color = CONSTANT::COLOR_FORE)
+        void draw_line(sf::Vector2f p1, sf::Vector2f p2, sf::Color color = CONSTANT::COLOR_FORE, int thinkness = 1)
         {
-            sf::Vertex line[] = {sf::Vertex(p1, color), sf::Vertex(p2, color)};
-            this->renderTexture.draw(line, 2, sf::Lines);
+            // sf::Vertex line[] = {sf::Vertex(p1, color), sf::Vertex(p2, color)};
+            // this->renderTexture.draw(line, 2, sf::Lines);
+
+            float delta = (p2.y - p1.y) / (p2.x - p1.x);
+            float rotation = std::atan(delta);
+            float length = std::sqrt( std::pow(p2.x - p1.x, 2) + std::pow(p2.y - p1.y, 2) );
+            sf::RectangleShape rect(sf::Vector2f(length, thinkness));
+            rect.setPosition((p1.x+p2.x)*0.5f, (p1.y+p2.y)*0.5f);
+            rect.setOrigin(length*0.5f, thinkness*0.5f);
+            rect.rotate(rotation * 180 / 3.1415926);
+            rect.setFillColor(color);
+            this->renderTexture.draw(rect);
         }
 
         cv::Vec3d rotate(cv::Vec3d vec, cv::Mat rot)
@@ -89,9 +99,9 @@ namespace owo
 
         void draw_origin(cv::Vec3d pos, cv::Mat rot, float size = 1.f)
         {
-            draw_line(vec3_vec2(rotate(cv::Vec3d(size, 0, 0), rot) + pos), vec3_vec2(rotate(cv::Vec3d(-size, 0, 0), rot) + pos), CONSTANT::COLOR_RED_LIGHT);
-            draw_line(vec3_vec2(rotate(cv::Vec3d(0, size, 0), rot) + pos), vec3_vec2(rotate(cv::Vec3d(0, -size, 0), rot) + pos), CONSTANT::COLOR_GREEN_LIGHT);
-            draw_line(vec3_vec2(rotate(cv::Vec3d(0, 0, size), rot) + pos), vec3_vec2(rotate(cv::Vec3d(0, 0, -size), rot) + pos), CONSTANT::COLOR_BLUE_LIGHT);
+            draw_line(vec3_vec2(rotate(cv::Vec3d(size, 0, 0), rot) + pos), vec3_vec2(rotate(cv::Vec3d(-size, 0, 0), rot) + pos), CONSTANT::COLOR_RED_LIGHT, 2);
+            draw_line(vec3_vec2(rotate(cv::Vec3d(0, size, 0), rot) + pos), vec3_vec2(rotate(cv::Vec3d(0, -size, 0), rot) + pos), CONSTANT::COLOR_GREEN_LIGHT, 2);
+            draw_line(vec3_vec2(rotate(cv::Vec3d(0, 0, size), rot) + pos), vec3_vec2(rotate(cv::Vec3d(0, 0, -size), rot) + pos), CONSTANT::COLOR_BLUE_LIGHT, 2);
         }
 
         void draw_camera(Camera* cam, cv::Vec3d* rays)
@@ -103,15 +113,15 @@ namespace owo
             sf::Vector2f p2 = vec3_vec2(rotate(cv::Vec3d( size*0.2,-size*0.4, size*0.5), rot) + pos);
             sf::Vector2f p3 = vec3_vec2(rotate(cv::Vec3d(-size*0.2,-size*0.4, size*0.5), rot) + pos);
             sf::Vector2f p4 = vec3_vec2(rotate(cv::Vec3d(-size*0.2, size*0.4, size*0.5), rot) + pos);
-            draw_line(vec3_vec2(rotate(cv::Vec3d(0, 0, size), rot) + pos), vec3_vec2(pos), CONSTANT::COLOR_BLUE_LIGHT);
-            draw_line(p1, vec3_vec2(pos), CONSTANT::COLOR_ORANGE_LIGHT);
-            draw_line(p2, vec3_vec2(pos), CONSTANT::COLOR_ORANGE_LIGHT);
-            draw_line(p3, vec3_vec2(pos), CONSTANT::COLOR_ORANGE_LIGHT);
-            draw_line(p4, vec3_vec2(pos), CONSTANT::COLOR_ORANGE_LIGHT);
-            draw_line(p1, p4, CONSTANT::COLOR_ORANGE_LIGHT);
-            draw_line(p2, p1, CONSTANT::COLOR_ORANGE_LIGHT);
-            draw_line(p3, p2, CONSTANT::COLOR_ORANGE_LIGHT);
-            draw_line(p4, p3, CONSTANT::COLOR_ORANGE_LIGHT);
+            draw_line(vec3_vec2(rotate(cv::Vec3d(0, 0, size), rot) + pos), vec3_vec2(pos), CONSTANT::COLOR_BLUE_LIGHT, 2);
+            draw_line(p1, vec3_vec2(pos), CONSTANT::COLOR_ORANGE_LIGHT, 2);
+            draw_line(p2, vec3_vec2(pos), CONSTANT::COLOR_ORANGE_LIGHT, 2);
+            draw_line(p3, vec3_vec2(pos), CONSTANT::COLOR_ORANGE_LIGHT, 2);
+            draw_line(p4, vec3_vec2(pos), CONSTANT::COLOR_ORANGE_LIGHT, 2);
+            draw_line(p1, p4, CONSTANT::COLOR_ORANGE_LIGHT, 2);
+            draw_line(p2, p1, CONSTANT::COLOR_ORANGE_LIGHT, 2);
+            draw_line(p3, p2, CONSTANT::COLOR_ORANGE_LIGHT, 2);
+            draw_line(p4, p3, CONSTANT::COLOR_ORANGE_LIGHT, 2);
 
             if (cam->isDebugMode())
             {
@@ -131,7 +141,7 @@ namespace owo
                 draw_line(
                     vec3_vec2(points[CONSTANT::POSE_CONNECTIONS[i][0]]),
                     vec3_vec2(points[CONSTANT::POSE_CONNECTIONS[i][1]]),
-                    CONSTANT::COLOR_PURPLE_LIGHT
+                    CONSTANT::COLOR_PURPLE_LIGHT, 4
                 );
         }
 
@@ -182,7 +192,7 @@ namespace owo
 
         void update(float dt, sf::Vector2i mousePos)
         {
-            this->rotation.y += dt*0.2;
+            this->rotation.y += dt*0.5;
             if (clicked)
             {
                 sf::Vector2i delta = mousePos - lastMousePos;
@@ -190,7 +200,7 @@ namespace owo
                 this->rotation.y -= delta.x * 0.01;
             }
             apply_rotation();
-            this->bp.update();
+            this->bp.update(dt);
             lastMousePos = mousePos;
         }
 

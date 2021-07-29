@@ -125,6 +125,8 @@ namespace owo
         std::vector<int> aruco_ids;
         cv::Vec3d aruco_boardPosition, aruco_boardRotation;
 
+        std::chrono::steady_clock::time_point last_refresh_time;
+
         /**
          * @brief Set the camera dimensions from source stream
          */
@@ -151,6 +153,8 @@ namespace owo
             this->debugMode = false;
             this->rotation = cv::Mat::eye(cv::Size(3, 3), CV_64F);
             this->aruco_board = cv::aruco::GridBoard::create(3, 2, 0.088, 0.005, this->aruco_dict, 0);
+
+            this->last_refresh_time = std::chrono::steady_clock::now();
         }
 
         /**
@@ -192,7 +196,6 @@ namespace owo
                 this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients,
                 this->aruco_boardRotation, this->aruco_boardPosition, false
             );
-            getCamPosRot();
         }
 
         /**
@@ -291,6 +294,11 @@ namespace owo
          */
         void updateFrame(float dt)
         {
+            std::chrono::steady_clock::time_point current_refresh_time = std::chrono::steady_clock::now();
+            if ( std::chrono::duration_cast<std::chrono::milliseconds>( current_refresh_time-last_refresh_time ).count() < CONSTANT::CAMERA_FPS_DELTA )
+                return;
+            this->last_refresh_time = current_refresh_time;
+
             this->sourceAvailable =
                 this->frame.cols == this->dimensions.x &&
                 this->frame.rows == this->dimensions.y;
@@ -301,21 +309,26 @@ namespace owo
             {
                 if (this->debugMode)
                 {
-                    cv::aruco::drawDetectedMarkers(this->frame, this->aruco_corners, this->aruco_ids);
-                    cv::drawFrameAxes(
-                        this->frame, this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients,
-                        this->aruco_boardRotation, this->aruco_boardPosition, 0.042, 6
-                    );
-                    std::vector<cv::Point3f> tPoints = this->tracker->getPoints();
-                    if (tPoints.size() > 32)
+                    detectArucoMarkers();
+                    getArucoBoardPosition();
+                    if (this->aruco_ids.size() > 0)
                     {
-                        for(int i = 0; i < 35; i++)
+                        cv::aruco::drawDetectedMarkers(this->frame, this->aruco_corners, this->aruco_ids);
+                        cv::drawFrameAxes(
+                            this->frame, this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients,
+                            this->aruco_boardRotation, this->aruco_boardPosition, 0.042, 6
+                        );
+                    }
+                    std::vector<cv::Point3f> tPoints = this->tracker->getPoints();
+                    if (tPoints.size() == CONSTANT::NB_JOINTS)
+                    {
+                        for(int i = 0; i < CONSTANT::NB_CONNECTIONS; i++)
                         {
-                            if (tPoints[CONSTANT::POSE_CONNECTIONS[i][0]].z < 0.85f || tPoints[CONSTANT::POSE_CONNECTIONS[i][1]].z < 0.85f)
+                            if (tPoints[CONSTANT::POSE_CONNECTIONS[i][0]].z < 0.7f || tPoints[CONSTANT::POSE_CONNECTIONS[i][1]].z < 0.7f)
                                 continue;
                             cv::Point p1(this->frame.cols * tPoints[CONSTANT::POSE_CONNECTIONS[i][0]].x, this->frame.rows * tPoints[CONSTANT::POSE_CONNECTIONS[i][0]].y);
                             cv::Point p2(this->frame.cols * tPoints[CONSTANT::POSE_CONNECTIONS[i][1]].x, this->frame.rows * tPoints[CONSTANT::POSE_CONNECTIONS[i][1]].y);
-                            cv::line(this->frame, p1, p2, cv::Scalar(0, 0, 255), 8);
+                            cv::line(this->frame, p1, p2, cv::Scalar(0, 0, 255), 4);
                         }
                     }
                 }
@@ -325,9 +338,15 @@ namespace owo
             }
             catch (std::exception &e) 
             {
-                std::cerr << e.what() << std::endl;
                 this->graphImage->black(sf::Vector2u(300, 300));
             }
+        }
+
+        void calculatePosition()
+        {
+            detectArucoMarkers();
+            getArucoBoardPosition();
+            getCamPosRot();
         }
 
         /**
@@ -348,13 +367,19 @@ namespace owo
             this->shouldRead = true;
             while (this->shouldRead)
             {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 if(!this->source.grab()) continue;
                 this->source.retrieve(this->frame);
                 cv::cvtColor(this->frame, this->frame_rgb, cv::COLOR_BGR2RGB);
-                this->tracker->sendImage(this->frame_rgb);
-                detectArucoMarkers();
-                getArucoBoardPosition();
             }
+        }
+        
+        /**
+         * @brief Sends an image to the tracker for body position detection
+         */
+        void getBodyPosition()
+        {
+            this->tracker->sendImage(this->frame_rgb);
         }
 
         /**
@@ -364,14 +389,6 @@ namespace owo
         std::string getPath()
         {
             return this->path;
-        }
-
-        /**
-         * @brief Sends an image to the tracker for body position detection
-         */
-        void sendPic()
-        {
-            this->tracker->sendImage(this->frame);
         }
 
         /**

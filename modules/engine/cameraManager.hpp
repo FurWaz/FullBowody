@@ -31,13 +31,12 @@ namespace owo
          * @brief Toogle all the CameraManager's cameras body trackers for body tracking
          * @return If the cameras' trackers are now on or off
          */
-        bool toogleCameraTracking()
+        void toogleCameraTracking()
         {
             bool possible = true;
             for (Camera* c: this->cameras)
                 possible = possible & c->getPath() != "";
-            if (!possible)
-                return this->tracking;
+            if (!possible) return;
 
             if (this->tracking)
                 for (Camera* c: this->cameras)
@@ -47,7 +46,6 @@ namespace owo
                     c->getTracker()->startTracking();
 
             this->tracking = !this->tracking;
-            return this->tracking;
         }
 
         ~CameraManager()

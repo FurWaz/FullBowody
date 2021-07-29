@@ -20,6 +20,7 @@ namespace owo
         Button* calibrateBtn;
         Button* loadBtn;
         Button* saveBtn;
+        Button* detectBtn;
         std::string cameraSource;
 
         void setupCamView()
@@ -39,22 +40,28 @@ namespace owo
                 14, Input::CENTER, CONSTANT::COLOR_PRIMARY, "Enter camera address"
             );
             this->input->setCallback(&CameraView::_update_source, this);
+            this->detectBtn = new Button(
+                "Detect position",
+                sf::Vector2i(this->dimensions.left, this->dimensions.top+this->dimensions.height-50),
+                sf::Vector2i(this->dimensions.width, 50), 18,
+                CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
+            );
             this->calibrateBtn = new Button(
                 "Calibrate",
-                sf::Vector2i(this->dimensions.left, this->dimensions.top+this->dimensions.height-50),
-                sf::Vector2i(this->dimensions.width, 50),
+                sf::Vector2i(this->dimensions.left, this->dimensions.top+this->dimensions.height-100),
+                sf::Vector2i(this->dimensions.width*0.4, 50), 18,
                 CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
             );
             this->loadBtn = new Button(
                 "Load",
-                sf::Vector2i(this->dimensions.left, this->dimensions.top+this->dimensions.height-100),
-                sf::Vector2i(this->dimensions.width/2, 50),
+                sf::Vector2i(this->dimensions.left+this->dimensions.width*0.4, this->dimensions.top+this->dimensions.height-100),
+                sf::Vector2i(this->dimensions.width*0.3, 50), 16,
                 CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
             );
             this->saveBtn = new Button(
                 "Save",
-                sf::Vector2i(this->dimensions.left+this->dimensions.width/2, this->dimensions.top+this->dimensions.height-100),
-                sf::Vector2i(this->dimensions.width/2, 50),
+                sf::Vector2i(this->dimensions.left+this->dimensions.width*0.7, this->dimensions.top+this->dimensions.height-100),
+                sf::Vector2i(this->dimensions.width*0.3, 50), 16,
                 CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
             );
             this->checkbox = new Checkbox(
@@ -74,6 +81,7 @@ namespace owo
             this->loadBtn->setCallback(&CameraView::loadCameraCalibration, this);
             this->saveBtn->setCallback(&CameraView::saveCameraCalibration, this);
             this->calibrateBtn->setCallback(&CameraView::calibrateCamera, this);
+            this->detectBtn->setCallback(&CameraView::detectCameraPosition, this);
         }
 
     public:
@@ -157,6 +165,7 @@ namespace owo
             result.push_back(this->checkbox);
             result.push_back(this->checkbox_text);
             result.push_back(this->calibrateBtn);
+            result.push_back(this->detectBtn);
             result.push_back(this->loadBtn);
             result.push_back(this->saveBtn);
             return result;
@@ -192,6 +201,11 @@ namespace owo
         void calibrateCamera()
         {
             std::cout << "this->cam->calibrate();" << std::endl;
+        }
+
+        void detectCameraPosition()
+        {
+            this->cam->calculatePosition();
         }
 
         void toogleDebugMode()

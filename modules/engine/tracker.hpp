@@ -9,6 +9,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include "../UI/CallbackContainer.hpp"
 #include "./ipc.hpp"
 
 /**
@@ -64,6 +65,8 @@ namespace owo
         bool running;
         cv::Mat dataToSend;
         std::vector<cv::Point3f>* points; // z is visibility
+        CallbackContainer* cont;
+        bool newTrackingDataAvailable;
 
         /**
          * @brief Parses the raw text data to fill the points list the the actual joints positions
@@ -118,6 +121,7 @@ namespace owo
         Tracker()
         {
             this->points = new std::vector<cv::Point3f>();
+            this->newTrackingDataAvailable = false;
         }
 
         /**
@@ -158,7 +162,11 @@ namespace owo
             if (!this->dataAvailable)
                 std::cout << ">>> New input from Python: \n" << str << std::endl;
             else
+            {
                 getPointsFromData(data, length);
+                this->setNewTrackingDataAvailable(true);
+                this->cont->func();
+            }
 
             if (str == "READY")
                 this->dataAvailable = true;
@@ -198,12 +206,42 @@ namespace owo
         }
 
         /**
+         * @brief Sets the callback for new data recieved event
+         * 
+         * @tparam T The callback class
+         * @param callback The callback method
+         * @param c The callback medhod's class instance
+         */
+        template<class T> void setNewDataCallback(void (T::*callback)(), T* c)
+        {
+            this->cont = new TypedCallbackContainer<T>(callback, c);
+        }
+
+        /**
          * @brief Returns the 2D points of the detected body position (between 0 and 1)
          * @return a 2D point list corresponding to the positions of the body joints (z axis is the visibility of the point)
          */
         std::vector<cv::Point3f> getPoints()
         {
             return *this->points;
+        }
+
+        /**
+         * @brief Returns if new tracking data is available
+         * @return Boolean if the data is available or not
+         */
+        bool isNewTrackingDataAvailable()
+        {
+            return this->newTrackingDataAvailable;
+        }
+
+        /**
+         * @brief Sets if new tracking data is available or not
+         * @param state The new value
+         */
+        void setNewTrackingDataAvailable(bool state)
+        {
+            this->newTrackingDataAvailable = state;
         }
 
         ~Tracker()

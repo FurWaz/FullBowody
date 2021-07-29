@@ -3,6 +3,7 @@
 #include "./camera.hpp"
 #include <opencv2/core.hpp>
 #include <vector>
+#include <chrono>
 
 namespace owo
 {
@@ -18,8 +19,9 @@ namespace owo
 
         cv::Vec3d cam1_rays[CONSTANT::NB_JOINTS];
         cv::Vec3d cam2_rays[CONSTANT::NB_JOINTS];
-
         cv::Vec3d body[CONSTANT::NB_JOINTS];
+
+        float tracking_dt;
 
         /**
          * @brief Returns a new rotated point based on the point's position and a rotation matrix
@@ -113,6 +115,7 @@ namespace owo
                 this->cam1_rays[i] = cv::Vec3d();
                 this->cam2_rays[i] = cv::Vec3d();
             }
+            this->tracking_dt = 0;
         }
 
         /**
@@ -123,6 +126,7 @@ namespace owo
         void setCamera1(Camera* cam)
         {
             this->cam1 = cam;
+            this->cam1->getTracker()->setNewDataCallback(&BodyPos::refreshBody, this);
         }
         
         /**
@@ -133,13 +137,32 @@ namespace owo
         void setCamera2(Camera* cam)
         {
             this->cam2 = cam;
+            this->cam2->getTracker()->setNewDataCallback(&BodyPos::refreshBody, this);
         }
 
         /**
-         * @brief Updates the two camera's rays and calculates a new body position
+         * @brief Asks the cameras for new tracking data to update the body
          */
-        void update()
+        void update(float dt)
         {
+            this->tracking_dt += dt * 1000;
+            if ( this->tracking_dt < CONSTANT::TRACKING_FPS_DELTA )
+                return;
+
+            this->tracking_dt = 0;
+            this->cam1->getBodyPosition();
+            this->cam2->getBodyPosition();
+        }
+
+        /**
+         * @brief [INTERNAL] Updates camera rays and calculates the new body position
+         */
+        void refreshBody()
+        {
+            if (!this->cam1->getTracker()->isNewTrackingDataAvailable() || !this->cam2->getTracker()->isNewTrackingDataAvailable())
+                return;
+            this->cam1->getTracker()->setNewTrackingDataAvailable(false);
+            this->cam2->getTracker()->setNewTrackingDataAvailable(false);
             this->calculateCamRays(this->cam1, this->cam1_rays);
             this->calculateCamRays(this->cam2, this->cam2_rays);
             this->calculateBodyPosition();

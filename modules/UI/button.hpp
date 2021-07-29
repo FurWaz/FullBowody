@@ -76,12 +76,12 @@ namespace owo
             generateTexture();
         }
 
-        Button(std::string text, sf::Vector2i pos, sf::Vector2i size, sf::Color BGColor = CONSTANT::COLOR_BACK, sf::Color FGColor = CONSTANT::COLOR_PRIMARY)
+        Button(std::string text, sf::Vector2i pos, sf::Vector2i size, int textSize = 18, sf::Color BGColor = CONSTANT::COLOR_BACK, sf::Color FGColor = CONSTANT::COLOR_PRIMARY)
         {
             this->bgColor_normal = BGColor;
             this->fgColor_normal = FGColor;
             this->text = text;
-            this->textSize = 18;
+            this->textSize = textSize;
             this->setDimensions(pos.x, pos.y, size.x, size.y);
             generateHoverColors();
             generateTexture();

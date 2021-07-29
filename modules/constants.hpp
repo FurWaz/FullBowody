@@ -41,7 +41,7 @@ namespace CONSTANT
     /** @brief Number of body joints */
     const unsigned char NB_JOINTS = 33;
     /** @brief Number of connections between body joints */
-    const unsigned char NB_CONNECIONS = 35;
+    const unsigned char NB_CONNECTIONS = 35;
     /** @brief Connections between each joint of the body for a wired representation */
     const unsigned char POSE_CONNECTIONS[35][2] = {
         {15, 21},
@@ -83,7 +83,13 @@ namespace CONSTANT
     
     /** @brief App's main font */
     sf::Font FONT;
-    char NO_CHAR = '~';
+    const char NO_CHAR = '~';
+
+    unsigned short TRACKING_FPS = 20;
+    unsigned short CAMERA_FPS = 30;
+
+    unsigned short TRACKING_FPS_DELTA = 0;
+    unsigned short CAMERA_FPS_DELTA = 0;
 
     /**
      * @brief Initialises the common variables such as the fonts
@@ -92,5 +98,8 @@ namespace CONSTANT
     {
         if (!FONT.loadFromFile("./resources/fonts/Roboto-Regular.ttf"))
             std::cout << "Error loading default font" << std::endl;
+        
+        TRACKING_FPS_DELTA = 1000 / TRACKING_FPS;
+        CAMERA_FPS_DELTA = 1000 / CAMERA_FPS;
     }
 }

@@ -34,6 +34,9 @@ namespace SceneGenerator
         camView->getCamera()->loadCalibration("./out.txt");
         camView2->getCamera()->loadCalibration("./out.txt");
 
+        camView->getCamera()->openSource("http://192.168.43.1:8080/video");
+        camView2->getCamera()->openSource("http://192.168.43.163:8080/video");
+
         win.addElement(camView);
         for(GraphicElement* el: camView->getElements())
             win.addElement(el);
@@ -44,7 +47,8 @@ namespace SceneGenerator
         
         Button* btn = new Button(
             "Start tracking",
-            sf::Vector2i(win.getWidth()/2-100, 10), sf::Vector2i(200, 50),
+            sf::Vector2i(win.getWidth()/2-100, 10),
+            sf::Vector2i(200, 50), 20,
             CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
         );
         win.addElement(btn);
