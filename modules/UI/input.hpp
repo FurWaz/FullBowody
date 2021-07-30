@@ -1,6 +1,7 @@
 #pragma once
 #include "../constants.hpp"
 #include "CallbackContainer.hpp"
+#include <windows.h>
 #include "graphicElement.hpp"
 #include "label.hpp"
 
@@ -14,6 +15,62 @@ namespace owo
         CallbackContainer* cont;
         std::string highlight;
 
+        bool CTRL_pressed;
+
+        int cursorPos;
+
+        void init()
+        {
+            this->cursorPos = 0;
+            this->CTRL_pressed = false;
+        }
+
+        void copyToClipboard()
+        {
+            if (! OpenClipboard(nullptr))
+            {
+                std::cerr << "Error opening the clipboard" << std::endl;
+                return;
+            }
+            HGLOBAL clipbuffer;
+            char * buffer;
+            EmptyClipboard();
+            clipbuffer = GlobalAlloc(GMEM_DDESHARE, this->text.size()+1);
+            buffer = (char*)GlobalLock(clipbuffer);
+            strcpy(buffer, LPCSTR(this->text.c_str()));
+            GlobalUnlock(clipbuffer);
+            SetClipboardData(CF_TEXT,clipbuffer);
+            CloseClipboard();
+            CloseClipboard();
+        }
+
+        void pasteFromClipboard()
+        {
+            if (! OpenClipboard(nullptr))
+            {
+                std::cerr << "Error opening the clipboard" << std::endl;
+                return;
+            }
+            char* data = (char*) GetClipboardData(CF_TEXT);
+            if (data == nullptr)
+            {
+                std::cerr << "Error getting clipboard content" << std::endl;
+                return;
+            }
+
+            std::string text(data);
+            for (int i = 0; i < text.size(); i++)
+                this->addLetter(text.at(i));
+            
+            CloseClipboard();
+        }
+
+        void addLetter(char letter)
+        {
+            this->text = this->text.substr(0, this->cursorPos) + letter + this->text.substr(this->cursorPos, this->text.size());
+            this->cursorPos++;
+        }
+
     public:
         static const int LEFT = Label::LEFT;
         static const int CENTER = Label::CENTER;
@@ -24,6 +81,7 @@ namespace owo
             this->setDimensions(0, 0, 200, 50);
             this->text = "Input";
             this->label = new Label(this->text, 16);
+            this->init();
             this->generateTexture();
         }
 
@@ -35,19 +93,20 @@ namespace owo
             this->text = text;
             this->highlight = highlight;
             this->label = new Label(this->text, fontSize, placement, textColor);
+            this->init();
             this->generateTexture();
         }
 
         Input(std::string text,
               sf::Vector2i position, sf::Vector2i size = sf::Vector2i(-1, -1),
-              int fontSize = 16, int placement = Input::CENTER, sf::Color textColor = CONSTANT::COLOR_PRIMARY,
+              int fontSize = 16, int placement = Input::CENTER, sf::Color textColor = CONSTANT::COLOR_WHITE_LIGHT,
               std::string highlight = "Input text")
         {
             this->setDimensions(position.x, position.y, size.x, size.y);
             this->text = text;
             this->highlight = highlight;
             this->label = new Label(this->text, sf::Vector2i(0, 0), size, fontSize, placement, textColor);
-            std::cout << this->text.c_str() << std::endl;
+            this->init();
             this->generateTexture();
         }
 
@@ -59,7 +118,13 @@ namespace owo
             {
                 this->label->setText(this->text);
                 this->label->generateTexture();
+                sf::RectangleShape cursor(sf::Vector2f(1, this->label->getFontSize()));
+                sf::Vector2f pos = this->label->calculateTextPos(this->text);
+                sf::Vector2u size = this->label->calculateTextSize(this->text.substr(0, this->cursorPos));
+                cursor.setPosition(pos.x+size.x, pos.y+2);
+                cursor.setFillColor(CONSTANT::COLOR_PRIMARY);
                 this->renderTexture.draw(this->label->getSprite(0));
+                this->renderTexture.draw(cursor);
             } else
             {
                 Label l(
@@ -104,15 +169,79 @@ namespace owo
         
         void onKey(int key, char c, bool pressed)
         {
-            if (!pressed) return;
-            if (key == sf::Keyboard::BackSpace)
+            switch (key)
             {
-                if (this->text.size() > 0)
-                    this->text = this->text.substr(0, this->text.size()-1);
+                case sf::Keyboard::Left:
+                    if (!pressed) break;
+                    if (this->CTRL_pressed)
+                    {
+                        while (this->cursorPos > 0)
+                        {
+                            this->cursorPos--;
+                            if (this->cursorPos > 0 && this->text.at(this->cursorPos-1) == ' ')
+                                break;
+                        }
+                    } else
+                    {
+                        if (this->cursorPos > 0)
+                          this->cursorPos--;
+                    }
+                    break;
+                case sf::Keyboard::Right:
+                    if (!pressed) break;
+                    if (this->CTRL_pressed)
+                    {
+                        while (this->cursorPos < this->text.size())
+                        {
+                            this->cursorPos++;
+                            if (this->cursorPos < this->text.size() && this->text.at(this->cursorPos) == ' ')
+                                break;
+                        }
+                    } else
+                    {
+                        if (this->cursorPos < this->text.size())
+                            this->cursorPos++;
+                    }
+                    break;
+                case sf::Keyboard::End:
+                    this->cursorPos = this->text.size();
+                    break;
+                case sf::Keyboard::Home:
+                    this->cursorPos = 0;
+                    break;
+                case sf::Keyboard::LControl:
+                case sf::Keyboard::RControl:
+                    this->CTRL_pressed = pressed;
+                    break;
+                case sf::Keyboard::Delete:
+                    if (!pressed) break;
+                    if (this->cursorPos < this->text.size())
+                        this->text = this->text.substr(0, this->cursorPos) + this->text.substr(this->cursorPos+1, this->text.size());
+                    break;
+                case sf::Keyboard::BackSpace:
+                    if (!pressed) break;
+                    if (this->text.size() > 0 && this->cursorPos > 0)
+                    {
+                        this->text = this->text.substr(0, this->cursorPos-1) + this->text.substr(this->cursorPos, this->text.size());
+                        this->cursorPos--;
+                    }
+                    break;
+                default:
+                    if (!pressed) break;
+                    if (c == 3)
+                    {
+                        this->copyToClipboard();
+                        break;
+                    }
+                    if (c == 22)
+                    {
+                        this->pasteFromClipboard();
+                        break;
+                    }
+                    if (c != CONSTANT::NO_CHAR)
+                        this->addLetter(c);
+                    break;
             }
-            else
-                if (c != CONSTANT::NO_CHAR)
-                    this->text += c;
             this->generateTexture();
         }
 

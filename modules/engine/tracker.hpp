@@ -122,6 +122,8 @@ namespace owo
         {
             this->points = new std::vector<cv::Point3f>();
             this->newTrackingDataAvailable = false;
+            this->dataAvailable = false;
+            this->ipc.setReadCallback(&Tracker::_retrieve_positions, this);
         }
 
         /**
@@ -159,9 +161,7 @@ namespace owo
         {
             std::string str(data, length);
 
-            if (!this->dataAvailable)
-                std::cout << ">>> New input from Python: \n" << str << std::endl;
-            else
+            if (this->dataAvailable)
             {
                 getPointsFromData(data, length);
                 this->setNewTrackingDataAvailable(true);
@@ -189,7 +189,6 @@ namespace owo
          */
         void startTracking()
         {
-            this->ipc.setReadCallback(&Tracker::_retrieve_positions, this);
             this->ipc.startChild();
             this->running = true;
             this->sendingThread = std::thread(&Tracker::_check_for_input_data, this);

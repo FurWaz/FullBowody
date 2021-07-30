@@ -67,17 +67,7 @@ namespace owo
         {
             saAttr.nLength = sizeof(SECURITY_ATTRIBUTES); 
             saAttr.bInheritHandle = TRUE; 
-            saAttr.lpSecurityDescriptor = NULL; 
-            
-            // Create the pipes for the child process
-            if ( ! CreatePipe(&g_hChildStd_OUT_Rd, &g_hChildStd_OUT_Wr, &saAttr, 0) ) 
-                std::cout << "Error: Error during StdoutRd CreatePipe" << std::endl;
-            if ( ! SetHandleInformation(g_hChildStd_OUT_Rd, HANDLE_FLAG_INHERIT, 0) )
-                std::cout << "Error: Error during Stdout SetHandleInformation" << std::endl;
-            if (! CreatePipe(&g_hChildStd_IN_Rd, &g_hChildStd_IN_Wr, &saAttr, 0)) 
-                std::cout << "Error: Error during Stdin CreatePipe" << std::endl;
-            if ( ! SetHandleInformation(g_hChildStd_IN_Wr, HANDLE_FLAG_INHERIT, 0) )
-                std::cout << "Error: Error during Stdin SetHandleInformation" << std::endl;
+            saAttr.lpSecurityDescriptor = NULL;
         }
 
     public:
@@ -95,6 +85,16 @@ namespace owo
          */
         bool startChild()
         {
+            // Create the pipes for the child process
+            if ( ! CreatePipe(&g_hChildStd_OUT_Rd, &g_hChildStd_OUT_Wr, &saAttr, 0) ) 
+                std::cout << "Error: Error during StdoutRd CreatePipe" << std::endl;
+            if ( ! SetHandleInformation(g_hChildStd_OUT_Rd, HANDLE_FLAG_INHERIT, 0) )
+                std::cout << "Error: Error during Stdout SetHandleInformation" << std::endl;
+            if (! CreatePipe(&g_hChildStd_IN_Rd, &g_hChildStd_IN_Wr, &saAttr, 0)) 
+                std::cout << "Error: Error during Stdin CreatePipe" << std::endl;
+            if ( ! SetHandleInformation(g_hChildStd_IN_Wr, HANDLE_FLAG_INHERIT, 0) )
+                std::cout << "Error: Error during Stdin SetHandleInformation" << std::endl;
+                
             // Create the child process
             char* command = (char*) "python ./modules/engine/tracker.py";
             PROCESS_INFORMATION piProcInfo;
@@ -147,13 +147,14 @@ namespace owo
             char chBuf[SIZE];
             BOOL bSuccess = FALSE;
 
-            for (;;) 
+            while (this->running)
             { 
                 bSuccess = ReadFile( g_hChildStd_OUT_Rd, chBuf, SIZE, &dwRead, NULL);
                 if (this->call != nullptr && dwRead > 0)
                     this->call->func(chBuf, dwRead);
-                if( ! bSuccess || dwRead == 0 || !this->running)
+                if( ! bSuccess || dwRead == 0)
                     break;
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
         }
 

@@ -91,6 +91,9 @@ namespace CONSTANT
     unsigned short TRACKING_FPS_DELTA = 0;
     unsigned short CAMERA_FPS_DELTA = 0;
 
+    unsigned short WINDOW_WIDTH = 0;
+    unsigned short WINDOW_HEIGHT = 0;
+
     /**
      * @brief Initialises the common variables such as the fonts
      */

@@ -8,16 +8,15 @@ int main(int argc, char const *argv[])
 {
     CONSTANT::init();
 
-    Window win("FullBowody", 1920, 1080);
+    Window win("FullBowody", sf::VideoMode::getDesktopMode().width*0.8f, sf::VideoMode::getDesktopMode().height*0.8f);
     SceneGenerator::GenerateDefaultScene(win);
-    win.startUpdating();
 
+    win.startUpdating();
     while (win.isOpen())
     {
         win.processEvents();
         win.refresh();
     }
-
     win.stopUpdating();
 
     return 0;

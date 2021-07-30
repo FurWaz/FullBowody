@@ -270,7 +270,6 @@ namespace owo
             {
                 result = this->source.open(address);
                 this->setDimensionsFromSource();
-                this->source.grab();
             }
             catch (std::exception &e)
             {

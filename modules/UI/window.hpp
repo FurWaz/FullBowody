@@ -1,5 +1,6 @@
 #pragma once
 #include "graphicElement.hpp"
+#include "../constants.hpp"
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <thread>
@@ -39,6 +40,12 @@ namespace owo
             }
         }
 
+        void setWindowConstants()
+        {
+            CONSTANT::WINDOW_HEIGHT = this->getHeight();
+            CONSTANT::WINDOW_WIDTH = this->getWidth();
+        }
+
     public:
         /**
          * @brief Construct a new Window object
@@ -57,7 +64,7 @@ namespace owo
         Window(std::string name, int width, int height)
         {
             this->screen.create(sf::VideoMode(width, height), name, sf::Style::Default, this->context);
-            this->size = sf::Vector2i(width, height);
+            this->setSize(width, height);
             this->updateClock.restart();
             this->refreshClock.restart();
             this->screen.setVerticalSyncEnabled(true);
@@ -98,52 +105,54 @@ namespace owo
             int key;
             switch (event.type)
             {
-            case sf::Event::Closed:
-                this->close();
-                break;
-            case sf::Event::MouseMoved:
-                this->mousePos = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
-                break;
+                case sf::Event::Closed:
+                    this->close();
+                    break;
+                case sf::Event::Resized:
+                    this->setSize(event.size.width, event.size.height);
+                case sf::Event::MouseMoved:
+                    this->mousePos = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
+                    break;
 
-            case sf::Event::MouseButtonPressed:
-                this->focused = nullptr;
-                for (GraphicElement* el: this->elements)
-                    if (el->isHovered())
-                    {
-                        el->onClick(event.mouseButton.button, true);
-                        this->focused = el;
-                        if (!el->isFocused()) el->onFocus(true);
-                    } else
-                        if (el->isFocused()) el->onFocus(false);
-                break;
-            case sf::Event::MouseButtonReleased:
-                for (GraphicElement* el: this->elements)
-                    if (el->isHovered())
-                        el->onClick(event.mouseButton.button, false);
-                break;
-            case sf::Event::MouseWheelScrolled:
-                for (GraphicElement* el: this->elements)
-                    if (el->isHovered())
-                        el->onScroll(event.mouseWheelScroll.delta*100);
-                break;
-            case sf::Event::KeyPressed:
-                if (this->focused == nullptr) return;
-                key = event.key.code;
-                this->screen.pollEvent(this->event);
-                if (event.type == sf::Event::TextEntered)
-                    this->focused->onKey(key, event.text.unicode, true);
-                else this->focused->onKey(key, CONSTANT::NO_CHAR, true);
-                break;
-            case sf::Event::KeyReleased:
-                if (this->focused == nullptr) return;
-                key = event.key.code;
-                this->screen.pollEvent(this->event);
-                if (event.type == sf::Event::TextEntered)
-                    this->focused->onKey(key, event.text.unicode, false);
-                else this->focused->onKey(key, CONSTANT::NO_CHAR, false);
-                break;
-            default:
-                break;
+                case sf::Event::MouseButtonPressed:
+                    this->focused = nullptr;
+                    for (GraphicElement* el: this->elements)
+                        if (el->isHovered())
+                        {
+                            el->onClick(event.mouseButton.button, true);
+                            this->focused = el;
+                            if (!el->isFocused()) el->onFocus(true);
+                        } else
+                            if (el->isFocused()) el->onFocus(false);
+                    break;
+                case sf::Event::MouseButtonReleased:
+                    for (GraphicElement* el: this->elements)
+                        if (el->isHovered())
+                            el->onClick(event.mouseButton.button, false);
+                    break;
+                case sf::Event::MouseWheelScrolled:
+                    for (GraphicElement* el: this->elements)
+                        if (el->isHovered())
+                            el->onScroll(event.mouseWheelScroll.delta*100);
+                    break;
+                case sf::Event::KeyPressed:
+                    if (this->focused == nullptr) return;
+                    key = event.key.code;
+                    this->screen.pollEvent(this->event);
+                    if (event.type == sf::Event::TextEntered)
+                        this->focused->onKey(key, event.text.unicode, true);
+                    else this->focused->onKey(key, CONSTANT::NO_CHAR, true);
+                    break;
+                case sf::Event::KeyReleased:
+                    if (this->focused == nullptr) return;
+                    key = event.key.code;
+                    this->screen.pollEvent(this->event);
+                    if (event.type == sf::Event::TextEntered)
+                        this->focused->onKey(key, event.text.unicode, false);
+                    else this->focused->onKey(key, CONSTANT::NO_CHAR, false);
+                    break;
+                default:
+                    break;
             }
             
             for (GraphicElement* el: this->elements)
@@ -180,6 +189,14 @@ namespace owo
         }
 
         /**
+         * @brief Removes all the GraphicElements from the window
+         */
+        void clearElements()
+        {
+            this->elements.clear();
+        }
+
+        /**
          * @brief Returns if the window is open 
          * @return The window is open or closed
          */
@@ -200,6 +217,13 @@ namespace owo
         int getWidth()
         {
             return this->size.x;
+        }
+
+        void setSize(int w, int h)
+        {
+            this->size = sf::Vector2i(w, h);
+            this->screen.setView(sf::View(sf::FloatRect(0, 0, w, h)));
+            this->setWindowConstants();
         }
 
         int getHeight()

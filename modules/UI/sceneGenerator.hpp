@@ -17,25 +17,23 @@ namespace SceneGenerator
 {
     void GenerateDefaultScene(Window &win)
     {
-        int cameraWidth = win.getWidth()*0.25;
+        win.clearElements();
+        int cameraWidth = CONSTANT::WINDOW_WIDTH*0.25;
 
         View* view = new View(
                 sf::Vector2i(cameraWidth, 0),
-                sf::Vector2i(win.getWidth()-cameraWidth*2, win.getHeight())
+                sf::Vector2i(CONSTANT::WINDOW_WIDTH-cameraWidth*2, CONSTANT::WINDOW_HEIGHT)
         );
         win.addElement(view);
 
-        CameraView* camView = new CameraView(new Camera(), sf::Vector2i(10, 10), sf::Vector2i(cameraWidth, win.getHeight()-20));
-        CameraView* camView2 = new CameraView(new Camera(), sf::Vector2i(win.getWidth()-cameraWidth-10, 10), sf::Vector2i(cameraWidth, win.getHeight()-20));
+        CameraView* camView = new CameraView(new Camera(), sf::Vector2i(10, 10), sf::Vector2i(cameraWidth, CONSTANT::WINDOW_HEIGHT-20));
+        CameraView* camView2 = new CameraView(new Camera(), sf::Vector2i(CONSTANT::WINDOW_WIDTH-cameraWidth-10, 10), sf::Vector2i(cameraWidth, CONSTANT::WINDOW_HEIGHT-20));
 
         view->setCamera1(camView->getCamera());
         view->setCamera2(camView2->getCamera());
 
-        camView->getCamera()->loadCalibration("./out.txt");
-        camView2->getCamera()->loadCalibration("./out.txt");
-
-        camView->getCamera()->openSource("http://192.168.43.1:8080/video");
-        camView2->getCamera()->openSource("http://192.168.43.163:8080/video");
+        camView->getCamera()->loadCalibration("./note4_x.txt");
+        camView2->getCamera()->loadCalibration("./note4_x.txt");
 
         win.addElement(camView);
         for(GraphicElement* el: camView->getElements())
@@ -47,7 +45,7 @@ namespace SceneGenerator
         
         Button* btn = new Button(
             "Start tracking",
-            sf::Vector2i(win.getWidth()/2-100, 10),
+            sf::Vector2i(CONSTANT::WINDOW_WIDTH/2-100, 10),
             sf::Vector2i(200, 50), 20,
             CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
         );
@@ -56,6 +54,7 @@ namespace SceneGenerator
         CameraManager* camManager = new CameraManager();
         camManager->addCamera(camView->getCamera());
         camManager->addCamera(camView2->getCamera());
+        camManager->attachButton(btn);
         btn->setCallback(&CameraManager::toogleCameraTracking, camManager);
 
         //win.addElement(new FPSCounter());

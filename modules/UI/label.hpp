@@ -23,30 +23,8 @@ namespace owo
                 this->dimensions = sf::IntRect(this->dimensions.left, this->dimensions.top, txtSize.x, txtSize.y);
             
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
-            this->renderTexture.clear(CONSTANT::COLOR_BACK);
-            switch (this->placement)
-            {
-            case Label::CENTER:
-                txt.setPosition(
-                    (this->dimensions.width - txtSize.x) / 2,
-                    (this->dimensions.height - txtSize.y) / 2 - 2
-                );
-                break;
-            case Label::RIGHT:
-                txt.setPosition(
-                    this->dimensions.width - txtSize.x,
-                    (this->dimensions.height - txtSize.y) / 2 - 2
-                );
-                break;
-            case Label::LEFT:
-                txt.setPosition(
-                    0,
-                    (this->dimensions.height - txtSize.y) / 2 - 2
-                );
-                break;
-            default:
-                break;
-            }
+            this->renderTexture.clear(this->clearColor);
+            txt.setPosition(this->calculateTextPos(this->text));
             this->renderTexture.draw(txt);
             this->renderTexture.display();
             this->sprite.setTexture(this->renderTexture.getTexture());
@@ -65,24 +43,26 @@ namespace owo
             this->generateTexture();
         }
 
-        Label(std::string text, int fontSize = 16, int placement = Label::CENTER, sf::Color textColor = CONSTANT::COLOR_FORE)
+        Label(std::string text, int fontSize = 16, int placement = Label::CENTER, sf::Color textColor = CONSTANT::COLOR_FORE, sf::Color clearColor = CONSTANT::COLOR_BACK)
         {
             this->text = text;
             this->fontSize = fontSize;
             this->placement = placement;
             this->textColor = textColor;
+            this->clearColor = clearColor;
             this->setDimensions(0, 0, -1, -1);
             this->generateTexture();
         }
 
         Label(std::string text,
               sf::Vector2i position, sf::Vector2i size = sf::Vector2i(-1, -1),
-              int fontSize = 16, int placement = Label::CENTER, sf::Color textColor = CONSTANT::COLOR_FORE)
+              int fontSize = 16, int placement = Label::CENTER, sf::Color textColor = CONSTANT::COLOR_FORE, sf::Color clearColor = CONSTANT::COLOR_BACK)
         {
             this->text = text;
             this->fontSize = fontSize;
             this->placement = placement;
             this->textColor = textColor;
+            this->clearColor = clearColor;
             this->setDimensions(position.x, position.y, size.x, size.y);
             this->generateTexture();
         }
@@ -116,6 +96,60 @@ namespace owo
         {
             
         }
+        
+        sf::Vector2f calculateTextPos(std::string str)
+        {
+            sf::Text txt(str, CONSTANT::FONT, this->fontSize);
+            sf::Vector2u txtSize(txt.getLocalBounds().width, this->fontSize);
+            sf::Vector2f result;
+            switch (this->placement)
+            {
+            case Label::CENTER:
+                result = sf::Vector2f(
+                    (this->dimensions.width - txtSize.x) / 2,
+                    (this->dimensions.height - txtSize.y) / 2 - 2
+                );
+                break;
+            case Label::RIGHT:
+                result = sf::Vector2f(
+                    this->dimensions.width - txtSize.x,
+                    (this->dimensions.height - txtSize.y) / 2 - 2
+                );
+                break;
+            case Label::LEFT:
+                result = sf::Vector2f(
+                    0,
+                    (this->dimensions.height - txtSize.y) / 2 - 2
+                );
+                break;
+            default:
+                break;
+            }
+            return result;
+        }
+
+        sf::Vector2u calculateTextSize(std::string str)
+        {
+            sf::Text txt(str, CONSTANT::FONT, this->fontSize);
+            return sf::Vector2u(txt.getLocalBounds().width, this->fontSize);
+        }
+
+        void setFontSize(int size)
+        {
+            this->fontSize = size;
+            this->generateTexture();
+        }
+
+        void setPlacement(int placement)
+        {
+            this->placement = placement;
+            this->generateTexture();
+        }
+
+        void setTextColor(sf::Color color)
+        {
+            this->textColor = color;
+        }
 
         void setText(std::string text)
         {
@@ -141,6 +175,11 @@ namespace owo
         int getPlacement()
         {
             return this->placement;
+        }
+
+        std::string getText()
+        {
+            return this->text;
         }
 
         ~Label()

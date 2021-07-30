@@ -9,6 +9,7 @@ namespace owo
         sf::Sprite sprite;
         sf::RenderTexture renderTexture;
         sf::IntRect dimensions;
+        sf::Color clearColor;
 
         bool hovered = false;
         bool clicked = false;
@@ -20,7 +21,7 @@ namespace owo
          */
         GraphicElement()
         {
-            
+            this->clearColor = CONSTANT::COLOR_TRANS;
         }
 
         /**
@@ -116,6 +117,31 @@ namespace owo
         bool isFocused()
         {
             return this->focused;
+        }
+
+        void setClearColor(sf::Color color)
+        {
+            this->clearColor = color;
+        }
+
+        void setDimensions(sf::IntRect dims)
+        {
+            this->setDimensions(dims.left, dims.top, dims.width, dims.height);
+        }
+
+        void setPosition(sf::Vector2i pos)
+        {
+            this->setDimensions(pos.x, pos.y, this->dimensions.width, this->dimensions.height);
+        }
+
+        void setSize(sf::Vector2i size)
+        {
+            this->setDimensions(this->dimensions.left, this->dimensions.top, size.x, size.y);
+        }
+
+        sf::Color getClearColor()
+        {
+            return this->clearColor;
         }
 
         sf::IntRect getDimensions()

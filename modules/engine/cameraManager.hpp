@@ -1,5 +1,6 @@
 #include <vector>
 #include "./camera.hpp"
+#include "../UI/button.hpp"
 
 namespace owo
 {
@@ -10,6 +11,7 @@ namespace owo
     {
     private:
         std::vector<Camera*> cameras;
+        Button* button;
         bool tracking;
 
     public:
@@ -46,6 +48,13 @@ namespace owo
                     c->getTracker()->startTracking();
 
             this->tracking = !this->tracking;
+            this->button->setText( (this->tracking)? "Stop tracking": "Start tracking" );
+            this->button->setTextColor( (this->tracking)? CONSTANT::COLOR_RED_LIGHT: CONSTANT::COLOR_PRIMARY );
+        }
+
+        void attachButton(Button* button)
+        {
+            this->button = button;
         }
 
         ~CameraManager()

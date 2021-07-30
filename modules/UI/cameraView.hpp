@@ -37,7 +37,7 @@ namespace owo
             this->input = new Input(
                 this->cam->getPath(),
                 sf::Vector2i(this->dimensions.left, this->dimensions.top), sf::Vector2i(this->dimensions.width, 40),
-                14, Input::CENTER, CONSTANT::COLOR_PRIMARY, "Enter camera address"
+                14, Input::CENTER, CONSTANT::COLOR_WHITE_LIGHT, "Enter camera address"
             );
             this->input->setCallback(&CameraView::_update_source, this);
             this->detectBtn = new Button(
