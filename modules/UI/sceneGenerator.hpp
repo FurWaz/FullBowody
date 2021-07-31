@@ -21,8 +21,8 @@ namespace SceneGenerator
         int cameraWidth = CONSTANT::WINDOW_WIDTH*0.25;
 
         View* view = new View(
-                sf::Vector2i(cameraWidth, 0),
-                sf::Vector2i(CONSTANT::WINDOW_WIDTH-cameraWidth*2, CONSTANT::WINDOW_HEIGHT)
+                sf::Vector2i(0, 0),
+                sf::Vector2i(CONSTANT::WINDOW_WIDTH, CONSTANT::WINDOW_HEIGHT)
         );
         win.addElement(view);
 
@@ -52,6 +52,9 @@ namespace SceneGenerator
         camManager->attachButton(btn);
         btn->setCallback(&CameraManager::toogleCameraTracking, camManager);
 
-        //win.addElement(new FPSCounter());
+        win.addElement(new FPSCounter(
+            sf::Vector2i(CONSTANT::WINDOW_WIDTH/2 - 50, CONSTANT::WINDOW_HEIGHT-50),
+            sf::Vector2i(100, 40)
+        ));
     }
 }

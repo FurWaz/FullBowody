@@ -12,6 +12,11 @@ namespace owo
         sf::Color color;
         CallbackContainer* cont;
 
+        void init()
+        {
+            this->setReceiveEvents(true);
+        }
+
         void generateTexture()
         {
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
@@ -37,6 +42,7 @@ namespace owo
             this->checked = false;
             this->setDimensions(0, 0, 100, 100);
             this->color = CONSTANT::COLOR_PRIMARY;
+            this->init();
             this->generateTexture();
         }
 
@@ -45,6 +51,7 @@ namespace owo
             this->checked = false;
             this->setDimensions(pos.x, pos.y, size.x, size.y);
             this->color = color;
+            this->init();
             this->generateTexture();
         }
 

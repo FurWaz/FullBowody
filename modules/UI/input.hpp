@@ -33,6 +33,7 @@ namespace owo
             this->shouldLoad = false;
             this->callbackRequired = false;
             this->loadLogo = new Loading(sf::Vector2i(OUTLINE_THICKNESS, this->getSize().y-4-OUTLINE_THICKNESS), sf::Vector2i(this->getSize().x-OUTLINE_THICKNESS*2, 4));
+            this->setReceiveEvents(true);
         }
 
         void copyToClipboard()

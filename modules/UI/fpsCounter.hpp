@@ -16,6 +16,12 @@ namespace owo
             setDimensions(0, 0, 200, 50);
         }
 
+        FPSCounter(sf::Vector2i pos, sf::Vector2i size)
+        {
+            this->avgDelta = 0;
+            setDimensions(pos.x, pos.y, size.x, size.y);
+        }
+
         void onClick(int btn, bool clicked)
         {
             this->clicked = clicked;
@@ -54,7 +60,7 @@ namespace owo
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
             this->renderTexture.clear(CONSTANT::COLOR_TRANS);
 
-            sf::Text text(txt, CONSTANT::FONT, 16);
+            sf::Text text(txt, CONSTANT::FONT, this->getSize().y * 0.8f);
             text.setFillColor(sf::Color::White);
             this->renderTexture.draw(text);
             this->renderTexture.display();

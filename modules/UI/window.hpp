@@ -108,33 +108,50 @@ namespace owo
                 case sf::Event::Closed:
                     this->close();
                     break;
-                case sf::Event::Resized:
-                    this->setSize(event.size.width, event.size.height);
+
+                // case sf::Event::Resized:
+                //     this->setSize(event.size.width, event.size.height);
+                //     break;
+
                 case sf::Event::MouseMoved:
                     this->mousePos = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
                     break;
 
                 case sf::Event::MouseButtonPressed:
                     this->focused = nullptr;
-                    for (GraphicElement* el: this->elements)
+                    for (std::vector<GraphicElement*>::iterator i = this->elements.end()-1; i >= this->elements.begin(); i--)
+                    {
+                        GraphicElement* el = (*i);
+                        if (!el->doesReceiveEvents()) continue;
                         if (el->isHovered())
                         {
                             el->onClick(event.mouseButton.button, true);
                             this->focused = el;
                             if (!el->isFocused()) el->onFocus(true);
+                            break;
                         } else
                             if (el->isFocused()) el->onFocus(false);
+                    }
                     break;
+
                 case sf::Event::MouseButtonReleased:
-                    for (GraphicElement* el: this->elements)
-                        if (el->isHovered())
-                            el->onClick(event.mouseButton.button, false);
+                    for (std::vector<GraphicElement*>::iterator i = this->elements.end()-1; i >= this->elements.begin(); i--)
+                    {
+                        GraphicElement* el = (*i);
+                        if (!el->doesReceiveEvents() || !el->isHovered()) continue;
+                        el->onClick(event.mouseButton.button, false);
+                    }
                     break;
+
                 case sf::Event::MouseWheelScrolled:
-                    for (GraphicElement* el: this->elements)
-                        if (el->isHovered())
-                            el->onScroll(event.mouseWheelScroll.delta*100);
+                    for (std::vector<GraphicElement*>::iterator i = this->elements.end()-1; i >= this->elements.begin(); i--)
+                    {
+                        GraphicElement* el = (*i);
+                        if (!el->doesReceiveEvents() || !el->isHovered()) continue;
+                        el->onScroll(event.mouseWheelScroll.delta*100);
+                    }
                     break;
+
                 case sf::Event::KeyPressed:
                     if (this->focused == nullptr) return;
                     key = event.key.code;
@@ -143,6 +160,7 @@ namespace owo
                         this->focused->onKey(key, event.text.unicode, true);
                     else this->focused->onKey(key, CONSTANT::NO_CHAR, true);
                     break;
+
                 case sf::Event::KeyReleased:
                     if (this->focused == nullptr) return;
                     key = event.key.code;
@@ -151,21 +169,26 @@ namespace owo
                         this->focused->onKey(key, event.text.unicode, false);
                     else this->focused->onKey(key, CONSTANT::NO_CHAR, false);
                     break;
+                    
                 default:
                     break;
             }
             
-            for (GraphicElement* el: this->elements)
+            for (std::vector<GraphicElement*>::iterator i = this->elements.end()-1; i >= this->elements.begin(); i--)
             {
-                if (el->collides(this->mousePos))
+                GraphicElement* el = (*i);
+                if (el->doesReceiveEvents())
                 {
-                    if (!el->isHovered())
-                        el->onHover(true);
-                }
-                else
-                {
-                    if (el->isHovered())
-                        el->onHover(false);
+                    if (el->collides(this->mousePos))
+                    {
+                        if (!el->isHovered())
+                            el->onHover(true);
+                    }
+                    else
+                    {
+                        if (el->isHovered())
+                            el->onHover(false);
+                    }
                 }
             }
         }

@@ -32,6 +32,7 @@ namespace owo
             camFOV = 200;
             this->rotation = sf::Vector2f(0.75, 0.75);
             apply_rotation();
+            this->setReceiveEvents(true);
         }
 
         void apply_rotation()

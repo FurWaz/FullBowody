@@ -23,6 +23,9 @@ namespace owo
         Button* detectBtn;
         std::string cameraSource;
 
+        std::thread loaderThread;
+        bool shouldJoinThread;
+
         void setupCamView()
         {
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
@@ -39,7 +42,6 @@ namespace owo
                 sf::Vector2i(this->dimensions.left, this->dimensions.top), sf::Vector2i(this->dimensions.width, 40),
                 14, Input::CENTER, CONSTANT::COLOR_WHITE_LIGHT, "Enter camera address"
             );
-            this->input->setCallback(&CameraView::_update_source, this);
             this->detectBtn = new Button(
                 "Detect position",
                 sf::Vector2i(this->dimensions.left, this->dimensions.top+this->dimensions.height-50),
@@ -77,12 +79,13 @@ namespace owo
             );
             
             this->cam->attachImage(this->im);
+            this->input->setCallback(&CameraView::updateSource, this);
             this->checkbox->setCallback(&CameraView::toogleDebugMode, this);
             this->loadBtn->setCallback(&CameraView::loadCameraCalibration, this);
             this->saveBtn->setCallback(&CameraView::saveCameraCalibration, this);
             this->calibrateBtn->setCallback(&CameraView::calibrateCamera, this);
             this->detectBtn->setCallback(&CameraView::detectCameraPosition, this);
-
+            this->shouldJoinThread = false;
             
             this->addElement(this->im);
             this->addElement(this->input);
@@ -143,7 +146,11 @@ namespace owo
 
         void update(float dt, sf::Vector2i mousePos)
         {
-            
+            if (this->shouldJoinThread)
+            {
+                this->shouldJoinThread = false;
+                this->loaderThread.join();
+            }
         }
 
         sf::Sprite getSprite(float dt)
@@ -177,6 +184,11 @@ namespace owo
             this->im = im;
         }
 
+        void updateSource()
+        {
+            this->loaderThread = std::thread(&CameraView::_update_source, this);
+        }
+
         void _update_source()
         {
             std::string txt = this->input->getText();
@@ -186,6 +198,7 @@ namespace owo
                 this->cam->openSource(txt);
                 this->input->setLoading(false);
             }
+            this->shouldJoinThread = true;
         }
 
         void loadCameraCalibration()

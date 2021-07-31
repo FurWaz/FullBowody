@@ -12,9 +12,10 @@ namespace owo
         sf::IntRect dimensions;
         sf::Color clearColor;
 
-        bool hovered = false;
-        bool clicked = false;
-        bool focused = false;
+        bool hovered;
+        bool clicked;
+        bool focused;
+        bool receiveEvents;
 
         std::vector<GraphicElement*> elements;
 
@@ -25,6 +26,10 @@ namespace owo
         GraphicElement()
         {
             this->clearColor = CONSTANT::COLOR_TRANS;
+            this->hovered = false;
+            this->clicked = false;
+            this->focused = false;
+            this->receiveEvents = false;
         }
 
         /**
@@ -170,6 +175,11 @@ namespace owo
             return this->focused;
         }
 
+        bool doesReceiveEvents()
+        {
+            return this->receiveEvents;
+        }
+
         void setClearColor(sf::Color color)
         {
             this->clearColor = color;
@@ -188,6 +198,11 @@ namespace owo
         void setSize(sf::Vector2i size)
         {
             this->setDimensions(this->dimensions.left, this->dimensions.top, size.x, size.y);
+        }
+
+        void setReceiveEvents(bool state)
+        {
+            this->receiveEvents = state;
         }
 
         sf::Color getClearColor()

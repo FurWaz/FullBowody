@@ -26,6 +26,7 @@ namespace owo
         {
             this->generateHoverColors();
             this->label = new Label(this->text, sf::Vector2i(), this->getSize(), this->fontSize, Label::CENTER, this->fgColor, this->bgColor);
+            this->setReceiveEvents(true);
         }
 
         void generateHoverColors()
