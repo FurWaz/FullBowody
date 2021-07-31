@@ -1,6 +1,7 @@
 #pragma once
 #include "../constants.hpp"
-#include "CallbackContainer.hpp"
+#include "./callbackContainer.hpp"
+#include "./loading.hpp"
 #include <windows.h>
 #include "graphicElement.hpp"
 #include "label.hpp"
@@ -10,12 +11,17 @@ namespace owo
     class Input : public virtual GraphicElement
     {
     private:
+        const short OUTLINE_THICKNESS = 2;
         std::string text;
         Label* label;
         CallbackContainer* cont;
         std::string highlight;
+        Loading* loadLogo;
 
         bool CTRL_pressed;
+        bool loading;
+        bool shouldLoad;
+        bool callbackRequired;
 
         int cursorPos;
 
@@ -23,6 +29,10 @@ namespace owo
         {
             this->cursorPos = 0;
             this->CTRL_pressed = false;
+            this->loading = false;
+            this->shouldLoad = false;
+            this->callbackRequired = false;
+            this->loadLogo = new Loading(sf::Vector2i(OUTLINE_THICKNESS, this->getSize().y-4-OUTLINE_THICKNESS), sf::Vector2i(this->getSize().x-OUTLINE_THICKNESS*2, 4));
         }
 
         void copyToClipboard()
@@ -112,19 +122,21 @@ namespace owo
 
         void generateTexture()
         {
-            this->renderTexture.create(this->dimensions.width, this->dimensions.height);
             this->renderTexture.clear(CONSTANT::COLOR_BACK);
             if (this->text != "" || this->focused)
             {
                 this->label->setText(this->text);
                 this->label->generateTexture();
-                sf::RectangleShape cursor(sf::Vector2f(1, this->label->getFontSize()));
-                sf::Vector2f pos = this->label->calculateTextPos(this->text);
-                sf::Vector2u size = this->label->calculateTextSize(this->text.substr(0, this->cursorPos));
-                cursor.setPosition(pos.x+size.x, pos.y+2);
-                cursor.setFillColor(CONSTANT::COLOR_PRIMARY);
                 this->renderTexture.draw(this->label->getSprite(0));
-                this->renderTexture.draw(cursor);
+                if (this->focused)
+                {
+                    sf::RectangleShape cursor(sf::Vector2f(1, this->label->getFontSize()));
+                    sf::Vector2f pos = this->label->calculateTextPos(this->text);
+                    sf::Vector2u size = this->label->calculateTextSize(this->text.substr(0, this->cursorPos));
+                    cursor.setPosition(pos.x+size.x, pos.y+2);
+                    cursor.setFillColor(CONSTANT::COLOR_PRIMARY);
+                    this->renderTexture.draw(cursor);
+                }
             } else
             {
                 Label l(
@@ -141,9 +153,14 @@ namespace owo
             sf::RectangleShape highlightRect(sf::Vector2f(this->dimensions.width-4, this->dimensions.height-4));
             highlightRect.setPosition(sf::Vector2f(2, 2));
             highlightRect.setFillColor(CONSTANT::COLOR_TRANS);
-            highlightRect.setOutlineColor(color);
-            highlightRect.setOutlineThickness(2);
+            highlightRect.setOutlineColor( this->focused? CONSTANT::COLOR_PRIMARY: CONSTANT::COLOR_FORE );
+            highlightRect.setOutlineThickness(this->OUTLINE_THICKNESS);
             this->renderTexture.draw(highlightRect);
+
+            this->loading = this->shouldLoad;
+            if (this->loading)
+                this->renderTexture.draw(this->loadLogo->getSprite(0.16));
+
             this->renderTexture.display();
             this->sprite.setTexture(this->renderTexture.getTexture());
             this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
@@ -159,7 +176,7 @@ namespace owo
             this->focused = focused;
             this->generateTexture();
             if (!this->focused && this->cont != nullptr)
-                this->cont->func();
+                this->callbackRequired = true;
         }
 
         void onHover(bool hovered)
@@ -252,11 +269,22 @@ namespace owo
 
         void update(float dt, sf::Vector2i mousePos)
         {
-            
+            if (this->callbackRequired)
+            {
+                this->callbackRequired = false;
+                this->cont->func();
+            }
+        }
+
+        void setLoading(bool state)
+        {
+            this->shouldLoad = state;
         }
 
         sf::Sprite getSprite(float dt)
         {
+            if (this->shouldLoad || this->loading != this->shouldLoad)
+                this->generateTexture();
             return this->sprite;
         }
 

@@ -25,7 +25,6 @@ namespace owo
             imgSprite = sf::Sprite();
             imgSprite.setTexture(tex);
 
-            this->renderTexture.create(this->dimensions.width, this->dimensions.height);
             this->renderTexture.clear(CONSTANT::COLOR_TRANS);
             if ((this->dimensions.width / (float)this->dimensions.height) > (imgSize.x / (float)imgSize.y))
                 this->scaleFactor = this->dimensions.height / (float) imgSize.y;
@@ -55,17 +54,17 @@ namespace owo
     public:
         Image()
         {
-            setDimensions(0, 0, 300, 300);
             this->img.create(300, 300, sf::Color::Black);
             this->path = "";
+            setDimensions(0, 0, 300, 300);
             generateTexture();
         }
 
         Image(sf::Vector2i pos, sf::Vector2i size)
         {
-            setDimensions(pos.x, pos.y, size.x, size.y);
             this->img.create(300, 300, sf::Color::Black);
             this->path = "";
+            setDimensions(pos.x, pos.y, size.x, size.y);
             generateTexture();
         }
 
@@ -97,8 +96,7 @@ namespace owo
 
         void resizeTo(sf::Vector2i size)
         {
-            this->dimensions.width = size.x;
-            this->dimensions.height = size.y;
+            this->setSize(size);
             generateTexture();
         }
 

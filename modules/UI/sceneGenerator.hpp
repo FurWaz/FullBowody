@@ -36,12 +36,7 @@ namespace SceneGenerator
         camView2->getCamera()->loadCalibration("./note4_x.txt");
 
         win.addElement(camView);
-        for(GraphicElement* el: camView->getElements())
-            win.addElement(el);
-        
         win.addElement(camView2);
-        for(GraphicElement* el: camView2->getElements())
-            win.addElement(el);
         
         Button* btn = new Button(
             "Start tracking",

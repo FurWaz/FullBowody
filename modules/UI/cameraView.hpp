@@ -82,6 +82,16 @@ namespace owo
             this->saveBtn->setCallback(&CameraView::saveCameraCalibration, this);
             this->calibrateBtn->setCallback(&CameraView::calibrateCamera, this);
             this->detectBtn->setCallback(&CameraView::detectCameraPosition, this);
+
+            
+            this->addElement(this->im);
+            this->addElement(this->input);
+            this->addElement(this->checkbox);
+            this->addElement(this->checkbox_text);
+            this->addElement(this->calibrateBtn);
+            this->addElement(this->detectBtn);
+            this->addElement(this->loadBtn);
+            this->addElement(this->saveBtn);
         }
 
     public:
@@ -157,20 +167,6 @@ namespace owo
             return this->input;
         }
 
-        std::vector<GraphicElement*> getElements()
-        {
-            std::vector<GraphicElement*> result;
-            result.push_back(this->im);
-            result.push_back(this->input);
-            result.push_back(this->checkbox);
-            result.push_back(this->checkbox_text);
-            result.push_back(this->calibrateBtn);
-            result.push_back(this->detectBtn);
-            result.push_back(this->loadBtn);
-            result.push_back(this->saveBtn);
-            return result;
-        }
-
         void setCamera(Camera* cam)
         {
             this->cam = cam;
@@ -185,7 +181,11 @@ namespace owo
         {
             std::string txt = this->input->getText();
             if (txt != "")
+            {
+                this->input->setLoading(true);
                 this->cam->openSource(txt);
+                this->input->setLoading(false);
+            }
         }
 
         void loadCameraCalibration()

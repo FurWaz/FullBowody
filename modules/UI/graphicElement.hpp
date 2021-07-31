@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <vector>
 
 namespace owo
 {
@@ -14,6 +15,8 @@ namespace owo
         bool hovered = false;
         bool clicked = false;
         bool focused = false;
+
+        std::vector<GraphicElement*> elements;
 
     public:
         /**
@@ -33,7 +36,55 @@ namespace owo
          */
         void setDimensions(int x, int y, int width, int height)
         {
-            this->dimensions = sf::Rect<int>(x, y, width, height);
+            this->dimensions = sf::IntRect(x, y, width, height);
+            this->renderTexture.create(this->dimensions.width, this->dimensions.height);
+            this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
+        }
+
+        /**
+         * @brief Returns the list of child elements of this element
+         */
+        std::vector<GraphicElement*> getElements()
+        {
+            return this->elements;
+        }
+
+        /**
+         * @brief Add a GraphicElement to the UI
+         * @param el The GraphicElement to add
+         */
+        void addElement(GraphicElement* el)
+        {
+            this->elements.push_back(el);
+        }
+
+        /**
+         * @brief Remove a GraphicElement from the UI
+         * @param el The GraphicElement to remove
+         */
+        void removeElement(GraphicElement* el)
+        {
+            int index = -1;
+            int counter = 0;
+            for(GraphicElement* element: this->elements)
+            {
+                if (element == el)
+                {
+                    index = counter;
+                    break;
+                }
+                counter++;
+            }
+            this->removeElement(index);
+        }
+
+        /**
+         * @brief Remove a GraphicElement from the UI
+         * @param index The index of the element to remove
+         */
+        void removeElement(int index)
+        {
+            this->elements.erase(this->elements.begin()+index);
         }
 
         /**

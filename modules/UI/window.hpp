@@ -177,6 +177,8 @@ namespace owo
         void addElement(GraphicElement* el)
         {
             this->elements.push_back(el);
+            for(GraphicElement* element: el->getElements())
+                this->addElement(element);
         }
 
         /**
@@ -185,7 +187,29 @@ namespace owo
          */
         void removeElement(GraphicElement* el)
         {
-            
+            int index = -1;
+            int counter = 0;
+            for(GraphicElement* element: this->elements)
+            {
+                if (element == el)
+                {
+                    index = counter;
+                    break;
+                }
+                counter++;
+            }
+            this->removeElement(index);
+        }
+
+        /**
+         * @brief Remove a GraphicElement from the UI
+         * @param index The index of the element to remove
+         */
+        void removeElement(int index)
+        {
+            for(GraphicElement* el: this->elements.at(index)->getElements())
+                this->removeElement(el);
+            this->elements.erase(this->elements.begin()+index);
         }
 
         /**
