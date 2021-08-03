@@ -10,6 +10,13 @@ namespace owo
     {
     private:
         XrInstance instance;
+        XrSession session;
+        XrSystemId systemId;
+
+        XrEnvironmentBlendMode envBlendMode;
+        XrReferenceSpaceType appSpaceType;
+        XrSpace appSpace;
+        XrAction poseAction;
 
         uint32_t nb_extensions;
         std::vector<XrExtensionProperties> extensionsProperties;
@@ -56,6 +63,109 @@ namespace owo
             if (this->isExtensionAvailable("XR_EXT_hand_tracking"))
                 this->appExtensions.push_back("XR_EXT_hand_tracking");
         }
+
+        void initInstance()
+        {
+            std::cout << ">> Info: creating instance ..." << std::endl;
+            XrInstanceCreateInfo info{XR_TYPE_INSTANCE_CREATE_INFO};
+            this->retreiveAvailableExtensions();
+            info.applicationInfo = this->createXrApplicationInfo(XR_CURRENT_API_VERSION, "FullBowody", 1, "FurWaz", 1);
+            info.enabledExtensionCount = this->appExtensions.size();
+            info.enabledExtensionNames = this->appExtensions.data();
+            XrResult res = xrCreateInstance(&info, &instance);
+            std::cout << ">> Info: xrCreateInstance returned [" << XRCODE2STR(res) << "]" << std::endl;
+        }
+
+        void initSystem()
+        {
+            std::cout << ">> Info: initializing system ..." << std::endl;
+            XrSystemGetInfo systemInfo{XR_TYPE_SYSTEM_GET_INFO};
+            systemInfo.formFactor = XrFormFactor{XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY};
+            XrResult res = XR_TIMEOUT_EXPIRED;
+            while (res != XR_SUCCESS)
+            {
+                res = xrGetSystem(this->instance, &systemInfo, &this->systemId);
+                std::cout << ">> Info: xrGetSystem returned [" << XRCODE2STR(res) << "]" << std::endl;
+
+                if (res == XR_ERROR_FORM_FACTOR_UNAVAILABLE)
+                {
+                    std::cout << ">> No headset detected, try again in 1s ..." << std::endl;
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                }
+            }
+
+            XrViewConfigurationType viewConfigType{XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO};
+            uint32_t nb_modes;
+            xrEnumerateEnvironmentBlendModes(this->instance, systemId, viewConfigType, 0, &nb_modes, nullptr);
+            std::vector<XrEnvironmentBlendMode> blendModes(nb_modes);
+            xrEnumerateEnvironmentBlendModes(this->instance, systemId, viewConfigType, nb_modes, &nb_modes, blendModes.data());
+
+            this->envBlendMode = blendModes[0];
+        }
+
+        void initView()
+        {
+            std::cout << ">> Info: creating views ..." << std::endl;
+            uint32_t nb_views;
+            xrEnumerateViewConfigurations(this->instance, this->systemId, 0, &nb_views, nullptr);
+            std::vector<XrViewConfigurationType> viewConfs(nb_views);
+            xrEnumerateViewConfigurations(this->instance, this->systemId, nb_views, &nb_views, viewConfs.data());
+            XrViewConfigurationProperties props;
+            xrGetViewConfigurationProperties(this->instance, this->systemId, viewConfs[0], &props);
+
+            uint32_t nb_confViews;
+            xrEnumerateViewConfigurationViews(this->instance, this->systemId, viewConfs[0], 0, &nb_confViews, nullptr);
+            std::vector<XrViewConfigurationView> confViews(nb_confViews, {XR_TYPE_VIEW_CONFIGURATION_VIEW});
+            xrEnumerateViewConfigurationViews(this->instance, this->systemId, viewConfs[0], nb_confViews, &nb_confViews, confViews.data());
+        }
+
+        void initActions()
+        {
+            std::cout << ">> Info: creating actions ..." << std::endl;
+            XrActionSetCreateInfo actionSetInfo{XR_TYPE_ACTION_SET_CREATE_INFO};
+            strcpy(actionSetInfo.actionSetName, "move_hand");
+            strcpy(actionSetInfo.localizedActionSetName, "Move Hand");
+            actionSetInfo.priority = 1;
+            XrActionSet actionSet;
+            XrResult res = xrCreateActionSet(this->instance, &actionSetInfo, &actionSet);
+            std::cout << ">> Info: xrCreateActionSet returned [" << XRCODE2STR(res) << "]" << std::endl;
+
+            XrPath handPaths[2];
+            xrStringToPath(this->instance, "/user/hand/left", &handPaths[0]);
+            xrStringToPath(this->instance, "/user/hand/right", &handPaths[1]);
+
+            XrActionCreateInfo actionInfo{XR_TYPE_ACTION_CREATE_INFO};
+            actionInfo.actionType = XR_ACTION_TYPE_POSE_INPUT;
+            strcpy_s(actionInfo.actionName, "hand_pose");
+            strcpy_s(actionInfo.localizedActionName, "Hand Pose");
+            actionInfo.countSubactionPaths = 2;
+            actionInfo.subactionPaths = handPaths;
+            res = xrCreateAction(actionSet, &actionInfo, &this->poseAction);
+            std::cout << ">> Info: xrCreateAction returned [" << XRCODE2STR(res) << "]" << std::endl;
+        }
+
+        void initSession()
+        {
+            std::cout << ">> Info: initializing session ..." << std::endl;
+
+            XrSessionCreateInfo createInfo{XR_TYPE_SESSION_CREATE_INFO};
+            createInfo.systemId = this->systemId;
+            createInfo.next = NULL;
+
+            XrResult res = xrCreateSession(this->instance, &createInfo, &this->session);
+            std::cout << ">> Info: xrCreateSession returned [" << XRCODE2STR(res) << "]" << std::endl;
+        }
+
+        void initSpaces()
+        {
+            std::cout << ">> Info: initializing spaces ..." << std::endl;
+            this->appSpaceType = XR_REFERENCE_SPACE_TYPE_LOCAL;
+            XrReferenceSpaceCreateInfo spaceCreateInfo{XR_TYPE_REFERENCE_SPACE_CREATE_INFO};
+            spaceCreateInfo.referenceSpaceType = this->appSpaceType;
+            spaceCreateInfo.poseInReferenceSpace = XrPosef{{0, 0, 0, 1}, {0, 0, 0}};
+            XrResult res = xrCreateReferenceSpace(this->session, &spaceCreateInfo, &this->appSpace);
+            std::cout << ">> Info: xrCreateReferenceSpace returned [" << XRCODE2STR(res) << "]" << std::endl;
+        }
         
     public:
         OpenXRCore()
@@ -66,16 +176,12 @@ namespace owo
         void start()
         {
             std::cout << ">> STARTING OPENXR <<" << std::endl;
-            XrInstanceCreateInfo info{XR_TYPE_INSTANCE_CREATE_INFO};
-
-            this->retreiveAvailableExtensions();
-
-            info.applicationInfo = createXrApplicationInfo(XR_CURRENT_API_VERSION, "FullBowody", 1, "", 1);
-            info.enabledExtensionCount = appExtensions.size();
-            info.enabledExtensionNames = appExtensions.data();
-
-            XrResult res = xrCreateInstance(&info, &instance);
-            std::cout << ">> Info: xrCreateInstance returned [" << XRCODE2STR(res) << "]" << std::endl;
+            this->initInstance();
+            this->initSystem();
+            this->initView();
+            this->initActions();
+            this->initSession();
+            this->initSpaces();
         }
 
         void stop()
