@@ -4,6 +4,9 @@
 #include <opencv2/core.hpp>
 #include <vector>
 #include <chrono>
+#include "../external/softwareConnection.hpp"
+
+SoftwareConnection con;
 
 namespace owo
 {
@@ -101,6 +104,7 @@ namespace owo
                 cv::Vec3d v2 = cam2_rays[i];
                 this->intersection(c1, v1, c2, v2, this->body[i]);
             }
+            con.sendNewBodyPosition(this->getBody());
         }
 
     public:
@@ -116,6 +120,7 @@ namespace owo
                 this->cam2_rays[i] = cv::Vec3d();
             }
             this->tracking_dt = 0;
+            con.startConnection();
         }
 
         /**

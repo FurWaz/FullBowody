@@ -2,8 +2,6 @@
 #include "modules/UI/window.hpp"
 #include "modules/UI/sceneGenerator.hpp"
 
-#include "./modules/OpenXR/core.hpp"
-
 using namespace owo;
 
 int main(int argc, char const *argv[])
@@ -14,9 +12,6 @@ int main(int argc, char const *argv[])
     Window win("FullBowody", 1280, 720);
     SceneGenerator::GenerateDefaultScene(win);
 
-    OpenXRCore core;
-    core.start();
-
     win.startUpdating();
     while (win.isOpen())
     {
@@ -24,8 +19,6 @@ int main(int argc, char const *argv[])
         win.refresh();
     }
     win.stopUpdating();
-
-    core.stop();
 
     return 0;
 }
