@@ -2,13 +2,17 @@
 #include "modules/UI/window.hpp"
 #include "modules/UI/sceneGenerator.hpp"
 
+#include "./modules/OpenXR/init.hpp"
+
 using namespace owo;
 
 int main(int argc, char const *argv[])
 {
     CONSTANT::init();
 
-    // Window win("FullBowody", sf::VideoMode::getDesktopMode().width*0.8f, sf::VideoMode::getDesktopMode().height*0.8f);
+    init_openxr();
+
+    // Window win("FullBowody", sf::VideoMode::getDesktopMode().width*0.75f, sf::VideoMode::getDesktopMode().height*0.75f);
     Window win("FullBowody", 1280, 720);
     SceneGenerator::GenerateDefaultScene(win);
 
@@ -19,6 +23,8 @@ int main(int argc, char const *argv[])
         win.refresh();
     }
     win.stopUpdating();
+
+    shutdown_openxr();
 
     return 0;
 }

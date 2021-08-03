@@ -19,5 +19,6 @@ The dependencies used in this project are:
 - OpenCV
 - SFML
 - Mediapipe Pose
+- OpenXR
 
 Author: [FurWaz](https://github.com/furwaz)
