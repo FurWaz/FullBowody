@@ -132,6 +132,6 @@ public:
 
     ~SoftwareConnection()
     {
-        this->stopConnection();
+        
     }
 };

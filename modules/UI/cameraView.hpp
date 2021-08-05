@@ -34,46 +34,46 @@ namespace owo
             this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
 
             this->im = new Image(
-                sf::Vector2i(this->dimensions.left+4, this->dimensions.top+50),
+                sf::Vector2i(4, 50),
                 sf::Vector2i(this->dimensions.width-8, this->dimensions.height-200)
             );
             this->input = new Input(
                 this->cam->getPath(),
-                sf::Vector2i(this->dimensions.left, this->dimensions.top), sf::Vector2i(this->dimensions.width, 40),
+                sf::Vector2i(0, 0), sf::Vector2i(this->dimensions.width, 40),
                 14, Input::CENTER, CONSTANT::COLOR_WHITE_LIGHT, "Enter camera address"
             );
             this->detectBtn = new Button(
                 "Detect position",
-                sf::Vector2i(this->dimensions.left, this->dimensions.top+this->dimensions.height-50),
+                sf::Vector2i(0, this->dimensions.height-50),
                 sf::Vector2i(this->dimensions.width, 50), 18,
                 CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
             );
             this->calibrateBtn = new Button(
                 "Calibrate",
-                sf::Vector2i(this->dimensions.left, this->dimensions.top+this->dimensions.height-100),
+                sf::Vector2i(0, this->dimensions.height-100),
                 sf::Vector2i(this->dimensions.width*0.4, 50), 18,
                 CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
             );
             this->loadBtn = new Button(
                 "Load",
-                sf::Vector2i(this->dimensions.left+this->dimensions.width*0.4, this->dimensions.top+this->dimensions.height-100),
+                sf::Vector2i(this->dimensions.width*0.4, this->dimensions.height-100),
                 sf::Vector2i(this->dimensions.width*0.3, 50), 16,
                 CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
             );
             this->saveBtn = new Button(
                 "Save",
-                sf::Vector2i(this->dimensions.left+this->dimensions.width*0.7, this->dimensions.top+this->dimensions.height-100),
+                sf::Vector2i(this->dimensions.width*0.7, this->dimensions.height-100),
                 sf::Vector2i(this->dimensions.width*0.3, 50), 16,
                 CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
             );
             this->checkbox = new Checkbox(
-                sf::Vector2i(this->dimensions.left+10, this->dimensions.top+this->dimensions.height-135),
+                sf::Vector2i(10, this->dimensions.height-135),
                 sf::Vector2i(20, 20),
                 CONSTANT::COLOR_PRIMARY
             );
             this->checkbox_text = new Label(
                 "Debug mode",
-                sf::Vector2i(this->dimensions.left+40, this->dimensions.top+this->dimensions.height-140),
+                sf::Vector2i(40, this->dimensions.height-140),
                 sf::Vector2i(this->dimensions.width-50, 30),
                 16, Label::LEFT, CONSTANT::COLOR_FORE
             );
@@ -95,6 +95,9 @@ namespace owo
             this->addElement(this->detectBtn);
             this->addElement(this->loadBtn);
             this->addElement(this->saveBtn);
+
+            for(GraphicElement* el: this->getElements())
+                el->setParentAboluteDimensions(this->absDims);
         }
 
     public:
@@ -156,6 +159,7 @@ namespace owo
         sf::Sprite getSprite(float dt)
         {
             this->cam->updateFrame(dt);
+            this->renderTexture.display();
             return this->sprite;
         }
 

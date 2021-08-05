@@ -22,7 +22,7 @@ namespace owo
         float refreshDelta;
         float updateDelta;
         
-        std::vector<GraphicElement*> elements;
+        std::vector<GraphicElement*> elements, graphicElements;
         GraphicElement* focused = nullptr;
         bool shouldUpdate = false;
 
@@ -44,6 +44,22 @@ namespace owo
         {
             CONSTANT::WINDOW_HEIGHT = this->getHeight();
             CONSTANT::WINDOW_WIDTH = this->getWidth();
+        }
+
+        void drawElement(GraphicElement* el, sf::RenderTexture* tex)
+        {
+            sf::RenderTexture* pTex = el->getRenderTexture();
+            for (GraphicElement* child: el->getElements())
+                this->drawElement(child, pTex);
+            tex->draw(el->getSprite(this->refreshDelta));
+        }
+
+        void drawElement(GraphicElement* el, sf::RenderWindow* tex)
+        {
+            sf::RenderTexture* pTex = el->getRenderTexture();
+            for (GraphicElement* child: el->getElements())
+                this->drawElement(child, pTex);
+            tex->draw(el->getSprite(this->refreshDelta));
         }
 
     public:
@@ -78,8 +94,8 @@ namespace owo
             this->refreshDelta = this->refreshClock.restart().asSeconds();
             screen.clear(CONSTANT::COLOR_CLEAR);
             int index = 0;
-            for (GraphicElement* el: this->elements)
-                this->screen.draw(el->getSprite(this->refreshDelta));
+            for (GraphicElement* el: this->graphicElements)
+                this->drawElement(el, &this->screen);
             screen.display();
         }
 
@@ -199,9 +215,10 @@ namespace owo
          */
         void addElement(GraphicElement* el)
         {
+            this->graphicElements.push_back(el);
             this->elements.push_back(el);
-            for(GraphicElement* element: el->getElements())
-                this->addElement(element);
+            for (GraphicElement* child: el->getElements())
+                this->elements.push_back(child);
         }
 
         /**
@@ -230,9 +247,10 @@ namespace owo
          */
         void removeElement(int index)
         {
-            for(GraphicElement* el: this->elements.at(index)->getElements())
-                this->removeElement(el);
+            for (GraphicElement* child: this->elements.at(index)->getElements())
+                this->removeElement(child);
             this->elements.erase(this->elements.begin()+index);
+            this->graphicElements.erase(this->elements.begin()+index);
         }
 
         /**

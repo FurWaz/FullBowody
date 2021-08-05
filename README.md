@@ -1,5 +1,5 @@
 # FullBowody
-A full body tracking for VR using dual cameras
+A full body tracking app using two or more HD cameras, for VR, 3D animation, etc. 
 
 ## Compiling from sources (Windows)
 - Download the github repository

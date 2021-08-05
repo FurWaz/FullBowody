@@ -1,4 +1,4 @@
-import socket, time
+import socket
 from threading import Thread
 
 class FullBowodyConnection:

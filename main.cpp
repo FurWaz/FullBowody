@@ -8,8 +8,7 @@ int main(int argc, char const *argv[])
 {
     CONSTANT::init();
 
-    // Window win("FullBowody", sf::VideoMode::getDesktopMode().width*0.75f, sf::VideoMode::getDesktopMode().height*0.75f);
-    Window win("FullBowody", 1280, 720);
+    Window win("FullBowody", sf::VideoMode::getDesktopMode().width*0.8f, sf::VideoMode::getDesktopMode().height*0.8f);
     SceneGenerator::GenerateDefaultScene(win);
 
     win.startUpdating();

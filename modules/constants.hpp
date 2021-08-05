@@ -2,6 +2,13 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
+template<typename T> T clamp(T val, T min, T max)
+{
+    if (val < min) return min;
+    if (val > max) return max;
+    return val;
+}
+
 /**
  * @brief Constant namespace, contains all the common variables of the program 
  * such as the colors, etc.

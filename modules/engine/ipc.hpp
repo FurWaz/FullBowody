@@ -149,12 +149,12 @@ namespace owo
 
             while (this->running)
             { 
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 bSuccess = ReadFile( g_hChildStd_OUT_Rd, chBuf, SIZE, &dwRead, NULL);
                 if (this->call != nullptr && dwRead > 0)
                     this->call->func(chBuf, dwRead);
                 if( ! bSuccess || dwRead == 0)
                     break;
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
         }
 

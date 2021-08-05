@@ -9,7 +9,7 @@ namespace owo
     protected:
         sf::Sprite sprite;
         sf::RenderTexture renderTexture;
-        sf::IntRect dimensions;
+        sf::IntRect dimensions, absDims, parentAbsDims;
         sf::Color clearColor;
 
         bool hovered;
@@ -18,6 +18,16 @@ namespace owo
         bool receiveEvents;
 
         std::vector<GraphicElement*> elements;
+
+        void calculateAbsDims()
+        {
+            this->absDims = sf::IntRect(
+                clamp<int>(this->dimensions.left, 0, this->parentAbsDims.width) + this->parentAbsDims.left,
+                clamp<int>(this->dimensions.top, 0, this->parentAbsDims.height) + this->parentAbsDims.top,
+                clamp<int>(this->dimensions.width, 0, this->parentAbsDims.width-this->dimensions.left),
+                clamp<int>(this->dimensions.height, 0, this->parentAbsDims.height-this->dimensions.top)
+            );
+        }
 
     public:
         /**
@@ -30,6 +40,8 @@ namespace owo
             this->clicked = false;
             this->focused = false;
             this->receiveEvents = false;
+            this->parentAbsDims = sf::IntRect(0, 0, CONSTANT::WINDOW_WIDTH, CONSTANT::WINDOW_HEIGHT);
+            this->calculateAbsDims();
         }
 
         /**
@@ -42,6 +54,7 @@ namespace owo
         void setDimensions(int x, int y, int width, int height)
         {
             this->dimensions = sf::IntRect(x, y, width, height);
+            this->calculateAbsDims();
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
             this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
         }
@@ -145,7 +158,7 @@ namespace owo
          */
         bool collides(sf::Vector2i pos)
         {
-            return this->dimensions.contains(pos);
+            return this->absDims.contains(pos);
         }
 
         /**
@@ -210,9 +223,25 @@ namespace owo
             return this->clearColor;
         }
 
+        sf::RenderTexture* getRenderTexture()
+        {
+            return &this->renderTexture;
+        }
+
         sf::IntRect getDimensions()
         {
             return this->dimensions;
+        }
+
+        void setParentAboluteDimensions(sf::IntRect dims)
+        {
+            this->parentAbsDims = dims;
+            this->calculateAbsDims();
+        }
+
+        sf::IntRect getAbsoluteDimensions()
+        {
+            return this->absDims;
         }
 
         sf::Vector2i getPosition()
