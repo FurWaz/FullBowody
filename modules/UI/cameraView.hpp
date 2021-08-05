@@ -6,6 +6,7 @@
 #include "checkbox.hpp"
 #include "button.hpp"
 #include "../engine/camera.hpp"
+#include "../engine/cameraCalibrator.hpp"
 
 namespace owo
 {
@@ -223,7 +224,7 @@ namespace owo
 
         void calibrateCamera()
         {
-            std::cout << "this->cam->calibrate();" << std::endl;
+            CameraCalibrator::calibrateCamera(this->cam);
         }
 
         void detectCameraPosition()

@@ -1,22 +1,30 @@
 #pragma once
 #include "../constants.hpp"
 #include "./graphicElement.hpp"
+#include "./popup.hpp"
 
 namespace owo
 {
-    class Template : public virtual GraphicElement
+    class CalibrationPopup : public virtual GraphicElement
     {
     private:
-
+        Popup* popup;
     public:
-        Template()
+        CalibrationPopup()
         {
-            
+            this->setDimensions(0, 0, CONSTANT::WINDOW_WIDTH, CONSTANT::WINDOW_HEIGHT);
+            this->setReceiveEvents(true);
+            this->setClearColor(sf::Color(0, 0, 0, 96));
+            this->generateTexture();
+            this->popup = new Popup("Camera calibration");
+            this->addElement(this->popup);
         }
 
         void generateTexture()
         {
-
+            this->renderTexture.clear(this->clearColor);
+            this->renderTexture.display();
+            this->sprite.setTexture(this->renderTexture.getTexture());
         }
 
         void onClick(int btn, bool clicked)
@@ -49,12 +57,17 @@ namespace owo
             
         }
 
+        Popup* getPopup()
+        {
+            return this->popup;
+        }
+
         sf::Sprite getSprite(float dt)
         {
             return this->sprite;
         }
 
-        ~Template()
+        ~CalibrationPopup()
         {
 
         }

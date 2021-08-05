@@ -1,6 +1,7 @@
 #include "modules/constants.hpp"
 #include "modules/UI/window.hpp"
 #include "modules/UI/sceneGenerator.hpp"
+#include "modules/engine/cameraCalibrator.hpp"
 
 using namespace owo;
 
@@ -10,6 +11,7 @@ int main(int argc, char const *argv[])
 
     Window win("FullBowody", sf::VideoMode::getDesktopMode().width*0.8f, sf::VideoMode::getDesktopMode().height*0.8f);
     SceneGenerator::GenerateDefaultScene(win);
+    CameraCalibrator::setWindow(&win);
     // SceneGenerator::GenerateTestScene(win);
 
     win.startUpdating();

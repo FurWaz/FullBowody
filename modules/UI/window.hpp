@@ -61,6 +61,38 @@ namespace owo
                 this->drawElement(child, pTex);
             tex->draw(el->getSprite(this->refreshDelta));
         }
+        
+        /**
+         * @brief Add a GraphicElement to the collision system
+         * @param el The GraphicElement to add
+         */
+        void addPhysicElement(GraphicElement* el)
+        {
+            this->elements.push_back(el);
+            for (GraphicElement* child: el->getElements())
+                this->addPhysicElement(child);
+        }
+
+        /**
+         * @brief Remove a GraphicElement from the collision system
+         * @param el The GraphicElement to remove
+         */
+        void removePhysicElement(GraphicElement* el)
+        {
+            int index = -1;
+            int counter = 0;
+            for(GraphicElement* element: this->elements)
+            {
+                if (element == el)
+                {
+                    index = counter;
+                    break;
+                }
+                counter++;
+            }
+            if (index >= 0)
+                this->removeElement(index);
+        }
 
     public:
         /**
@@ -190,6 +222,7 @@ namespace owo
                     break;
             }
             
+            bool canHoverTrue = true;
             for (std::vector<GraphicElement*>::iterator i = this->elements.end()-1; i >= this->elements.begin(); i--)
             {
                 GraphicElement* el = (*i);
@@ -197,8 +230,9 @@ namespace owo
                 {
                     if (el->collides(this->mousePos))
                     {
-                        if (!el->isHovered())
+                        if (!el->isHovered() && canHoverTrue)
                             el->onHover(true);
+                        canHoverTrue = false;
                     }
                     else
                     {
@@ -216,9 +250,7 @@ namespace owo
         void addElement(GraphicElement* el)
         {
             this->graphicElements.push_back(el);
-            this->elements.push_back(el);
-            for (GraphicElement* child: el->getElements())
-                this->elements.push_back(child);
+            this->addPhysicElement(el);
         }
 
         /**
@@ -238,7 +270,22 @@ namespace owo
                 }
                 counter++;
             }
-            this->removeElement(index);
+            if (index >= 0)
+                this->removeElement(index);
+            
+            index = -1;
+            counter = 0;
+            for(GraphicElement* element: this->graphicElements)
+            {
+                if (element == el)
+                {
+                    index = counter;
+                    break;
+                }
+                counter++;
+            }
+            if (index >= 0)
+                this->graphicElements.erase(this->graphicElements.begin()+index);
         }
 
         /**
@@ -248,9 +295,8 @@ namespace owo
         void removeElement(int index)
         {
             for (GraphicElement* child: this->elements.at(index)->getElements())
-                this->removeElement(child);
+                this->removePhysicElement(child);
             this->elements.erase(this->elements.begin()+index);
-            this->graphicElements.erase(this->elements.begin()+index);
         }
 
         /**
