@@ -124,13 +124,11 @@ public:
                 if (string.substr(0, 11) != "FullBowody-") continue;
                 std::string appName = string.substr(11, string.size());
                 this->appsPorts.push_back(SoftwareInfo(port, appName));
-                std::cout << ">> Info: New connection from application [" << appName << "] on port " << port << std::endl;
             }
             else
             {
                 if (result == sf::Socket::NotReady) continue;
-                std::cerr << "Unknown error: " << to_string(result) << ", closing all apps" << std::endl;
-                this->appsPorts.clear();
+                if (result == 3) this->appsPorts.clear();
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }

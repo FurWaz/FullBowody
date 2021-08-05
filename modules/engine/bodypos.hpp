@@ -4,7 +4,7 @@
 #include <opencv2/core.hpp>
 #include <vector>
 #include <chrono>
-#include "../external/softwareConnection.hpp"
+#include "./softwareConnection.hpp"
 
 SoftwareConnection con;
 
