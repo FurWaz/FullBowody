@@ -212,6 +212,35 @@ namespace owo
             this->fov = cv::Point2d(std::atan(x / fx), std::atan(y / fy));
         }
 
+        bool loadSource(std::string address)
+        {
+            if (this->path == address) return false;
+            this->path = address;
+            this->sourceAvailable = false;
+            if (this->shouldRead)
+            {
+                this->shouldRead = false;
+                this->updateThread.join();
+            }
+            bool result = true;
+            try
+            {
+                result = this->source.open(address);
+                this->setDimensionsFromSource();
+            }
+            catch (std::exception &e)
+            {
+                std::cerr << "err: " << std::endl << e.what();
+            }
+            this->updateThread = std::thread(&Camera::_read_frame, this);
+            if (!result)
+            {
+                this->dimensions = sf::Vector2u(300, 300);
+                this->graphImage->black(sf::Vector2u(300, 300));
+            }
+            return result;
+        }
+
     public:
         Camera()
         {
@@ -232,28 +261,7 @@ namespace owo
          */
         bool openSource(int index)
         {
-            char* str;
-            itoa(index, str, 0);
-            this->path = str;
-            bool result = true;
-            try
-            {
-                result = this->source.open(index);
-                this->setDimensionsFromSource();
-            }
-            catch (std::exception &e)
-            {
-                std::cerr << "err: " << std::endl << e.what();
-            }
-            if (this->shouldRead == false)
-                this->updateThread = std::thread(&Camera::_read_frame, this);
-            if (!result)
-            {
-                this->dimensions = sf::Vector2u(300, 300);
-                this->sourceAvailable = false;
-                this->graphImage->black(sf::Vector2u(300, 300));
-            }
-            return result;
+            return this->loadSource(std::to_string(index));
         }
         
         /**
@@ -264,26 +272,7 @@ namespace owo
          */
         bool openSource(std::string address)
         {
-            this->path = address;
-            bool result = true;
-            try
-            {
-                result = this->source.open(address);
-                this->setDimensionsFromSource();
-            }
-            catch (std::exception &e)
-            {
-                std::cerr << "err: " << std::endl << e.what();
-            }
-            if (this->shouldRead == false)
-                this->updateThread = std::thread(&Camera::_read_frame, this);
-            if (!result)
-            {
-                this->dimensions = sf::Vector2u(300, 300);
-                this->sourceAvailable = false;
-                this->graphImage->black(sf::Vector2u(300, 300));
-            }
-            return result;
+            return this->loadSource(address);
         }
 
         /**

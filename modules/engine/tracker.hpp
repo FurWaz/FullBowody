@@ -144,9 +144,10 @@ namespace owo
                     this->ipc.writeToChild(a, buffer.size());
                     delete[] a;
                     this->dataToSend = cv::Mat();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(2));
                 } else
                 {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 }
             }
         }
@@ -160,7 +161,6 @@ namespace owo
         void _retrieve_positions(char* data, unsigned short length)
         {
             std::string str(data, length);
-
             if (this->dataAvailable)
             {
                 getPointsFromData(data, length);
