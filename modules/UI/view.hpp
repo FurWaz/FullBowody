@@ -165,6 +165,16 @@ namespace owo
             init();
         }
 
+        void generateTexture()
+        {
+            clear_tex();
+            draw_origin(cv::Vec3d(0, 0, 0), cv::Mat::eye(cv::Size(3, 3), CV_64F), 0.5);
+            draw_camera(cam1, this->bp.getCamRays1());
+            draw_camera(cam2, this->bp.getCamRays2());
+            draw_body();
+            apply_tex();
+        }
+
         void onClick(int btn, bool clicked)
         {
             this->clicked = clicked;
@@ -207,13 +217,7 @@ namespace owo
 
         sf::Sprite getSprite(float dt)
         {
-            clear_tex();
-            draw_origin(cv::Vec3d(0, 0, 0), cv::Mat::eye(cv::Size(3, 3), CV_64F), 0.5);
-            draw_camera(cam1, this->bp.getCamRays1());
-            draw_camera(cam2, this->bp.getCamRays2());
-            draw_body();
-
-            apply_tex();
+            this->generateTexture();
             return this->sprite;
         }
 

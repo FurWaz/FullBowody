@@ -10,6 +10,7 @@ int main(int argc, char const *argv[])
 
     Window win("FullBowody", sf::VideoMode::getDesktopMode().width*0.8f, sf::VideoMode::getDesktopMode().height*0.8f);
     SceneGenerator::GenerateDefaultScene(win);
+    // SceneGenerator::GenerateTestScene(win);
 
     win.startUpdating();
     while (win.isOpen())

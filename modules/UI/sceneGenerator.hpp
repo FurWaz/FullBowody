@@ -7,6 +7,7 @@
 #include "./input.hpp"
 #include "./cameraView.hpp"
 #include "./view.hpp"
+#include "./list.hpp"
 
 #include "../engine/camera.hpp"
 #include "../engine/cameraManager.hpp"
@@ -56,5 +57,19 @@ namespace SceneGenerator
             sf::Vector2i(CONSTANT::WINDOW_WIDTH/2 - 50, CONSTANT::WINDOW_HEIGHT-50),
             sf::Vector2i(100, 40)
         ));
+    }
+
+    void GenerateTestScene(Window &win)
+    {
+        win.clearElements();
+        List* l = new List(sf::Vector2i(20, 20), sf::Vector2i(150, CONSTANT::WINDOW_HEIGHT-40), CONSTANT::COLOR_BACK);
+        Button* b1 = new Button("First", sf::Vector2i(10, 10), sf::Vector2i(100, 50), 20, CONSTANT::COLOR_RED_LIGHT, CONSTANT::COLOR_CLEAR);
+        Button* b2 = new Button("Second", sf::Vector2i(10, 10), sf::Vector2i(100, 50), 20, CONSTANT::COLOR_RED_LIGHT, CONSTANT::COLOR_CLEAR);
+        Button* b3 = new Button("Third", sf::Vector2i(10, 10), sf::Vector2i(100, 50), 20, CONSTANT::COLOR_RED_LIGHT, CONSTANT::COLOR_CLEAR);
+        l->addComponent(b1);
+        l->addComponent(b2);
+        l->addComponent(b3);
+        l->propagateParentAbsPos();
+        win.addElement(l);
     }
 }

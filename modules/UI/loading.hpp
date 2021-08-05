@@ -12,6 +12,11 @@ namespace owo
         float speed;
         sf::Color color;
 
+        void init()
+        {
+            this->sprite.setTexture(this->renderTexture.getTexture());
+        }
+
     public:
         Loading()
         {
@@ -19,6 +24,7 @@ namespace owo
             this->speed = 1;
             this->color = CONSTANT::COLOR_FORE;
             this->setDimensions(0, 0, 100, 100);
+            this->init();
         }
 
         Loading(sf::Vector2i pos, sf::Vector2i size, float speed = 1, sf::Color color = CONSTANT::COLOR_FORE, sf::Color clearColor = CONSTANT::COLOR_BACK)
@@ -28,6 +34,17 @@ namespace owo
             this->color = color;
             this->clearColor = clearColor;
             this->setDimensions(pos.x, pos.y, size.x, size.y);
+            this->init();
+        }
+
+        void generateTexture()
+        {
+            this->renderTexture.clear(this->clearColor);
+            float pos = ((int)(this->progress * this->speed * this->getSize().x * 0.1) % this->getSize().x*2) - this->getSize().x;
+            sf::RectangleShape rect(sf::Vector2f(this->getSize().x, this->getSize().y));
+            rect.setPosition(pos, 0);
+            this->renderTexture.draw(rect);
+            this->renderTexture.display();
         }
 
         void onClick(int btn, bool clicked)
@@ -62,13 +79,8 @@ namespace owo
 
         sf::Sprite getSprite(float dt)
         {
-            progress += dt;
-            this->renderTexture.clear(this->clearColor);
-            float pos = ((int)(this->progress * this->speed * this->getSize().x * 0.1) % this->getSize().x*2) - this->getSize().x;
-            sf::RectangleShape rect(sf::Vector2f(this->getSize().x, this->getSize().y));
-            rect.setPosition(pos, 0);
-            this->renderTexture.draw(rect);
-            this->sprite.setTexture(this->renderTexture.getTexture());
+            this->progress += dt;
+            this->generateTexture();
             return this->sprite;
         }
 

@@ -6,6 +6,9 @@ namespace owo
 {
     class GraphicElement
     {
+    private:
+        std::vector<GraphicElement*> elements;
+
     protected:
         sf::Sprite sprite;
         sf::RenderTexture renderTexture;
@@ -16,8 +19,6 @@ namespace owo
         bool clicked;
         bool focused;
         bool receiveEvents;
-
-        std::vector<GraphicElement*> elements;
 
         void calculateAbsDims()
         {
@@ -149,6 +150,11 @@ namespace owo
          * @param mousePos Current mouse position
          */
         virtual void update(float dt, sf::Vector2i mousePos) = 0;
+
+        /**
+         * @brief Redraws the element's texture
+         */
+        virtual void generateTexture() = 0;
         
         /**
          * @brief Returns if the position is in the element's hitbox
@@ -159,6 +165,16 @@ namespace owo
         bool collides(sf::Vector2i pos)
         {
             return this->absDims.contains(pos);
+        }
+
+        /**
+         * @brief Applies parent absolute position to all
+         * child GraphicElement of this element
+         */
+        void propagateParentAbsPos()
+        {
+            for(GraphicElement* el: this->getElements())
+                el->setParentAboluteDimensions(this->absDims);
         }
 
         /**

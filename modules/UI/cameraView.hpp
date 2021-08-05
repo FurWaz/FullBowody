@@ -25,8 +25,9 @@ namespace owo
 
         std::thread loaderThread;
         bool shouldJoinThread;
+        float dt;
 
-        void setupCamView()
+        void init()
         {
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
             this->renderTexture.clear(CONSTANT::COLOR_BACK);
@@ -95,9 +96,8 @@ namespace owo
             this->addElement(this->detectBtn);
             this->addElement(this->loadBtn);
             this->addElement(this->saveBtn);
-
-            for(GraphicElement* el: this->getElements())
-                el->setParentAboluteDimensions(this->absDims);
+            this->propagateParentAbsPos();
+            this->dt = 0;
         }
 
     public:
@@ -105,21 +105,27 @@ namespace owo
         {
             this->cam = new Camera();
             this->setDimensions(0, 0, 120, 200);
-            this->setupCamView();
+            this->init();
         }
 
         CameraView(Camera* cam)
         {
             this->cam = cam;
             this->setDimensions(0, 0, 120, 200);
-            this->setupCamView();
+            this->init();
         }
 
         CameraView(Camera* cam, sf::Vector2i position, sf::Vector2i size)
         {
             this->cam = cam;
             this->setDimensions(position.x, position.y, size.x, size.y);
-            this->setupCamView();
+            this->init();
+        }
+
+        void generateTexture()
+        {
+            this->cam->updateFrame(this->dt);
+            this->renderTexture.display();
         }
 
         void onClick(int btn, bool clicked)
@@ -158,8 +164,8 @@ namespace owo
 
         sf::Sprite getSprite(float dt)
         {
-            this->cam->updateFrame(dt);
-            this->renderTexture.display();
+            this->dt = dt;
+            this->generateTexture();
             return this->sprite;
         }
 
