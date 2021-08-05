@@ -11,6 +11,16 @@ typedef struct SoftwareInfo {
     SoftwareInfo(unsigned short p, std::string n): port(p), name(n) {}
 } SoftwareInfo;
 
+std::string to_string(sf::Socket::Status st)
+{
+    if (st == sf::Socket::Done) return "Done";
+    if (st == sf::Socket::NotReady) return "NotReady";
+    if (st == sf::Socket::Partial) return "Partial";
+    if (st == sf::Socket::Disconnected) return "Disconnected";
+    if (st == sf::Socket::Error) return "Error";
+    return "";
+}
+
 class SoftwareConnection
 {
 private:
@@ -31,6 +41,7 @@ private:
             std::cerr << "Error: Cannot bind socket port 5621, aborting" << std::endl;
             return false;
         }
+        socket.setBlocking(false);
         return true;
     }
 
@@ -90,9 +101,9 @@ public:
 
             for (SoftwareInfo soft: this->appsPorts)
             {
-                if (this->socket.send(string, length, "localhost", soft.port) != sf::Socket::Done)
-                    std::cout << "failed to send body position at port " << soft.port << std::endl;
-                else std::cout << "position sent to port " << soft.port << " (" << soft.name << ")" << std::endl;
+                if (this->socket.send(string, length, "localhost", soft.port) == sf::Socket::Done)
+                    std::cout << "position sent to port " << soft.port << " (" << soft.name << ")" << std::endl;
+                else std::cout << "failed to send body position on port " << soft.port << std::endl;
             }
         }
     }
@@ -105,12 +116,8 @@ public:
             std::size_t received;
             sf::IpAddress sender;
             unsigned short port;
-            if (this->socket.receive(data, 100, received, sender, port) != sf::Socket::Done)
-            {
-                std::cerr << "Failed to retreive data from external software, closing all apps" << std::endl;
-                this->appsPorts.clear();
-            }
-            else
+            sf::Socket::Status result = this->socket.receive(data, 100, received, sender, port);
+            if (result == sf::Socket::Done)
             {
                 if (received < 11) continue;
                 std::string string(data, received);
@@ -119,7 +126,13 @@ public:
                 this->appsPorts.push_back(SoftwareInfo(port, appName));
                 std::cout << ">> Info: New connection from application [" << appName << "] on port " << port << std::endl;
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            else
+            {
+                if (result == sf::Socket::NotReady) continue;
+                std::cerr << "Unknown error: " << to_string(result) << ", closing all apps" << std::endl;
+                this->appsPorts.clear();
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 
@@ -132,6 +145,6 @@ public:
 
     ~SoftwareConnection()
     {
-        
+        this->stopConnection();
     }
 };

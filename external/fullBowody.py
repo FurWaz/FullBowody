@@ -1,19 +1,33 @@
 import socket
 from threading import Thread
+from typing import List
 
-class FullBowodyConnection:
-    def __init__(self) -> None:
-        self.__LOGIN_MSG = b"FullBowody-BlenderAddon"
+class BodyJoint:
+    def __init__(self, x:float=0, y:float=0, z:float=0) -> None:
+        self.x:float = x
+        self.y:float = y
+        self.z:float = z
+
+    def str(self):
+        return "("+str(self.x)+", "+str(self.y)+", "+str(self.z)+")"
+
+class FBConnection:
+    NB_JOINTS = 33
+    def __init__(self, name:str="PythonAddon", port:int=5621, address:str="localhost") -> None:
+        self.__LOGIN_MSG:bytes = ("FullBowody-"+name).encode("utf-8")
         self.__sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.__sock.setblocking(False)
         self.__thread = Thread(target=self.__retrieve_positions)
         self.__running = False
-        self.bodyPosition = None
-        self.callback = None
+        self.__port = port
+        self.__addr = address
+        self.bodyPosition:list[BodyJoint] = None
+        self.__callback = None
     
     def start(self) -> bool:
         try:
             self.__running = True
-            self.__sock.sendto(self.__LOGIN_MSG, ("localhost", 5621))
+            r = self.__sock.sendto(self.__LOGIN_MSG, (self.__addr, self.__port))
             self.__thread.start()
             return True
         except:
@@ -25,9 +39,10 @@ class FullBowodyConnection:
             return False
         self.__running = False
         self.__thread.join()
+        return True
 
     def setCallback(self, callback):
-        self.callback = callback
+        self.__callback = callback
     
     def __retrieve_positions(self):
         while self.__running:
@@ -40,10 +55,10 @@ class FullBowodyConnection:
                     for e in range(len(points[i])):
                         points[i][e] = float(points[i][e])
                 self.bodyPosition = points
-                if (self.callback != None):
-                    self.callback()
-            except: self.__running = False
-
+                if (self.__callback != None):
+                    self.__callback()
+            except BlockingIOError: pass
+            except Exception: self.__running = False
 
 ####################
 #                  #
@@ -53,18 +68,18 @@ class FullBowodyConnection:
 
 def connectionDemo():
     #first, create the connection
-    connection = FullBowodyConnection()
+    conn = FBConnection()
 
     # [OPTIONAL] You can define a callback function that will be called when a new body position is recieved
     def onNewPosition():
         print("New body position !")
-    connection.setCallback(onNewPosition)
+    conn.setCallback(onNewPosition)
 
     #next, start the connection
-    connection.start()
+    conn.start()
 
     #now, you can get the current body position at anytime
-    print("Current body position: ", connection.bodyPosition)
+    print("Current body position: ", conn.bodyPosition)
 
     #at the end of the program, don't forget to stop the connection
-    connection.stop()
+    conn.stop()
