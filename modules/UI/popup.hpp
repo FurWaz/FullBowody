@@ -9,7 +9,7 @@ namespace owo
     class Popup : public virtual GraphicElement
     {
     private:
-        static const int POPUP_MARGIN = 40;
+        static const int POPUP_MARGIN = 50;
         static const int HEADER_SIZE = 40;
         Button* closeBtn;
         Label* title;
@@ -30,7 +30,7 @@ namespace owo
             this->setClearColor(CONSTANT::COLOR_CLEAR);
             this->generateTexture();
 
-            this->closeBtn = new Button("Close", sf::Vector2i(this->getSize().x-80, 0), sf::Vector2i(80, HEADER_SIZE), 20);
+            this->closeBtn = new Button("X", sf::Vector2i(this->getSize().x-HEADER_SIZE, 0), sf::Vector2i(HEADER_SIZE, HEADER_SIZE), 20, CONSTANT::COLOR_CLEAR, CONSTANT::COLOR_RED_LIGHT);
             this->title = new Label(title, sf::Vector2i(this->getSize().x/2-100, 0), sf::Vector2i(200, HEADER_SIZE), 20, Label::CENTER, CONSTANT::COLOR_FORE, CONSTANT::COLOR_CLEAR);
             this->addElement(this->closeBtn);
             this->addElement(this->title);

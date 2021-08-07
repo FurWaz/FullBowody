@@ -2,13 +2,14 @@
 #include "../constants.hpp"
 #include "./graphicElement.hpp"
 #include "./button.hpp"
+#include "./label.hpp"
 
 namespace owo
 {
     class MenuBar : public virtual GraphicElement
     {
     private:
-        std::vector<Button*> buttons;
+        Label* label;
 
         void refreshView()
         {
@@ -26,12 +27,14 @@ namespace owo
             this->setDimensions(0, 0, CONSTANT::WINDOW_WIDTH, MENUBAR_HEIGHT);
             this->setClearColor(CONSTANT::COLOR_BLACK_DARKER);
             this->setReceiveEvents(true);
+            this->label = new Label("FullBowody", sf::Vector2i(CONSTANT::WINDOW_WIDTH-210, 0), sf::Vector2i(200, this->dimensions.height), 20, Label::RIGHT, CONSTANT::COLOR_BLACK_LIGHT, CONSTANT::COLOR_BLACK_DARKER);
             this->generateTexture();
         }
 
         void generateTexture()
         {
             this->renderTexture.clear(this->clearColor);
+            this->renderTexture.draw(this->label->getSprite(0));
             this->renderTexture.display();
             this->sprite.setTexture(this->renderTexture.getTexture());
         }

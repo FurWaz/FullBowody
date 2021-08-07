@@ -21,7 +21,7 @@ namespace owo
             this->popup = new Popup("Camera calibration");
             this->addElement(this->popup);
 
-            this->popup->addComponent(new Button("Bonjour", sf::Vector2i(0, 0), sf::Vector2i(100, 50)));
+            this->popup->addComponent(new Button("UwU :3", sf::Vector2i(0, 0), sf::Vector2i(100, 50)));
         }
 
         void generateTexture()

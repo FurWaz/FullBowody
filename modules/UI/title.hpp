@@ -11,10 +11,10 @@ namespace owo
         Label* label;
 
     public:
-        Title(sf::Vector2i pos, sf::Vector2i size, std::string str = "Title", int fontSize = 16)
+        Title(sf::Vector2i pos, sf::Vector2i size, std::string str = "Title", int fontSize = 16, sf::Color clearColor = CONSTANT::COLOR_BACK)
         {
             this->setDimensions(pos.x, pos.y, size.x, size.y);
-            this->setClearColor(CONSTANT::COLOR_BACK);
+            this->setClearColor(clearColor);
             this->label = new Label(str, sf::Vector2i(0, 0), sf::Vector2i(-1, size.y), fontSize, Label::CENTER, CONSTANT::COLOR_FORE, this->clearColor);
             this->label->setPosition(sf::Vector2i((size.x-this->label->getSize().x)/2, 0));
             this->label->generateTexture();
@@ -28,7 +28,7 @@ namespace owo
             sf::RectangleShape rect;
             rect.setPosition(2, this->dimensions.height/2);
             rect.setSize(sf::Vector2f(this->dimensions.width-4, 2));
-            rect.setFillColor(CONSTANT::COLOR_WHITE_DARK);
+            rect.setFillColor(CONSTANT::COLOR_GREY_DARK);
             this->renderTexture.draw(rect);
             this->renderTexture.display();
             this->sprite.setTexture(this->renderTexture.getTexture());

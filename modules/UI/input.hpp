@@ -11,7 +11,7 @@ namespace owo
     class Input : public virtual GraphicElement
     {
     private:
-        const short OUTLINE_THICKNESS = 2;
+        const short OUTLINE_THICKNESS = 1;
         std::string text;
         Label* label;
         CallbackContainer* cont;

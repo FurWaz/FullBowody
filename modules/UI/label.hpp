@@ -106,13 +106,13 @@ namespace owo
                 break;
             case Label::RIGHT:
                 result = sf::Vector2f(
-                    this->dimensions.width - txtSize.x,
+                    this->dimensions.width - txtSize.x - 1,
                     (this->dimensions.height - txtSize.y) / 2 - 2
                 );
                 break;
             case Label::LEFT:
                 result = sf::Vector2f(
-                    0,
+                    1,
                     (this->dimensions.height - txtSize.y) / 2 - 2
                 );
                 break;

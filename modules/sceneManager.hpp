@@ -69,16 +69,21 @@ namespace SceneManager
         win->clearElements();
         win->addElement(menuBar);
         menuBar->setSelectedButton(0);
+        const int TITLE_SIZE = 30;
 
-        camList = new List(sf::Vector2i(0, MenuBar::MENUBAR_HEIGHT), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.6, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT), CONSTANT::COLOR_CLEAR);
+        win->addElement(new Title(sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.2, MenuBar::MENUBAR_HEIGHT), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.2, TITLE_SIZE), "Cameras", 18, CONSTANT::COLOR_CLEAR));
+
+        camList = new List(sf::Vector2i(0, MenuBar::MENUBAR_HEIGHT+TITLE_SIZE), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.6, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT-TITLE_SIZE), CONSTANT::COLOR_CLEAR);
         win->addElement(camList);
         _populate_camlist();
 
-        View* v = new View(sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.6, MenuBar::MENUBAR_HEIGHT), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.4, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT));
+        win->addElement(new Title(sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.7, MenuBar::MENUBAR_HEIGHT), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.2, TITLE_SIZE), "3D View", 18, CONSTANT::COLOR_CLEAR));
+
+        View* v = new View(sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.6, MenuBar::MENUBAR_HEIGHT+TITLE_SIZE), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.4, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT-TITLE_SIZE));
         v->setBodyPos(&bp);
         win->addElement(v);
 
-        Label* separator = new Label("", sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.6-2, MenuBar::MENUBAR_HEIGHT), sf::Vector2i(4, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT), 16, Label::CENTER, CONSTANT::COLOR_BACK);
+        Label* separator = new Label("", sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.6-2, MenuBar::MENUBAR_HEIGHT+TITLE_SIZE), sf::Vector2i(4, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT-TITLE_SIZE), 16, Label::CENTER, CONSTANT::COLOR_BACK);
         win->addElement(separator);
 
         Button* trackBtn = new Button("Start tracking", sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.725, CONSTANT::WINDOW_HEIGHT-90), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.15, 70), 20);
