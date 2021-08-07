@@ -17,11 +17,8 @@ namespace owo
     class BodyPos
     {
     private:
-        Camera* cam1;
-        Camera* cam2;
-
-        cv::Vec3d cam1_rays[CONSTANT::NB_JOINTS];
-        cv::Vec3d cam2_rays[CONSTANT::NB_JOINTS];
+        std::vector<Camera*> cameras;
+        std::vector<cv::Vec3d*> rays;
         cv::Vec3d body[CONSTANT::NB_JOINTS];
 
         float tracking_dt;
@@ -96,14 +93,35 @@ namespace owo
          */
         void calculateBodyPosition()
         {
-            cv::Vec3d c1 = this->cam1->getPosition();
-            cv::Vec3d c2 = this->cam2->getPosition();
-            for(int i = 0; i < CONSTANT::NB_JOINTS; i++)
+            for (int i = 0; i < CONSTANT::NB_JOINTS; i++)
             {
-                cv::Vec3d v1 = cam1_rays[i];
-                cv::Vec3d v2 = cam2_rays[i];
-                this->intersection(c1, v1, c2, v2, this->body[i]);
+                int cam1 = 0;
+                int cam2 = 1;
+
+                // determine the two cameras with the best point visibility
+                float visibility1 = this->cameras.at(cam1)->getTracker()->getPoints().at(i).z;
+                float visibility2 = this->cameras.at(cam2)->getTracker()->getPoints().at(i).z;
+                for (int j = 2; j < this->cameras.size(); j++)
+                {
+                    float v = this->cameras.at(j)->getTracker()->getPoints().at(i).z;
+                    if (v > visibility1 && v > visibility2)
+                    {
+                        if (visibility1 > visibility2)
+                            cam2 = j;
+                        else cam1 = j;
+                    }
+                    else if (v > visibility1) cam1 = j;
+                    else if (v > visibility2) cam2 = j;
+                }
+
+                // calculate the point position
+                this->intersection(
+                    this->cameras.at(cam1)->getPosition(), *this->rays.at(cam1),
+                    this->cameras.at(cam2)->getPosition(), *this->rays.at(cam2),
+                    this->body[i]
+                );
             }
+
             con.sendNewBodyPosition(this->getBody());
         }
 
@@ -114,35 +132,21 @@ namespace owo
         BodyPos()
         {
             for(int i = 0; i < 33; i++)
-            {
-                this->body[i]      = cv::Vec3d();
-                this->cam1_rays[i] = cv::Vec3d();
-                this->cam2_rays[i] = cv::Vec3d();
-            }
+                this->body[i] = cv::Vec3d();
             this->tracking_dt = 0;
             con.startConnection();
         }
 
         /**
-         * @brief Set the Camera1 object
-         * 
+         * @brief Adds a new Camera object
          * @param cam The targeted camera
          */
-        void setCamera1(Camera* cam)
+        void AddCamera(Camera* cam)
         {
-            this->cam1 = cam;
-            this->cam1->getTracker()->setNewDataCallback(&BodyPos::refreshBody, this);
-        }
-        
-        /**
-         * @brief Set the Camera2 object
-         * 
-         * @param cam The targeted camera
-         */
-        void setCamera2(Camera* cam)
-        {
-            this->cam2 = cam;
-            this->cam2->getTracker()->setNewDataCallback(&BodyPos::refreshBody, this);
+            this->cameras.push_back(cam);
+            cv::Vec3d newRays[CONSTANT::NB_JOINTS];
+            this->rays.push_back(newRays);
+            cam->getTracker()->setNewDataCallback(&BodyPos::refreshBody, this);
         }
 
         /**
@@ -155,8 +159,8 @@ namespace owo
                 return;
 
             this->tracking_dt = 0;
-            this->cam1->getBodyPosition();
-            this->cam2->getBodyPosition();
+            for (Camera* cam: this->cameras)
+                cam->getBodyPosition();
         }
 
         /**
@@ -164,12 +168,17 @@ namespace owo
          */
         void refreshBody()
         {
-            if (!this->cam1->getTracker()->isNewTrackingDataAvailable() || !this->cam2->getTracker()->isNewTrackingDataAvailable())
-                return;
-            this->cam1->getTracker()->setNewTrackingDataAvailable(false);
-            this->cam2->getTracker()->setNewTrackingDataAvailable(false);
-            this->calculateCamRays(this->cam1, this->cam1_rays);
-            this->calculateCamRays(this->cam2, this->cam2_rays);
+            for (Camera* cam: this->cameras)
+                if (!cam->getTracker()->isNewTrackingDataAvailable())
+                    return;
+                    
+            for(int i = 0; i < this->cameras.size(); i++)
+            {
+                Camera* c = this->cameras.at(i);
+                cv::Vec3d* r = this->rays.at(i);
+                c->getTracker()->setNewTrackingDataAvailable(false);
+                this->calculateCamRays(c, r);
+            }
             this->calculateBodyPosition();
         }
 
@@ -183,21 +192,17 @@ namespace owo
         }
 
         /**
-         * @brief Returns the first camera's joints rays
+         * @brief Returns the selected camera's joints rays
          * @return An array of 3D vectors directions
          */
-        cv::Vec3d* getCamRays1()
+        cv::Vec3d* getCamRays(int camIndex)
         {
-            return this->cam1_rays;
+            return this->rays.at(camIndex);
         }
 
-        /**
-         * @brief Returns the second camera's joints rays
-         * @return An array of 3D vectors directions
-         */
-        cv::Vec3d* getCamRays2()
+        std::vector<Camera*> getCameras()
         {
-            return this->cam2_rays;
+            return this->cameras;
         }
 
         ~BodyPos()

@@ -19,18 +19,15 @@ namespace owo
 
         sf::Vector2i lastMousePos;
 
-        Camera* cam1;
-        Camera* cam2;
-
-        BodyPos bp;
+        BodyPos* bp;
 
         void init()
         {
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
             this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
-            this->camDist = 2;
+            this->camDist = 1;
             camFOV = 200;
-            this->rotation = sf::Vector2f(0.75, 0.75);
+            this->rotation = sf::Vector2f(0.6, 0);
             apply_rotation();
             this->setReceiveEvents(true);
         }
@@ -67,14 +64,11 @@ namespace owo
 
         void clear_tex()
         {
-            this->renderTexture.clear(CONSTANT::COLOR_CLEAR);
+            this->renderTexture.clear(this->clearColor);
         }
 
         void draw_line(sf::Vector2f p1, sf::Vector2f p2, sf::Color color = CONSTANT::COLOR_FORE, int thinkness = 1)
         {
-            // sf::Vertex line[] = {sf::Vertex(p1, color), sf::Vertex(p2, color)};
-            // this->renderTexture.draw(line, 2, sf::Lines);
-
             float delta = (p2.y - p1.y) / (p2.x - p1.x);
             float rotation = std::atan(delta);
             float length = std::sqrt( std::pow(p2.x - p1.x, 2) + std::pow(p2.y - p1.y, 2) );
@@ -126,7 +120,7 @@ namespace owo
 
             if (cam->isDebugMode())
             {
-                for(int i = 0; i < 35; i++)
+                for(int i = 0; i < CONSTANT::NB_CONNECTIONS; i++)
                     draw_line(
                         vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][0]], rot) + pos),
                         vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][1]], rot) + pos),
@@ -137,8 +131,8 @@ namespace owo
 
         void draw_body()
         {
-            cv::Vec3d* points = this->bp.getBody();
-            for(int i = 0; i < 35; i++)
+            cv::Vec3d* points = this->bp->getBody();
+            for(int i = 0; i < CONSTANT::NB_CONNECTIONS; i++)
                 draw_line(
                     vec3_vec2(points[CONSTANT::POSE_CONNECTIONS[i][0]]),
                     vec3_vec2(points[CONSTANT::POSE_CONNECTIONS[i][1]]),
@@ -156,12 +150,14 @@ namespace owo
         View()
         {
             this->setDimensions(0, 0, 200, 200);
+            this->setClearColor(CONSTANT::COLOR_CLEAR);
             init();
         }
 
-        View(sf::Vector2i pos, sf::Vector2i size)
+        View(sf::Vector2i pos, sf::Vector2i size, sf::Color clearColor = CONSTANT::COLOR_CLEAR)
         {
             this->setDimensions(pos.x, pos.y, size.x, size.y);
+            this->setClearColor(clearColor);
             init();
         }
 
@@ -169,8 +165,9 @@ namespace owo
         {
             clear_tex();
             draw_origin(cv::Vec3d(0, 0, 0), cv::Mat::eye(cv::Size(3, 3), CV_64F), 0.5);
-            draw_camera(cam1, this->bp.getCamRays1());
-            draw_camera(cam2, this->bp.getCamRays2());
+            std::vector<Camera*> cams = this->bp->getCameras();
+            for (int i = 0; i < cams.size(); i++)
+                draw_camera(cams.at(i), this->bp->getCamRays(i));
             draw_body();
             apply_tex();
         }
@@ -211,7 +208,7 @@ namespace owo
                 this->rotation.y -= delta.x * 0.01;
             }
             apply_rotation();
-            this->bp.update(dt);
+            this->bp->update(dt);
             lastMousePos = mousePos;
         }
 
@@ -221,16 +218,9 @@ namespace owo
             return this->sprite;
         }
 
-        void setCamera1(Camera* cam)
+        void setBodyPos(BodyPos* bodyPos)
         {
-            this->cam1 = cam;
-            this->bp.setCamera1(cam);
-        }
-
-        void setCamera2(Camera* cam)
-        {
-            this->cam2 = cam;
-            this->bp.setCamera2(cam);
+            this->bp = bodyPos;
         }
 
         ~View()

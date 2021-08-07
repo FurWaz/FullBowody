@@ -15,6 +15,7 @@ template<typename T> T clamp(T val, T min, T max)
  */
 namespace CONSTANT
 {
+    sf::Color COLOR_BLACK_DARKER(35, 49, 64);
     sf::Color COLOR_BLACK_DARK   (44, 62, 80);
     sf::Color COLOR_BLACK_LIGHT  (52, 73, 94);
     sf::Color COLOR_GREY_DARK    (127, 140, 141);

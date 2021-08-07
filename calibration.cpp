@@ -21,7 +21,7 @@ bool captureSamples()
     sf::Event ev;
 
     cv::VideoCapture cap;
-    cap.open("http://192.168.43.1:8080/video");
+    cap.open("http://192.168.0.15:8080/video");
     if (!cap.isOpened())
     {
         std::cout << "Error reading stream" << std::endl;

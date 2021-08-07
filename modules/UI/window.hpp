@@ -22,9 +22,10 @@ namespace owo
         float refreshDelta;
         float updateDelta;
         
-        std::vector<GraphicElement*> elements, graphicElements;
+        std::vector<GraphicElement*> graphicElements, elements;
         GraphicElement* focused = nullptr;
         bool shouldUpdate = false;
+        bool showHitboxes = false;
 
         /**
          * @brief Update the window's UI elements
@@ -61,37 +62,12 @@ namespace owo
                 this->drawElement(child, pTex);
             tex->draw(el->getSprite(this->refreshDelta));
         }
-        
-        /**
-         * @brief Add a GraphicElement to the collision system
-         * @param el The GraphicElement to add
-         */
+
         void addPhysicElement(GraphicElement* el)
         {
             this->elements.push_back(el);
             for (GraphicElement* child: el->getElements())
                 this->addPhysicElement(child);
-        }
-
-        /**
-         * @brief Remove a GraphicElement from the collision system
-         * @param el The GraphicElement to remove
-         */
-        void removePhysicElement(GraphicElement* el)
-        {
-            int index = -1;
-            int counter = 0;
-            for(GraphicElement* element: this->elements)
-            {
-                if (element == el)
-                {
-                    index = counter;
-                    break;
-                }
-                counter++;
-            }
-            if (index >= 0)
-                this->removeElement(index);
         }
 
     public:
@@ -128,7 +104,24 @@ namespace owo
             int index = 0;
             for (GraphicElement* el: this->graphicElements)
                 this->drawElement(el, &this->screen);
-            screen.display();
+                
+            if (this->showHitboxes)
+            {
+                int index = 0;
+                int max = this->elements.size();
+                for(GraphicElement* el: this->elements)
+                {
+                    sf::RectangleShape rect;
+                    rect.setPosition(el->getAbsoluteDimensions().left, el->getAbsoluteDimensions().top);
+                    rect.setSize(sf::Vector2f(el->getAbsoluteDimensions().width, el->getAbsoluteDimensions().height));
+                    rect.setOutlineThickness(2);
+                    rect.setFillColor(CONSTANT::COLOR_TRANS);
+                    rect.setOutlineColor(sf::Color(index*255/max, 0, (255-(index*255/max))));
+                    this->screen.draw(rect);
+                    index++;
+                }
+            }
+            this->screen.display();
         }
 
         void startUpdating()
@@ -150,16 +143,16 @@ namespace owo
         {
             if (!this->screen.pollEvent(this->event)) return;
 
+            this->elements.clear();
+            for (GraphicElement* el: this->graphicElements)
+                this->addPhysicElement(el);
+
             int key;
             switch (event.type)
             {
                 case sf::Event::Closed:
                     this->close();
                     break;
-
-                // case sf::Event::Resized:
-                //     this->setSize(event.size.width, event.size.height);
-                //     break;
 
                 case sf::Event::MouseMoved:
                     this->mousePos = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
@@ -250,7 +243,6 @@ namespace owo
         void addElement(GraphicElement* el)
         {
             this->graphicElements.push_back(el);
-            this->addPhysicElement(el);
         }
 
         /**
@@ -261,20 +253,6 @@ namespace owo
         {
             int index = -1;
             int counter = 0;
-            for(GraphicElement* element: this->elements)
-            {
-                if (element == el)
-                {
-                    index = counter;
-                    break;
-                }
-                counter++;
-            }
-            if (index >= 0)
-                this->removeElement(index);
-            
-            index = -1;
-            counter = 0;
             for(GraphicElement* element: this->graphicElements)
             {
                 if (element == el)
@@ -285,7 +263,7 @@ namespace owo
                 counter++;
             }
             if (index >= 0)
-                this->graphicElements.erase(this->graphicElements.begin()+index);
+                this->removeElement(index);
         }
 
         /**
@@ -294,9 +272,7 @@ namespace owo
          */
         void removeElement(int index)
         {
-            for (GraphicElement* child: this->elements.at(index)->getElements())
-                this->removePhysicElement(child);
-            this->elements.erase(this->elements.begin()+index);
+            this->graphicElements.erase(this->graphicElements.begin()+index);
         }
 
         /**
@@ -304,7 +280,8 @@ namespace owo
          */
         void clearElements()
         {
-            this->elements.clear();
+            for(GraphicElement* el: this->graphicElements)
+                this->removeElement(el);
         }
 
         /**

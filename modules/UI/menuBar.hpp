@@ -2,17 +2,13 @@
 #include "../constants.hpp"
 #include "./graphicElement.hpp"
 #include "./button.hpp"
-#include "./label.hpp"
 
 namespace owo
 {
-    class Popup : public virtual GraphicElement
+    class MenuBar : public virtual GraphicElement
     {
     private:
-        static const int POPUP_MARGIN = 40;
-        static const int HEADER_SIZE = 40;
-        Button* closeBtn;
-        Label* title;
+        std::vector<Button*> buttons;
 
         void refreshView()
         {
@@ -23,23 +19,26 @@ namespace owo
         }
 
     public:
-        Popup(std::string title="")
-        {
-            this->setDimensions(POPUP_MARGIN, POPUP_MARGIN, CONSTANT::WINDOW_WIDTH-POPUP_MARGIN*2, CONSTANT::WINDOW_HEIGHT-POPUP_MARGIN*2);
-            this->setReceiveEvents(true);
-            this->setClearColor(CONSTANT::COLOR_CLEAR);
-            this->generateTexture();
+        static const int MENUBAR_HEIGHT = 40;
 
-            this->closeBtn = new Button("Close", sf::Vector2i(this->getSize().x-80, 0), sf::Vector2i(80, HEADER_SIZE), 20);
-            this->title = new Label(title, sf::Vector2i(this->getSize().x/2-100, 0), sf::Vector2i(200, HEADER_SIZE), 20, Label::CENTER, CONSTANT::COLOR_FORE, CONSTANT::COLOR_CLEAR);
-            this->addElement(this->closeBtn);
-            this->addElement(this->title);
-            this->propagateParentAbsPos();
+        MenuBar()
+        {
+            this->setDimensions(0, 0, CONSTANT::WINDOW_WIDTH, MENUBAR_HEIGHT);
+            this->setClearColor(CONSTANT::COLOR_BLACK_DARKER);
+            this->setReceiveEvents(true);
+            this->generateTexture();
+        }
+
+        void generateTexture()
+        {
+            this->renderTexture.clear(this->clearColor);
+            this->renderTexture.display();
+            this->sprite.setTexture(this->renderTexture.getTexture());
         }
 
         void addComponent(GraphicElement* el)
         {
-            el->setPosition(el->getPosition() + sf::Vector2i(0, HEADER_SIZE));
+            el->setPosition(el->getPosition()+sf::Vector2i(this->calculateElementsSize(), 0));
             this->addElement(el);
             this->refreshView();
         }
@@ -54,13 +53,6 @@ namespace owo
         {
             this->removeElement(index);
             this->refreshView();
-        }
-
-        void generateTexture()
-        {
-            this->renderTexture.clear(this->clearColor);
-            this->renderTexture.display();
-            this->sprite.setTexture(this->renderTexture.getTexture());
         }
 
         void onClick(int btn, bool clicked)
@@ -93,9 +85,20 @@ namespace owo
             
         }
 
-        Button* getCloseButton()
+        void setSelectedButton(int index)
         {
-            return this->closeBtn;
+            for(GraphicElement* el: this->getElements())
+                dynamic_cast<Button*>(el)->setBackColor(this->getClearColor());
+            dynamic_cast<Button*>(this->getElements().at(index))->setBackColor(CONSTANT::COLOR_CLEAR);
+            this->refreshView();
+        }
+        
+        int calculateElementsSize()
+        {
+            if (this->getElements().size() == 0)
+                return 0;
+            GraphicElement* el = this->getElements().at(this->getElements().size()-1);
+            return el->getPosition().x + el->getSize().x;
         }
 
         sf::Sprite getSprite(float dt)
@@ -103,7 +106,7 @@ namespace owo
             return this->sprite;
         }
 
-        ~Popup()
+        ~MenuBar()
         {
 
         }

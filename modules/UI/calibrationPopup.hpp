@@ -2,6 +2,7 @@
 #include "../constants.hpp"
 #include "./graphicElement.hpp"
 #include "./popup.hpp"
+#include "./button.hpp"
 
 namespace owo
 {
@@ -9,6 +10,7 @@ namespace owo
     {
     private:
         Popup* popup;
+        
     public:
         CalibrationPopup()
         {
@@ -18,6 +20,8 @@ namespace owo
             this->generateTexture();
             this->popup = new Popup("Camera calibration");
             this->addElement(this->popup);
+
+            this->popup->addComponent(new Button("Bonjour", sf::Vector2i(0, 0), sf::Vector2i(100, 50)));
         }
 
         void generateTexture()

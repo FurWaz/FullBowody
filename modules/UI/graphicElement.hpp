@@ -23,10 +23,10 @@ namespace owo
         void calculateAbsDims()
         {
             this->absDims = sf::IntRect(
-                clamp<int>(this->dimensions.left, 0, this->parentAbsDims.width) + this->parentAbsDims.left,
-                clamp<int>(this->dimensions.top, 0, this->parentAbsDims.height) + this->parentAbsDims.top,
-                clamp<int>(this->dimensions.width, 0, this->parentAbsDims.width-this->dimensions.left),
-                clamp<int>(this->dimensions.height, 0, this->parentAbsDims.height-this->dimensions.top)
+                this->dimensions.left + this->parentAbsDims.left,
+                this->dimensions.top + this->parentAbsDims.top,
+                this->dimensions.width,
+                this->dimensions.height
             );
         }
 
@@ -56,6 +56,7 @@ namespace owo
         {
             this->dimensions = sf::IntRect(x, y, width, height);
             this->calculateAbsDims();
+            this->propagateParentAbsPos();
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
             this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
         }
@@ -104,6 +105,11 @@ namespace owo
         void removeElement(int index)
         {
             this->elements.erase(this->elements.begin()+index);
+        }
+
+        void clearElements()
+        {
+            this->elements.clear();
         }
 
         /**
@@ -253,6 +259,7 @@ namespace owo
         {
             this->parentAbsDims = dims;
             this->calculateAbsDims();
+            this->propagateParentAbsPos();
         }
 
         sf::IntRect getAbsoluteDimensions()

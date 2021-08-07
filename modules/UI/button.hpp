@@ -167,6 +167,13 @@ namespace owo
             this->generateTexture();
         }
 
+        void setBackColor(sf::Color color)
+        {
+            this->bgColor_normal = color;
+            this->generateHoverColors();
+            this->generateTexture();
+        }
+
         Label* getLabel()
         {
             return this->label;
