@@ -74,7 +74,7 @@ namespace owo
          * @param cam The targeted camera for rays calculation
          * @param rays The calculaterd rays array
          */
-        void calculateCamRays(Camera* cam, std::array<cv::Vec3d, CONSTANT::NB_JOINTS> rays)
+        void calculateCamRays(Camera* cam, std::array<cv::Vec3d, CONSTANT::NB_JOINTS> &rays)
         {
             std::array<cv::Point3f, CONSTANT::NB_JOINTS> points = cam->getTracker()->getPoints();
             cv::Mat rot = cam->getRotation();
@@ -204,7 +204,7 @@ namespace owo
          */
         std::array<cv::Vec3d, CONSTANT::NB_JOINTS> getCamRays(int camIndex)
         {
-            return this->rays.at(camIndex);
+            return this->rays[camIndex];
         }
 
         std::vector<Camera*> getCameras()
