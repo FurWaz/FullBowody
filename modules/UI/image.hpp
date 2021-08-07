@@ -25,7 +25,7 @@ namespace owo
             imgSprite = sf::Sprite();
             imgSprite.setTexture(tex);
 
-            this->renderTexture.clear(CONSTANT::COLOR_TRANS);
+            this->renderTexture.clear(CONSTANT::COLOR_CLEAR);
             if ((this->dimensions.width / (float)this->dimensions.height) > (imgSize.x / (float)imgSize.y))
                 this->scaleFactor = this->dimensions.height / (float) imgSize.y;
             else
@@ -114,7 +114,7 @@ namespace owo
             bool shouldGenerate = false;
             if (dims != this->img.getSize())
                 shouldGenerate = true;
-            this->img.create(dims.x, dims.y, sf::Color(0, 0, 0));
+            this->img.create(dims.x, dims.y, sf::Color(0, 0, 0, 0));
             shouldGenerate? this->generateTexture() : this->updateTexture();
         }
 

@@ -25,6 +25,8 @@ namespace SceneManager
     BodyPos bp;
     List* camList;
 
+    CameraManager camMan;
+
     void _populate_camlist();
     void _add_camera()
     {
@@ -41,16 +43,18 @@ namespace SceneManager
 
     void _populate_camlist()
     {
+        bp.setCameras(cameras);
+        camMan.setCameras(cameras);
         camList->clearComponents();
         for (Camera* cam: cameras)
         {
-            CameraView* camView = new CameraView(cam, sf::Vector2i(10, 10), sf::Vector2i(camList->getSize().x-20, 500));
+            CameraView* camView = new CameraView(cam, sf::Vector2i(10, 10), sf::Vector2i(camList->getSize().x-20, 400));
             camList->addComponent(camView);
         }
-        Button* b = new Button("Ajouter", sf::Vector2i(10, 20), sf::Vector2i(100, 50));
+        Button* b = new Button("Add", sf::Vector2i(10, 20), sf::Vector2i(100, 50));
         b->setCallback(_add_camera);
         camList->addComponent(b);
-        b = new Button("Supprimer", sf::Vector2i(10, 20), sf::Vector2i(100, 50));
+        b = new Button("Remove", sf::Vector2i(120, -50), sf::Vector2i(100, 50));
         b->setCallback(_rem_camera);
         camList->addComponent(b);
     }
@@ -70,9 +74,17 @@ namespace SceneManager
         win->addElement(camList);
         _populate_camlist();
 
-        View* v = new View(sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.6, MenuBar::MENUBAR_HEIGHT), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.4, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT), CONSTANT::COLOR_BACK);
+        View* v = new View(sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.6, MenuBar::MENUBAR_HEIGHT), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.4, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT));
         v->setBodyPos(&bp);
         win->addElement(v);
+
+        Label* separator = new Label("", sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.6-2, MenuBar::MENUBAR_HEIGHT), sf::Vector2i(4, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT), 16, Label::CENTER, CONSTANT::COLOR_BACK);
+        win->addElement(separator);
+
+        Button* trackBtn = new Button("Start tracking", sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.725, CONSTANT::WINDOW_HEIGHT-90), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.15, 70), 20);
+        camMan.attachButton(trackBtn);
+        trackBtn->setCallback(&CameraManager::toogleCameraTracking, &camMan);
+        win->addElement(trackBtn);
     }
 
     void GenerateOptionsScene()
@@ -80,20 +92,6 @@ namespace SceneManager
         win->clearElements();
         win->addElement(menuBar);
         menuBar->setSelectedButton(1);
-    }
-
-    void GenerateTestScene()
-    {
-        win->clearElements();
-        List* l = new List(sf::Vector2i(20, 20), sf::Vector2i(150, CONSTANT::WINDOW_HEIGHT-40), CONSTANT::COLOR_BACK);
-        Button* b1 = new Button("First", sf::Vector2i(10, 10), sf::Vector2i(100, 50), 20, CONSTANT::COLOR_RED_LIGHT, CONSTANT::COLOR_CLEAR);
-        Button* b2 = new Button("Second", sf::Vector2i(10, 10), sf::Vector2i(100, 50), 20, CONSTANT::COLOR_RED_LIGHT, CONSTANT::COLOR_CLEAR);
-        Button* b3 = new Button("Third", sf::Vector2i(10, 10), sf::Vector2i(100, 50), 20, CONSTANT::COLOR_RED_LIGHT, CONSTANT::COLOR_CLEAR);
-        l->addComponent(b1);
-        l->addComponent(b2);
-        l->addComponent(b3);
-        l->propagateParentAbsPos();
-        win->addElement(l);
     }
 
     void GenerateExtensionsScene()
@@ -127,5 +125,7 @@ namespace SceneManager
         btn = new Button("About", sf::Vector2i(0, 0), sf::Vector2i(150, MenuBar::MENUBAR_HEIGHT), 20, CONSTANT::COLOR_BLACK_DARKER);
         btn->setCallback(GenerateAboutScene);
         menuBar->addComponent(btn);
+
+        bp.setCameras(cameras);
     }
 }

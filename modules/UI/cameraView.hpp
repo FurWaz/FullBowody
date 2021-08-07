@@ -1,10 +1,12 @@
 #pragma once
 #include "../constants.hpp"
-#include "graphicElement.hpp"
-#include "image.hpp"
-#include "input.hpp"
-#include "checkbox.hpp"
-#include "button.hpp"
+#include "./graphicElement.hpp"
+#include "./image.hpp"
+#include "./input.hpp"
+#include "./checkbox.hpp"
+#include "./button.hpp"
+#include "./title.hpp"
+
 #include "../engine/camera.hpp"
 #include "../engine/cameraCalibrator.hpp"
 
@@ -36,8 +38,8 @@ namespace owo
             this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
 
             this->im = new Image(
-                sf::Vector2i(4, 50),
-                sf::Vector2i(this->dimensions.width-8, this->dimensions.height-200)
+                sf::Vector2i(4, 44),
+                sf::Vector2i(this->dimensions.width/2-8, this->dimensions.height-48)
             );
             this->input = new Input(
                 this->cam->getPath(),
@@ -46,37 +48,47 @@ namespace owo
             );
             this->detectBtn = new Button(
                 "Detect position",
-                sf::Vector2i(0, this->dimensions.height-50),
-                sf::Vector2i(this->dimensions.width, 50), 18,
+                sf::Vector2i(this->dimensions.width/2, this->dimensions.height-50),
+                sf::Vector2i(this->dimensions.width/2, 50), 18,
                 CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
             );
+            this->addElement(new Title(
+                sf::Vector2i(this->dimensions.width/2, this->dimensions.height-80),
+                sf::Vector2i(this->dimensions.width/2, 30),
+                "Position", 18
+            ));
             this->calibrateBtn = new Button(
                 "Calibrate",
-                sf::Vector2i(0, this->dimensions.height-100),
-                sf::Vector2i(this->dimensions.width*0.4, 50), 18,
+                sf::Vector2i(this->dimensions.width*0.5, this->dimensions.height-130),
+                sf::Vector2i(this->dimensions.width*0.2, 50), 18,
                 CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
             );
             this->loadBtn = new Button(
                 "Load",
-                sf::Vector2i(this->dimensions.width*0.4, this->dimensions.height-100),
-                sf::Vector2i(this->dimensions.width*0.3, 50), 16,
+                sf::Vector2i(this->dimensions.width*0.7, this->dimensions.height-130),
+                sf::Vector2i(this->dimensions.width*0.15, 50), 16,
                 CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
             );
             this->saveBtn = new Button(
                 "Save",
-                sf::Vector2i(this->dimensions.width*0.7, this->dimensions.height-100),
-                sf::Vector2i(this->dimensions.width*0.3, 50), 16,
+                sf::Vector2i(this->dimensions.width*0.85, this->dimensions.height-130),
+                sf::Vector2i(this->dimensions.width*0.15, 50), 16,
                 CONSTANT::COLOR_BACK, CONSTANT::COLOR_PRIMARY
             );
+            this->addElement(new Title(
+                sf::Vector2i(this->dimensions.width/2, 40),
+                sf::Vector2i(this->dimensions.width/2, 30),
+                "Developers", 18
+            ));
             this->checkbox = new Checkbox(
-                sf::Vector2i(10, this->dimensions.height-135),
+                sf::Vector2i(this->dimensions.width/2, 70),
                 sf::Vector2i(20, 20),
                 CONSTANT::COLOR_PRIMARY
             );
             this->checkbox_text = new Label(
                 "Debug mode",
-                sf::Vector2i(40, this->dimensions.height-140),
-                sf::Vector2i(this->dimensions.width-50, 30),
+                sf::Vector2i(this->dimensions.width/2+35, 70),
+                sf::Vector2i(this->dimensions.width/2-35, 20),
                 16, Label::LEFT, CONSTANT::COLOR_FORE
             );
             

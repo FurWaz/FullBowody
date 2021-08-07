@@ -64,7 +64,7 @@ namespace owo
         std::thread sendingThread;
         bool running;
         cv::Mat dataToSend;
-        std::vector<cv::Point3f>* points; // z is visibility
+        std::array<cv::Point3f, CONSTANT::NB_JOINTS> points; // z is visibility
         CallbackContainer* cont;
         bool newTrackingDataAvailable;
 
@@ -76,9 +76,9 @@ namespace owo
          */
         void getPointsFromData(char* data, unsigned short length)
         {
-            this->points->clear();
-            ushort cursor = 0;
-            while (cursor < length && this->points->size() < 33)
+            unsigned short cursor = 0;
+            unsigned short index = 0;
+            while (cursor < length && index < CONSTANT::NB_JOINTS)
             {
                 try 
                 {
@@ -109,8 +109,9 @@ namespace owo
                         coordY / nbDigitDivide(coordY), 
                         visibility / nbDigitDivide(visibility)
                     );
-                    this->points->push_back( p );
+                    this->points[index] = p;
                 } catch (std::exception &e) {break;}
+                index++;
             }
         }
         
@@ -120,7 +121,6 @@ namespace owo
          */
         Tracker()
         {
-            this->points = new std::vector<cv::Point3f>();
             this->newTrackingDataAvailable = false;
             this->dataAvailable = false;
             this->ipc.setReadCallback(&Tracker::_retrieve_positions, this);
@@ -220,9 +220,9 @@ namespace owo
          * @brief Returns the 2D points of the detected body position (between 0 and 1)
          * @return a 2D point list corresponding to the positions of the body joints (z axis is the visibility of the point)
          */
-        std::vector<cv::Point3f> getPoints()
+        std::array<cv::Point3f, CONSTANT::NB_JOINTS> getPoints()
         {
-            return *this->points;
+            return this->points;
         }
 
         /**

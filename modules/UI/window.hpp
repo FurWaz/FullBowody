@@ -1,6 +1,7 @@
 #pragma once
 #include "graphicElement.hpp"
 #include "../constants.hpp"
+#include "../engine/bodypos.hpp"
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <thread>
@@ -27,6 +28,8 @@ namespace owo
         bool shouldUpdate = false;
         bool showHitboxes = false;
 
+        BodyPos* bodyPos;
+
         /**
          * @brief Update the window's UI elements
          */
@@ -37,6 +40,7 @@ namespace owo
                 this->updateDelta = this->updateClock.restart().asSeconds();
                 for (GraphicElement* el: this->elements)
                     el->update(this->updateDelta, this->mousePos);
+                bodyPos->update(this->updateDelta);
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
         }
@@ -280,8 +284,8 @@ namespace owo
          */
         void clearElements()
         {
-            for(GraphicElement* el: this->graphicElements)
-                this->removeElement(el);
+            this->graphicElements.clear();
+            this->elements.clear();
         }
 
         /**
@@ -300,6 +304,11 @@ namespace owo
         {
             this->shouldUpdate = false;
             this->screen.close();
+        }
+
+        void setBodyPos(BodyPos* bp)
+        {
+            this->bodyPos = bp;
         }
 
         int getWidth()

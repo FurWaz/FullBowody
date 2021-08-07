@@ -17,18 +17,12 @@ namespace owo
         {
             sf::Text txt(this->text, CONSTANT::FONT, this->fontSize);
             txt.setFillColor(this->textColor);
-            sf::Vector2u txtSize(txt.getLocalBounds().width, this->fontSize);
-
-            if (this->dimensions.width == -1 || this->dimensions.height == -1)
-                this->dimensions = sf::IntRect(this->dimensions.left, this->dimensions.top, txtSize.x, txtSize.y);
             
-            this->renderTexture.create(this->dimensions.width, this->dimensions.height);
             this->renderTexture.clear(this->clearColor);
             txt.setPosition(this->calculateTextPos(this->text));
             this->renderTexture.draw(txt);
             this->renderTexture.display();
             this->sprite.setTexture(this->renderTexture.getTexture());
-            this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
         }
 
         static const int LEFT = 1;
@@ -39,7 +33,7 @@ namespace owo
         {
             this->text = "Label";
             this->fontSize = 16;
-            this->setDimensions(0, 0, -1, -1);
+            this->setDimensions(0, 0, 20, 20);
             this->generateTexture();
         }
 
@@ -50,12 +44,11 @@ namespace owo
             this->placement = placement;
             this->textColor = textColor;
             this->clearColor = clearColor;
-            this->setDimensions(0, 0, -1, -1);
+            this->setDimensions(0, 0, 20, 20);
             this->generateTexture();
         }
 
-        Label(std::string text,
-              sf::Vector2i position, sf::Vector2i size = sf::Vector2i(-1, -1),
+        Label(std::string text, sf::Vector2i position, sf::Vector2i size = sf::Vector2i(0, 0),
               int fontSize = 16, int placement = Label::CENTER, sf::Color textColor = CONSTANT::COLOR_FORE, sf::Color clearColor = CONSTANT::COLOR_BACK)
         {
             this->text = text;
@@ -63,7 +56,8 @@ namespace owo
             this->placement = placement;
             this->textColor = textColor;
             this->clearColor = clearColor;
-            this->setDimensions(position.x, position.y, size.x, size.y);
+            sf::Vector2u txtSize = this->calculateTextSize(this->text);
+            this->setDimensions(position.x, position.y, (size.x == -1)? txtSize.x+10: size.x, (size.y == -1)? txtSize.y+4: size.y);
             this->generateTexture();
         }
 

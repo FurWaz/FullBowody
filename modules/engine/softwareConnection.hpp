@@ -29,7 +29,7 @@ private:
     bool newDataAvailable;
     std::vector<SoftwareInfo> appsPorts;
 
-    cv::Vec3d* bodyPosition;
+    std::array<cv::Vec3d, CONSTANT::NB_JOINTS> bodyPosition;
 
     std::thread listenerThread;
     std::thread senderThread;
@@ -134,7 +134,7 @@ public:
         }
     }
 
-    void sendNewBodyPosition(cv::Vec3d* bodyPos)
+    void sendNewBodyPosition(std::array<cv::Vec3d, CONSTANT::NB_JOINTS> bodyPos)
     {
         if (!this->ready) return;
         this->newDataAvailable = true;

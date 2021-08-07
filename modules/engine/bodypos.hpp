@@ -18,8 +18,8 @@ namespace owo
     {
     private:
         std::vector<Camera*> cameras;
-        std::vector<cv::Vec3d*> rays;
-        cv::Vec3d body[CONSTANT::NB_JOINTS];
+        std::vector<std::array<cv::Vec3d, CONSTANT::NB_JOINTS>> rays;
+        std::array<cv::Vec3d, CONSTANT::NB_JOINTS> body;
 
         float tracking_dt;
 
@@ -74,12 +74,12 @@ namespace owo
          * @param cam The targeted camera for rays calculation
          * @param rays The calculaterd rays array
          */
-        void calculateCamRays(Camera* cam, cv::Vec3d* rays)
+        void calculateCamRays(Camera* cam, std::array<cv::Vec3d, CONSTANT::NB_JOINTS> rays)
         {
-            std::vector<cv::Point3f> points = cam->getTracker()->getPoints();
+            std::array<cv::Point3f, CONSTANT::NB_JOINTS> points = cam->getTracker()->getPoints();
             cv::Mat rot = cam->getRotation();
             cv::Point2d fov = cam->getFOV();
-            for(int i = 0; i < points.size(); i++)
+            for(int i = 0; i < CONSTANT::NB_JOINTS; i++)
             {
                 const cv::Point3f p = points[i];
                 double rotX = ((p.y - 0.5) * 2) * fov.y;
@@ -93,14 +93,15 @@ namespace owo
          */
         void calculateBodyPosition()
         {
+            if (this->cameras.size() < 2) return;
             for (int i = 0; i < CONSTANT::NB_JOINTS; i++)
             {
                 int cam1 = 0;
                 int cam2 = 1;
 
                 // determine the two cameras with the best point visibility
-                float visibility1 = this->cameras.at(cam1)->getTracker()->getPoints().at(i).z;
-                float visibility2 = this->cameras.at(cam2)->getTracker()->getPoints().at(i).z;
+                float visibility1 = this->cameras[cam1]->getTracker()->getPoints()[i].z;
+                float visibility2 = this->cameras[cam2]->getTracker()->getPoints()[i].z;
                 for (int j = 2; j < this->cameras.size(); j++)
                 {
                     float v = this->cameras.at(j)->getTracker()->getPoints().at(i).z;
@@ -116,8 +117,8 @@ namespace owo
 
                 // calculate the point position
                 this->intersection(
-                    this->cameras.at(cam1)->getPosition(), *this->rays.at(cam1),
-                    this->cameras.at(cam2)->getPosition(), *this->rays.at(cam2),
+                    this->cameras.at(cam1)->getPosition(), this->rays[cam1][i],
+                    this->cameras.at(cam2)->getPosition(), this->rays[cam2][i],
                     this->body[i]
                 );
             }
@@ -144,9 +145,16 @@ namespace owo
         void AddCamera(Camera* cam)
         {
             this->cameras.push_back(cam);
-            cv::Vec3d newRays[CONSTANT::NB_JOINTS];
-            this->rays.push_back(newRays);
+            this->rays.push_back(std::array<cv::Vec3d, CONSTANT::NB_JOINTS>());
             cam->getTracker()->setNewDataCallback(&BodyPos::refreshBody, this);
+        }
+
+        void setCameras(std::vector<Camera*> cams)
+        {
+            this->rays = std::vector<std::array<cv::Vec3d, CONSTANT::NB_JOINTS>>(cams.size());
+            this->cameras = cams;
+            for(int i = 0; i < this->cameras.size(); i++)
+                this->cameras.at(i)->getTracker()->setNewDataCallback(&BodyPos::refreshBody, this);
         }
 
         /**
@@ -175,9 +183,8 @@ namespace owo
             for(int i = 0; i < this->cameras.size(); i++)
             {
                 Camera* c = this->cameras.at(i);
-                cv::Vec3d* r = this->rays.at(i);
                 c->getTracker()->setNewTrackingDataAvailable(false);
-                this->calculateCamRays(c, r);
+                this->calculateCamRays(c, this->rays[i]);
             }
             this->calculateBodyPosition();
         }
@@ -186,7 +193,7 @@ namespace owo
          * @brief Returns the body's 3D joints array
          * @return An array of 3D points
          */
-        cv::Vec3d* getBody()
+        std::array<cv::Vec3d, CONSTANT::NB_JOINTS> getBody()
         {
             return this->body;
         }
@@ -195,7 +202,7 @@ namespace owo
          * @brief Returns the selected camera's joints rays
          * @return An array of 3D vectors directions
          */
-        cv::Vec3d* getCamRays(int camIndex)
+        std::array<cv::Vec3d, CONSTANT::NB_JOINTS> getCamRays(int camIndex)
         {
             return this->rays.at(camIndex);
         }

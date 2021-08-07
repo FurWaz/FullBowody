@@ -29,13 +29,18 @@ namespace owo
             this->cameras.push_back(cam);
         }
 
+        void setCameras(std::vector<Camera*> cams)
+        {
+            this->cameras = cams;
+        }
+
         /**
          * @brief Toogle all the CameraManager's cameras body trackers for body tracking
          * @return If the cameras' trackers are now on or off
          */
         void toogleCameraTracking()
         {
-            bool possible = true;
+            bool possible = this->cameras.size() >= 2;
             for (Camera* c: this->cameras)
                 possible = possible & c->getPath() != "";
             if (!possible) return;

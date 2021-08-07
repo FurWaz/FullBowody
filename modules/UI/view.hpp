@@ -27,7 +27,7 @@ namespace owo
             this->sprite.setPosition(this->dimensions.left, this->dimensions.top);
             this->camDist = 1;
             camFOV = 200;
-            this->rotation = sf::Vector2f(0.6, 0);
+            this->rotation = sf::Vector2f(0.6, 0.8);
             apply_rotation();
             this->setReceiveEvents(true);
         }
@@ -58,7 +58,7 @@ namespace owo
             float Xresult = (distY * sinRotY) + (distX * cosRotY);
             float Yresult = (distZ * cosRotX) - (Zresult * sinRotX);
             if (Zresult2 > 0)
-                return sf::Vector2f();
+                return sf::Vector2f(this->dimensions.width/2, this->dimensions.height/2);
             return sf::Vector2f(camFOV * (Xresult / Zresult2) + this->dimensions.width/2, camFOV * (Yresult / Zresult2) + this->dimensions.height/2);
         }
 
@@ -99,7 +99,7 @@ namespace owo
             draw_line(vec3_vec2(rotate(cv::Vec3d(0, 0, size), rot) + pos), vec3_vec2(rotate(cv::Vec3d(0, 0, -size), rot) + pos), CONSTANT::COLOR_BLUE_LIGHT, 2);
         }
 
-        void draw_camera(Camera* cam, cv::Vec3d* rays)
+        void draw_camera(Camera* cam, std::array<cv::Vec3d, CONSTANT::NB_JOINTS> rays)
         {
             cv::Vec3d pos = cam->getPosition();
             cv::Mat rot = cam->getRotation();
@@ -131,7 +131,7 @@ namespace owo
 
         void draw_body()
         {
-            cv::Vec3d* points = this->bp->getBody();
+            std::array<cv::Vec3d, CONSTANT::NB_JOINTS> points = this->bp->getBody();
             for(int i = 0; i < CONSTANT::NB_CONNECTIONS; i++)
                 draw_line(
                     vec3_vec2(points[CONSTANT::POSE_CONNECTIONS[i][0]]),
@@ -200,15 +200,13 @@ namespace owo
 
         void update(float dt, sf::Vector2i mousePos)
         {
-            this->rotation.y += dt*0.5;
             if (clicked)
             {
                 sf::Vector2i delta = mousePos - lastMousePos;
                 this->rotation.x += delta.y * 0.01;
                 this->rotation.y -= delta.x * 0.01;
+                apply_rotation();
             }
-            apply_rotation();
-            this->bp->update(dt);
             lastMousePos = mousePos;
         }
 

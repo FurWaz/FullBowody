@@ -21,6 +21,7 @@ namespace owo
     {
         cv::Mat cameraMatrix = cv::Mat(3, 3, CV_64F);
         cv::Mat distanceCoefficients = cv::Mat(8, 1, CV_64F);
+        bool valide = false;
 
         /**
          * @brief Loads the calibration data from a given file
@@ -55,6 +56,7 @@ namespace owo
             } else result = false;
 
             inStream.close();
+            this->valide = result;
             return result;
         }
 
@@ -153,6 +155,7 @@ namespace owo
             this->debugMode = false;
             this->rotation = cv::Mat::eye(cv::Size(3, 3), CV_64F);
             this->aruco_board = cv::aruco::GridBoard::create(3, 2, 0.088, 0.005, this->aruco_dict, 0);
+            this->loadCalibration("note4_x.txt");
 
             this->last_refresh_time = std::chrono::steady_clock::now();
         }
@@ -191,11 +194,12 @@ namespace owo
          */
         void getArucoBoardPosition()
         {
-            cv::aruco::estimatePoseBoard(
-                this->aruco_corners, this->aruco_ids, this->aruco_board,
-                this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients,
-                this->aruco_boardRotation, this->aruco_boardPosition, false
-            );
+            if (this->calibrData.valide)
+                cv::aruco::estimatePoseBoard(
+                    this->aruco_corners, this->aruco_ids, this->aruco_board,
+                    this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients,
+                    this->aruco_boardRotation, this->aruco_boardPosition, false
+                );
         }
 
         /**
@@ -214,7 +218,6 @@ namespace owo
 
         bool loadSource(std::string address)
         {
-            if (this->path == address) return false;
             this->path = address;
             this->sourceAvailable = false;
             if (this->shouldRead)
@@ -299,6 +302,7 @@ namespace owo
                 {
                     detectArucoMarkers();
                     getArucoBoardPosition();
+                    getCamPosRot();
                     if (this->aruco_ids.size() > 0)
                     {
                         cv::aruco::drawDetectedMarkers(this->frame, this->aruco_corners, this->aruco_ids);
@@ -307,12 +311,12 @@ namespace owo
                             this->aruco_boardRotation, this->aruco_boardPosition, 0.042, 6
                         );
                     }
-                    std::vector<cv::Point3f> tPoints = this->tracker->getPoints();
+                    std::array<cv::Point3f, CONSTANT::NB_JOINTS> tPoints = this->tracker->getPoints();
                     if (tPoints.size() == CONSTANT::NB_JOINTS)
                     {
                         for(int i = 0; i < CONSTANT::NB_CONNECTIONS; i++)
                         {
-                            if (tPoints[CONSTANT::POSE_CONNECTIONS[i][0]].z < 0.7f || tPoints[CONSTANT::POSE_CONNECTIONS[i][1]].z < 0.7f)
+                            if (tPoints[CONSTANT::POSE_CONNECTIONS[i][0]].z < 0.9f || tPoints[CONSTANT::POSE_CONNECTIONS[i][1]].z < 0.9f)
                                 continue;
                             cv::Point p1(this->frame.cols * tPoints[CONSTANT::POSE_CONNECTIONS[i][0]].x, this->frame.rows * tPoints[CONSTANT::POSE_CONNECTIONS[i][0]].y);
                             cv::Point p2(this->frame.cols * tPoints[CONSTANT::POSE_CONNECTIONS[i][1]].x, this->frame.rows * tPoints[CONSTANT::POSE_CONNECTIONS[i][1]].y);
