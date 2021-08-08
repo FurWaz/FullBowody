@@ -1,10 +1,10 @@
 #pragma once
-#include "graphicElement.hpp"
-#include "../constants.hpp"
-#include "../engine/bodypos.hpp"
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <thread>
+#include "../constants.hpp"
+#include "../engine/bodypos.hpp"
+#include "./essentials/graphicElement.hpp"
 
 namespace owo
 {
@@ -309,6 +309,16 @@ namespace owo
         void setBodyPos(BodyPos* bp)
         {
             this->bodyPos = bp;
+        }
+
+        void setShowHitBoxes(bool state)
+        {
+            this->showHitboxes = state;
+        }
+
+        bool doesShowhitboxes()
+        {
+            return this->showHitboxes;
         }
 
         int getWidth()

@@ -1,7 +1,7 @@
 #pragma once
-#include "../constants.hpp"
-#include "graphicElement.hpp"
-#include "CallbackContainer.hpp"
+#include "../../constants.hpp"
+#include "./graphicElement.hpp"
+#include "./CallbackContainer.hpp"
 
 namespace owo
 {
@@ -10,7 +10,7 @@ namespace owo
     private:
         bool checked;
         sf::Color color;
-        CallbackContainer* cont;
+        BoolCallbackContainer* cont;
 
         void init()
         {
@@ -41,15 +41,17 @@ namespace owo
         {
             this->checked = false;
             this->setDimensions(0, 0, 100, 100);
+            this->setClearColor(CONSTANT::COLOR_BACK);
             this->color = CONSTANT::COLOR_PRIMARY;
             this->init();
             this->generateTexture();
         }
 
-        Checkbox(sf::Vector2i pos, sf::Vector2i size, sf::Color color = CONSTANT::COLOR_PRIMARY)
+        Checkbox(sf::Vector2i pos, sf::Vector2i size, sf::Color color = CONSTANT::COLOR_PRIMARY, sf::Color clearColor = CONSTANT::COLOR_BACK)
         {
             this->checked = false;
             this->setDimensions(pos.x, pos.y, size.x, size.y);
+            this->setClearColor(clearColor);
             this->color = color;
             this->init();
             this->generateTexture();
@@ -63,7 +65,7 @@ namespace owo
                 this->checked = !this->checked;
                 this->generateTexture();
                 if (this->cont != nullptr)
-                    this->cont->func();
+                    this->cont->func(this->checked);
             }
         }
 
@@ -97,14 +99,20 @@ namespace owo
             return this->sprite;
         }
 
+        void setChecked(bool state)
+        {
+            this->checked = state;
+            this->generateTexture();
+        }
+
         bool isChecked()
         {
             return this->checked;
         }
 
-        template<class T> void setCallback(void (T::*callback)(), T* instance)
+        template<class T> void setCallback(void (T::*callback)(bool), T* instance)
         {
-            this->cont = new TypedCallbackContainer<T>(callback, instance);
+            this->cont = new TypedBoolCallbackContainer<T>(callback, instance);
         }
 
         ~Checkbox()

@@ -1,10 +1,10 @@
 #pragma once
-#include "../constants.hpp"
+#include <windows.h>
+#include "../../constants.hpp"
 #include "./callbackContainer.hpp"
 #include "./loading.hpp"
-#include <windows.h>
-#include "graphicElement.hpp"
-#include "label.hpp"
+#include "./graphicElement.hpp"
+#include "./label.hpp"
 
 namespace owo
 {
@@ -14,7 +14,7 @@ namespace owo
         const short OUTLINE_THICKNESS = 1;
         std::string text;
         Label* label;
-        CallbackContainer* cont;
+        StringCallbackContainer* cont;
         std::string highlight;
         Loading* loadLogo;
 
@@ -273,7 +273,7 @@ namespace owo
             if (this->callbackRequired)
             {
                 this->callbackRequired = false;
-                this->cont->func();
+                this->cont->func(this->text);
             }
         }
 
@@ -294,9 +294,14 @@ namespace owo
             return this->text;
         }
 
-        template<class T> void setCallback(void (T::*callback)(), T* instance)
+        template<class T> void setCallback(void (T::*callback)(std::string), T* instance)
         {
-            this->cont = new TypedCallbackContainer<T>(callback, instance);
+            this->cont = new TypedStringCallbackContainer<T>(callback, instance);
+        }
+
+        void setCallback(void (callback)(std::string))
+        {
+            this->cont = new VoidStringCallbackContainer(callback);
         }
 
         ~Input()

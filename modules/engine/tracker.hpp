@@ -9,7 +9,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
-#include "../UI/CallbackContainer.hpp"
+#include "../UI/essentials/callbackContainer.hpp"
 #include "./ipc.hpp"
 
 /**

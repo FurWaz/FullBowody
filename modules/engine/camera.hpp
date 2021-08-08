@@ -1,15 +1,15 @@
 #pragma once
+#include <SFML/System.hpp>
+#include <thread>
+#include <fstream>
+#include <iostream>
 #include <opencv2/core.hpp>
 #include <opencv2/aruco.hpp>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-#include "../UI/image.hpp"
+#include "../UI/essentials/image.hpp"
 #include "./tracker.hpp"
-#include <SFML/System.hpp>
-#include <thread>
-#include <fstream>
-#include <iostream>
 
 namespace owo
 {
@@ -254,17 +254,6 @@ namespace owo
         {
             this->graphImage = im;
             this->init();
-        }
-        
-        /**
-         * @brief Opens a video device
-         * 
-         * @param index Index of the video device (default is 0)
-         * @return If the source as been opened successfully or not
-         */
-        bool openSource(int index)
-        {
-            return this->loadSource(std::to_string(index));
         }
         
         /**

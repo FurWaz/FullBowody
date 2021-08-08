@@ -1,8 +1,10 @@
 #pragma once
 #include "../constants.hpp"
-#include "./graphicElement.hpp"
+#include "./essentials/graphicElement.hpp"
+#include "./essentials/button.hpp"
+#include "./essentials/image.hpp"
+#include "./essentials/list.hpp"
 #include "./popup.hpp"
-#include "./button.hpp"
 
 namespace owo
 {
@@ -10,6 +12,7 @@ namespace owo
     {
     private:
         Popup* popup;
+        std::vector<cv::Mat> images;
         
     public:
         CalibrationPopup()
@@ -21,7 +24,7 @@ namespace owo
             this->popup = new Popup("Camera calibration");
             this->addElement(this->popup);
 
-            this->popup->addComponent(new Button("UwU :3", sf::Vector2i(0, 0), sf::Vector2i(100, 50)));
+            Image* preview = new Image();
         }
 
         void generateTexture()

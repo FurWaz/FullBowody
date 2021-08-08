@@ -1,8 +1,8 @@
 #pragma once
-#include "../constants.hpp"
-#include "CallbackContainer.hpp"
+#include "../../constants.hpp"
+#include "./graphicElement.hpp"
+#include "./CallbackContainer.hpp"
 #include "./label.hpp"
-#include "graphicElement.hpp"
 
 namespace owo
 {

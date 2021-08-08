@@ -1,9 +1,9 @@
 #pragma once
-#include "../constants.hpp"
-#include "graphicElement.hpp"
-#include "../engine/camera.hpp"
-#include "../engine/bodypos.hpp"
-#include "opencv2/core.hpp"
+#include <opencv2/core.hpp>
+#include "../../constants.hpp"
+#include "./graphicElement.hpp"
+#include "../../engine/camera.hpp"
+#include "../../engine/bodypos.hpp"
 
 namespace owo
 {

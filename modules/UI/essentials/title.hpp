@@ -1,5 +1,5 @@
 #pragma once
-#include "../constants.hpp"
+#include "../../constants.hpp"
 #include "./graphicElement.hpp"
 #include "./label.hpp"
 
@@ -20,6 +20,7 @@ namespace owo
             this->label->generateTexture();
             this->addElement(this->label);
             this->generateTexture();
+            this->propagateParentAbsPos();
         }
 
         void generateTexture()

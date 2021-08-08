@@ -1,11 +1,11 @@
 #pragma once
 #include "../constants.hpp"
-#include "./graphicElement.hpp"
-#include "./image.hpp"
-#include "./input.hpp"
-#include "./checkbox.hpp"
-#include "./button.hpp"
-#include "./title.hpp"
+#include "./essentials/graphicElement.hpp"
+#include "./essentials/image.hpp"
+#include "./essentials/input.hpp"
+#include "./essentials/checkbox.hpp"
+#include "./essentials/button.hpp"
+#include "./essentials/title.hpp"
 
 #include "../engine/camera.hpp"
 #include "../engine/cameraCalibrator.hpp"
@@ -81,20 +81,20 @@ namespace owo
                 "Developers", 18
             ));
             this->checkbox = new Checkbox(
-                sf::Vector2i(this->dimensions.width/2, 70),
+                sf::Vector2i(this->dimensions.width/2+5, 70),
                 sf::Vector2i(20, 20),
                 CONSTANT::COLOR_PRIMARY
             );
             this->checkbox_text = new Label(
                 "Debug mode",
-                sf::Vector2i(this->dimensions.width/2+35, 70),
+                sf::Vector2i(this->dimensions.width/2+40, 70),
                 sf::Vector2i(this->dimensions.width/2-35, 20),
                 16, Label::LEFT, CONSTANT::COLOR_FORE
             );
             
             this->cam->attachImage(this->im);
-            this->input->setCallback(&CameraView::updateSource, this);
-            this->checkbox->setCallback(&CameraView::toogleDebugMode, this);
+            this->input->setCallback(&CameraView::openCameraSource, this);
+            this->checkbox->setCallback(&Camera::setDebugMode, this->cam);
             this->loadBtn->setCallback(&CameraView::loadCameraCalibration, this);
             this->saveBtn->setCallback(&CameraView::saveCameraCalibration, this);
             this->calibrateBtn->setCallback(&CameraView::calibrateCamera, this);
@@ -207,9 +207,9 @@ namespace owo
             this->im = im;
         }
 
-        void updateSource()
+        void openCameraSource(std::string path)
         {
-            this->loaderThread = std::thread(&CameraView::_update_source, this);
+            this->cam->openSource(path);
         }
 
         void _update_source()
@@ -242,11 +242,6 @@ namespace owo
         void detectCameraPosition()
         {
             this->cam->calculatePosition();
-        }
-
-        void toogleDebugMode()
-        {
-            this->cam->setDebugMode( this->checkbox->isChecked() );
         }
 
         ~CameraView()

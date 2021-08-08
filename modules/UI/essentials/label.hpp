@@ -1,6 +1,6 @@
 #pragma once
-#include "../constants.hpp"
-#include "graphicElement.hpp"
+#include "../../constants.hpp"
+#include "./graphicElement.hpp"
 
 namespace owo
 {

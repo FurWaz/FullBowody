@@ -1,13 +1,13 @@
 #pragma once
 #include "./UI/window.hpp"
-#include "./UI/button.hpp"
-#include "./UI/image.hpp"
-#include "./UI/fpsCounter.hpp"
-#include "./UI/label.hpp"
-#include "./UI/input.hpp"
+#include "./UI/essentials/button.hpp"
+#include "./UI/essentials/image.hpp"
+#include "./UI/essentials/fpsCounter.hpp"
+#include "./UI/essentials/label.hpp"
+#include "./UI/essentials/input.hpp"
+#include "./UI/essentials/view.hpp"
+#include "./UI/essentials/list.hpp"
 #include "./UI/cameraView.hpp"
-#include "./UI/view.hpp"
-#include "./UI/list.hpp"
 #include "./UI/menuBar.hpp"
 
 #include "./engine/camera.hpp"
@@ -27,19 +27,11 @@ namespace SceneManager
 
     CameraManager camMan;
 
-    void _populate_camlist();
-    void _add_camera()
-    {
-        cameras.push_back(new Camera());
-        _populate_camlist();
-    }
-
-    void _rem_camera()
-    {
-        if (cameras.size() == 0) return;
-        cameras.erase(cameras.end()-1);
-        _populate_camlist();
-    }
+    // Buttons callbacks
+    void _add_camera();
+    void _rem_camera();
+    void _set_tracking_fps(std::string fps);
+    void _set_camera_fps(std::string fps);
 
     void _populate_camlist()
     {
@@ -97,6 +89,29 @@ namespace SceneManager
         win->clearElements();
         win->addElement(menuBar);
         menuBar->setSelectedButton(1);
+
+        win->addElement(new Title(sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.4, MenuBar::MENUBAR_HEIGHT), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.2, 40), " Options ", 20, CONSTANT::COLOR_CLEAR));
+        List* l = new List(sf::Vector2i(0, MenuBar::MENUBAR_HEIGHT+40), sf::Vector2i(CONSTANT::WINDOW_WIDTH, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT+40), CONSTANT::COLOR_BACK);
+        win->addElement(l);
+
+        Label* l1 = new Label("Show elements hitboxes", sf::Vector2i(10, 10), sf::Vector2i(200, 50), 16, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK);
+        Checkbox* b1 = new Checkbox(sf::Vector2i(250, -35), sf::Vector2i(20, 20), CONSTANT::COLOR_PRIMARY, CONSTANT::COLOR_BACK);
+        b1->setChecked(win->doesShowhitboxes());
+        b1->setCallback(&Window::setShowHitBoxes, win);
+        l->addComponent(l1);
+        l->addComponent(b1);
+        
+        l1 = new Label("Tracking FPS", sf::Vector2i(10, 10), sf::Vector2i(200, 50), 16, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK);
+        Input* i1 = new Input(std::to_string(CONSTANT::TRACKING_FPS), sf::Vector2i(250, -40), sf::Vector2i(50, 30), 16, Input::CENTER, CONSTANT::COLOR_FORE, "20");
+        i1->setCallback(_set_tracking_fps);
+        l->addComponent(l1);
+        l->addComponent(i1);
+        
+        l1 = new Label("Cameras FPS", sf::Vector2i(10, 10), sf::Vector2i(200, 50), 16, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK);
+        i1 = new Input(std::to_string(CONSTANT::CAMERA_FPS), sf::Vector2i(250, -40), sf::Vector2i(50, 30), 16, Input::CENTER, CONSTANT::COLOR_FORE, "30");
+        i1->setCallback(_set_camera_fps);
+        l->addComponent(l1);
+        l->addComponent(i1);
     }
 
     void GenerateExtensionsScene()
@@ -132,5 +147,42 @@ namespace SceneManager
         menuBar->addComponent(btn);
 
         bp.setCameras(cameras);
+    }
+
+    // Buttons callbacks
+    void _add_camera()
+    {
+        cameras.push_back(new Camera());
+        _populate_camlist();
+    }
+    void _rem_camera()
+    {
+        if (cameras.size() == 0) return;
+        cameras.erase(cameras.end()-1);
+        _populate_camlist();
+    }
+    void _set_tracking_fps(std::string fps)
+    {
+        try
+        {
+            CONSTANT::TRACKING_FPS = std::stoi(fps);
+            if (CONSTANT::TRACKING_FPS == 0)
+                CONSTANT::TRACKING_FPS = 20;
+        } catch (std::exception &e)
+        {
+            CONSTANT::TRACKING_FPS = 20;
+        }
+    }
+    void _set_camera_fps(std::string fps)
+    {
+        try
+        {
+            CONSTANT::CAMERA_FPS = std::stoi(fps);
+            if (CONSTANT::CAMERA_FPS == 0)
+                CONSTANT::CAMERA_FPS = 30;
+        } catch (std::exception &e)
+        {
+            CONSTANT::CAMERA_FPS = 30;
+        }
     }
 }

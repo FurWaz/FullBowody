@@ -1,8 +1,8 @@
 #pragma once
 #include "../constants.hpp"
-#include "./graphicElement.hpp"
-#include "./button.hpp"
-#include "./label.hpp"
+#include "./essentials/graphicElement.hpp"
+#include "./essentials/button.hpp"
+#include "./essentials/label.hpp"
 
 namespace owo
 {

@@ -1,7 +1,7 @@
 #pragma once
-#include "../constants.hpp"
 #include <math.h>
-#include "graphicElement.hpp"
+#include "../../constants.hpp"
+#include "./graphicElement.hpp"
 
 namespace owo
 {
