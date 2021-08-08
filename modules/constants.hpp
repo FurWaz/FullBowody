@@ -9,6 +9,12 @@ template<typename T> T clamp(T val, T min, T max)
     return val;
 }
 
+void saveTexture(sf::Sprite s)
+{
+    sf::Image im = s.getTexture()->copyToImage();
+    im.saveToFile("./tex.png");
+}
+
 /**
  * @brief Constant namespace, contains all the common variables of the program 
  * such as the colors, etc.
@@ -101,6 +107,10 @@ namespace CONSTANT
 
     unsigned short WINDOW_WIDTH = 0;
     unsigned short WINDOW_HEIGHT = 0;
+
+    void VOIDCALLBACK() {}
+    void VOIDCALLBACK_BOOL(bool state) {}
+    void VOIDCALLBACK_STRING(std::string str) {}
 
     /**
      * @brief Initialises the common variables such as the fonts

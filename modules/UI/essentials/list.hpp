@@ -57,6 +57,7 @@ namespace owo
 
         void removeComponent(int index)
         {
+            if (index < 0) return;
             this->removeElement(index);
             this->refreshView();
         }

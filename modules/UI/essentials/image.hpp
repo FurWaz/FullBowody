@@ -10,6 +10,7 @@ namespace owo
         sf::Image img;
         std::string path;
         bool shouldUpdate;
+        bool flip;
 
         sf::Sprite imgSprite;
         float scaleFactor;
@@ -20,19 +21,25 @@ namespace owo
             sf::Vector2u imgSize = this->img.getSize();
             sf::Texture tex;
             tex.loadFromImage(this->img);
-            sf::Sprite s(tex);
             tex.setSmooth(true);
-            imgSprite = sf::Sprite();
-            imgSprite.setTexture(tex);
+            imgSprite = sf::Sprite(tex);
 
-            this->renderTexture.clear(CONSTANT::COLOR_CLEAR);
+            this->renderTexture.clear(this->clearColor);
             if ((this->dimensions.width / (float)this->dimensions.height) > (imgSize.x / (float)imgSize.y))
                 this->scaleFactor = this->dimensions.height / (float) imgSize.y;
             else
                 this->scaleFactor = this->dimensions.width / (float) imgSize.x;
                 
-            imgSprite.setScale(scaleFactor, scaleFactor);
-            imgSprite.setPosition((this->dimensions.width-imgSize.x*scaleFactor)/2, (this->dimensions.height-imgSize.y*scaleFactor)/2);
+            if (this->getFlipped())
+            {
+                imgSprite.setScale(-scaleFactor, scaleFactor);
+                imgSprite.setPosition((this->dimensions.width+imgSize.x*scaleFactor)/2, (this->dimensions.height-imgSize.y*scaleFactor)/2);
+            } else
+            {
+                imgSprite.setScale(scaleFactor, scaleFactor);
+                imgSprite.setPosition((this->dimensions.width-imgSize.x*scaleFactor)/2, (this->dimensions.height-imgSize.y*scaleFactor)/2);
+            }
+            
             this->renderTexture.draw(imgSprite);
             this->renderTexture.display();
             
@@ -51,21 +58,30 @@ namespace owo
             this->sprite.setTexture(this->renderTexture.getTexture());
         }
 
+        void init()
+        {
+            this->setFlipped(false);
+        }
+
     public:
         Image()
         {
             this->img.create(300, 300, sf::Color::Black);
+            this->setClearColor(CONSTANT::COLOR_BACK);
             this->path = "";
-            setDimensions(0, 0, 300, 300);
-            generateTexture();
+            this->setDimensions(0, 0, 300, 300);
+            this->init();
+            this->generateTexture();
         }
 
-        Image(sf::Vector2i pos, sf::Vector2i size)
+        Image(sf::Vector2i pos, sf::Vector2i size, sf::Color clearColor = CONSTANT::COLOR_BACK)
         {
             this->img.create(300, 300, sf::Color::Black);
+            this->setClearColor(clearColor);
             this->path = "";
-            setDimensions(pos.x, pos.y, size.x, size.y);
-            generateTexture();
+            this->setDimensions(pos.x, pos.y, size.x, size.y);
+            this->init();
+            this->generateTexture();
         }
 
         Image(std::string path)
@@ -77,11 +93,12 @@ namespace owo
                 std::cout << "Couldn't load image at " << path << std::endl;
                 this->img.create(300, 300, sf::Color::Black);
             }
-            setDimensions(0, 0, 300, 300);
-            generateTexture();
+            this->setDimensions(0, 0, 300, 300);
+            this->init();
+            this->generateTexture();
         }
 
-        Image(std::string path, sf::Vector2i pos, sf::Vector2i size)
+        Image(std::string path, sf::Vector2i pos, sf::Vector2i size, sf::Color clearColor = CONSTANT::COLOR_BACK)
         {
             sf::Image img;
             this->path = path;
@@ -90,8 +107,10 @@ namespace owo
                 std::cout << "Couldn't load image at " << path << std::endl;
                 this->img.create(300, 300, sf::Color::Black);
             }
-            setDimensions(pos.x, pos.y, size.x, size.y);
-            generateTexture();
+            this->setClearColor(this->clearColor);
+            this->setDimensions(pos.x, pos.y, size.x, size.y);
+            this->init();
+            this->generateTexture();
         }
 
         void resizeTo(sf::Vector2i size)
@@ -146,6 +165,17 @@ namespace owo
         void update(float dt, sf::Vector2i mousePos)
         {
             
+        }
+
+        void setFlipped(bool state)
+        {
+            this->flip = state;
+            this->generateTexture();
+        }
+
+        bool getFlipped()
+        {
+            return this->flip;
         }
 
         sf::Sprite getSprite(float dt)

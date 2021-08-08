@@ -50,10 +50,9 @@ namespace owo
             this->renderTexture.create(this->dimensions.width, this->dimensions.height);
             this->renderTexture.clear(this->bgColor);
 
-            this->label->setText(this->text);
             this->label->setTextColor(this->fgColor);
             this->label->setClearColor(this->bgColor);
-            this->label->generateTexture();
+            this->label->setText(this->text);
             this->renderTexture.draw(this->label->getSprite(0));
 
             this->renderTexture.display();

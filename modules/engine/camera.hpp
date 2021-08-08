@@ -19,6 +19,9 @@ namespace owo
      */
     struct CalibrationData
     {
+        private:
+            std::string CALIBFOLDER = "./resources/calibrations/";
+        public:
         cv::Mat cameraMatrix = cv::Mat(3, 3, CV_64F);
         cv::Mat distanceCoefficients = cv::Mat(8, 1, CV_64F);
         bool valide = false;
@@ -32,7 +35,7 @@ namespace owo
         bool loadFromFile(std::string path)
         {
             bool result = true;
-            std::ifstream inStream(path);
+            std::ifstream inStream(CALIBFOLDER+path);
             if (inStream)
             {
                 for (int x = 0; x < this->cameraMatrix.rows; x++)
@@ -69,7 +72,7 @@ namespace owo
         bool saveToFile(std::string path)
         {
             bool result = true;
-            std::ofstream outStream(path);
+            std::ofstream outStream(CALIBFOLDER+path);
             if (outStream)
             {
                 for (int x = 0; x < this->cameraMatrix.rows; x++)
@@ -77,7 +80,7 @@ namespace owo
                     for (int y = 0; y < this->cameraMatrix.cols; y++)
                     {
                         double value = this->cameraMatrix.at<double>(x, y);
-                        outStream << value;
+                        outStream << value << std::endl;
                     }
                 }
                 for (int x = 0; x < this->distanceCoefficients.rows; x++)
@@ -85,7 +88,7 @@ namespace owo
                     for (int y = 0; y < this->distanceCoefficients.cols; y++)
                     {
                         double value = this->distanceCoefficients.at<double>(x, y);
-                        outStream << value;
+                        outStream << value << std::endl;
                     }
                 }
             } else result = false;
@@ -111,14 +114,14 @@ namespace owo
         cv::Mat rotation;          // rotation matrix, relative to the markers board's rotation
         cv::Point2d fov;           // half of the camera field of view, in radians
 
-        sf::Vector2u dimensions;   // dimensions of the camera video stream
-        Image* graphImage;         // graphical image associated with the camera
-        std::string path;          // path to the camera stream
-        bool sourceAvailable;      // is the source of the camera ready
-        bool debugMode;            // is the camera in debug mode (for visual hints)
+        sf::Vector2u dimensions;           // dimensions of the camera video stream
+        std::vector<Image*> graphImages;   // graphical image associated with the camera
+        std::string path;                  // path to the camera stream
+        bool sourceAvailable;              // is the source of the camera ready
+        bool debugMode;                    // is the camera in debug mode (for visual hints)
 
-        bool shouldRead;           // should the camera thread read the vide stream
-        std::thread updateThread;  // video stream reading thread
+        bool shouldRead;                   // should the camera thread read the vide stream
+        std::thread updateThread;          // video stream reading thread
 
         cv::Ptr<cv::aruco::Dictionary> aruco_dict = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50); // aruco dictionnary (aruco x4 models)
         cv::Ptr<cv::aruco::DetectorParameters> aruco_params = cv::aruco::DetectorParameters::create();          // empty parameters for aruco detection
@@ -155,7 +158,6 @@ namespace owo
             this->debugMode = false;
             this->rotation = cv::Mat::eye(cv::Size(3, 3), CV_64F);
             this->aruco_board = cv::aruco::GridBoard::create(3, 2, 0.088, 0.005, this->aruco_dict, 0);
-            this->loadCalibration("note4_x.txt");
 
             this->last_refresh_time = std::chrono::steady_clock::now();
         }
@@ -239,7 +241,8 @@ namespace owo
             if (!result)
             {
                 this->dimensions = sf::Vector2u(300, 300);
-                this->graphImage->black(sf::Vector2u(300, 300));
+                for (Image* im: this->graphImages)
+                    im->black(sf::Vector2u(300, 300));
             }
             return result;
         }
@@ -252,7 +255,7 @@ namespace owo
 
         Camera(Image* im)
         {
-            this->graphImage = im;
+            this->attachImage(im);
             this->init();
         }
         
@@ -283,7 +286,7 @@ namespace owo
                 this->frame.cols == this->dimensions.x &&
                 this->frame.rows == this->dimensions.y;
 
-            if (this->graphImage == nullptr || !this->shouldRead || !this->sourceAvailable)
+            if (this->graphImages.size() < 1 || !this->shouldRead || !this->sourceAvailable)
                 return;
             try
             {
@@ -313,13 +316,16 @@ namespace owo
                         }
                     }
                 }
+                std::vector<std::vector<cv::Point2f>> imgPoints(1);
                 cv::Mat rgba;
                 cv::cvtColor(this->frame, rgba, cv::COLOR_BGR2RGBA);
-                this->graphImage->fromArray(rgba.ptr(), this->dimensions);
+                for (Image* im: this->graphImages)
+                    im->fromArray(rgba.ptr(), this->dimensions);
             }
             catch (std::exception &e) 
             {
-                this->graphImage->black(sf::Vector2u(300, 300));
+                for (Image* im: this->graphImages)
+                    im->black(sf::Vector2u(300, 300));
             }
         }
 
@@ -337,7 +343,39 @@ namespace owo
          */
         void attachImage(Image* im)
         {
-            this->graphImage = im;
+            this->graphImages.push_back(im);
+        }
+
+        /**
+         * @brief Detaches the given image from the camera preview
+         * 
+         * @param im The image to attach to the camera
+         */
+        void detachImage(Image* im)
+        {
+            int index = -1;
+            int counter = 0;
+            for (Image* img: this->graphImages)
+            {
+                if (img == im)
+                {
+                    index = counter;
+                    break;
+                }
+                counter++;
+            }
+            if (index >= 0)
+                this->detachImage(index);
+        }
+
+        /**
+         * @brief Detaches the given image from the camera preview
+         * 
+         * @param im The image to attach to the camera
+         */
+        void detachImage(int index)
+        {
+            this->graphImages.erase(this->graphImages.begin()+index);
         }
         
         /**
@@ -427,6 +465,15 @@ namespace owo
         cv::Point2d getFOV()
         {
             return this->fov;
+        }
+
+        /**
+         * @brief Get the Raw camera data
+         * @return The current raw image matrix of the camera
+         */
+        cv::Mat getRawImage()
+        {
+            return this->frame;
         }
 
         /**

@@ -1,5 +1,6 @@
 #pragma once
 #include "../constants.hpp"
+#include "../files.hpp"
 #include "./essentials/graphicElement.hpp"
 #include "./essentials/image.hpp"
 #include "./essentials/input.hpp"
@@ -226,12 +227,24 @@ namespace owo
 
         void loadCameraCalibration()
         {
-            std::cout << "this->cam->loadCalibration(path);" << std::endl;
+            Files::setCallback(&CameraView::_load_cam_calib, this);
+            Files::askForFile();
         }
 
         void saveCameraCalibration()
         {
-            std::cout << "this->cam->saveCalibration(path);" << std::endl;
+            Files::setCallback(&CameraView::_save_cam_calib, this);
+            Files::askForFile();
+        }
+
+        void _load_cam_calib(std::string path)
+        {
+            this->cam->loadCalibration(path);
+        }
+
+        void _save_cam_calib(std::string path)
+        {
+            this->cam->saveCalibration(path);
         }
 
         void calibrateCamera()

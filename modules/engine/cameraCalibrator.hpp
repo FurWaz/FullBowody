@@ -26,7 +26,7 @@ namespace CameraCalibrator
     void calibrateCamera(Camera* cam)
     {
         camera = cam;
-        calibPopup = new CalibrationPopup();
+        calibPopup = new CalibrationPopup(cam);
         calibPopup->getPopup()->getCloseButton()->setCallback(CameraCalibrator::_cancel_calibration);
         window->addElement(calibPopup);
     }

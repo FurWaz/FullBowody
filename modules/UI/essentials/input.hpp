@@ -116,14 +116,14 @@ namespace owo
             this->setDimensions(position.x, position.y, size.x, size.y);
             this->text = text;
             this->highlight = highlight;
-            this->label = new Label(this->text, sf::Vector2i(0, 0), size, fontSize, placement, textColor);
+            this->label = new Label(this->text, sf::Vector2i(1, 0), size+sf::Vector2i(-2, 0), fontSize, placement, textColor);
             this->init();
             this->generateTexture();
         }
 
         void generateTexture()
         {
-            this->renderTexture.clear(CONSTANT::COLOR_BACK);
+            this->renderTexture.clear(this->clearColor);
             if (this->text != "" || this->focused)
             {
                 this->label->setText(this->text);
@@ -134,7 +134,7 @@ namespace owo
                     sf::RectangleShape cursor(sf::Vector2f(1, this->label->getFontSize()));
                     sf::Vector2f pos = this->label->calculateTextPos(this->text);
                     sf::Vector2u size = this->label->calculateTextSize(this->text.substr(0, this->cursorPos));
-                    cursor.setPosition(pos.x+size.x, pos.y+2);
+                    cursor.setPosition(pos.x+size.x+1, pos.y+2);
                     cursor.setFillColor(CONSTANT::COLOR_PRIMARY);
                     this->renderTexture.draw(cursor);
                 }

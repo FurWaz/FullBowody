@@ -35,6 +35,11 @@ namespace SceneManager
 
     void _populate_camlist()
     {
+        if (cameras.size() > 1)
+        {
+            cameras[0]->loadCalibration("note4.txt");
+            cameras[1]->loadCalibration("note9.txt");
+        }
         bp.setCameras(cameras);
         camMan.setCameras(cameras);
         camList->clearComponents();
@@ -91,27 +96,28 @@ namespace SceneManager
         menuBar->setSelectedButton(1);
 
         win->addElement(new Title(sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.4, MenuBar::MENUBAR_HEIGHT), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.2, 40), " Options ", 20, CONSTANT::COLOR_CLEAR));
-        List* l = new List(sf::Vector2i(0, MenuBar::MENUBAR_HEIGHT+40), sf::Vector2i(CONSTANT::WINDOW_WIDTH, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT+40), CONSTANT::COLOR_BACK);
-        win->addElement(l);
+        List* list = new List(sf::Vector2i(0, MenuBar::MENUBAR_HEIGHT+40), sf::Vector2i(CONSTANT::WINDOW_WIDTH, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT+40), CONSTANT::COLOR_BACK);
+        win->addElement(list);
 
         Label* l1 = new Label("Show elements hitboxes", sf::Vector2i(10, 10), sf::Vector2i(200, 50), 16, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK);
         Checkbox* b1 = new Checkbox(sf::Vector2i(250, -35), sf::Vector2i(20, 20), CONSTANT::COLOR_PRIMARY, CONSTANT::COLOR_BACK);
         b1->setChecked(win->doesShowhitboxes());
+        
         b1->setCallback(&Window::setShowHitBoxes, win);
-        l->addComponent(l1);
-        l->addComponent(b1);
+        list->addComponent(l1);
+        list->addComponent(b1);
         
         l1 = new Label("Tracking FPS", sf::Vector2i(10, 10), sf::Vector2i(200, 50), 16, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK);
         Input* i1 = new Input(std::to_string(CONSTANT::TRACKING_FPS), sf::Vector2i(250, -40), sf::Vector2i(50, 30), 16, Input::CENTER, CONSTANT::COLOR_FORE, "20");
         i1->setCallback(_set_tracking_fps);
-        l->addComponent(l1);
-        l->addComponent(i1);
+        list->addComponent(l1);
+        list->addComponent(i1);
         
         l1 = new Label("Cameras FPS", sf::Vector2i(10, 10), sf::Vector2i(200, 50), 16, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK);
         i1 = new Input(std::to_string(CONSTANT::CAMERA_FPS), sf::Vector2i(250, -40), sf::Vector2i(50, 30), 16, Input::CENTER, CONSTANT::COLOR_FORE, "30");
         i1->setCallback(_set_camera_fps);
-        l->addComponent(l1);
-        l->addComponent(i1);
+        list->addComponent(l1);
+        list->addComponent(i1);
     }
 
     void GenerateExtensionsScene()

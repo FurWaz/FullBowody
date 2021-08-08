@@ -200,13 +200,14 @@ namespace owo
 
         void update(float dt, sf::Vector2i mousePos)
         {
+            this->rotation.y += dt*0.25f;
             if (clicked)
             {
                 sf::Vector2i delta = mousePos - lastMousePos;
                 this->rotation.x += delta.y * 0.01;
                 this->rotation.y -= delta.x * 0.01;
-                apply_rotation();
             }
+            apply_rotation();
             lastMousePos = mousePos;
         }
 

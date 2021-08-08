@@ -11,10 +11,12 @@ namespace owo
         float progress;
         float speed;
         sf::Color color;
+        bool showing;
 
         void init()
         {
             this->sprite.setTexture(this->renderTexture.getTexture());
+            this->showing = true;
         }
 
     public:
@@ -40,10 +42,13 @@ namespace owo
         void generateTexture()
         {
             this->renderTexture.clear(this->clearColor);
-            float pos = ((int)(this->progress * this->speed * this->getSize().x * 0.1) % this->getSize().x*2) - this->getSize().x;
-            sf::RectangleShape rect(sf::Vector2f(this->getSize().x, this->getSize().y));
-            rect.setPosition(pos, 0);
-            this->renderTexture.draw(rect);
+            if (this->showing)
+            {
+                float pos = ((int)(this->progress * this->speed * this->getSize().x * 0.1) % this->getSize().x*2) - this->getSize().x;
+                sf::RectangleShape rect(sf::Vector2f(this->getSize().x, this->getSize().y));
+                rect.setPosition(pos, 0);
+                this->renderTexture.draw(rect);
+            }
             this->renderTexture.display();
         }
 
@@ -76,6 +81,9 @@ namespace owo
         {
             
         }
+
+        void show() {this->showing = true;}
+        void hide() {this->showing = false;}
 
         sf::Sprite getSprite(float dt)
         {
