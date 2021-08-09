@@ -70,7 +70,7 @@ namespace owo
 
         void update(float dt, sf::Vector2i mousePos)
         {
-            
+
         }
 
         void setText(std::string text)

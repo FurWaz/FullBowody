@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 
+
 namespace owo
 {
     class GraphicElement
@@ -104,12 +105,16 @@ namespace owo
          */
         void removeElement(int index)
         {
+            if (index >= this->elements.size() || index < 0)
+                return;
             this->elements.erase(this->elements.begin()+index);
         }
 
         void clearElements()
         {
-            this->elements.clear();
+            if (this->elements.size() <= 0) return;
+            for(int i = this->elements.size()-1; i >= 0; i--)
+                this->removeElement(i);
         }
 
         /**

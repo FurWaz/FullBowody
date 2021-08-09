@@ -17,11 +17,11 @@ namespace owo
         StringCallbackContainer* cont;
         std::string highlight;
         Loading* loadLogo;
+        sf::Color textColor;
 
         bool CTRL_pressed;
         bool loading;
         bool shouldLoad;
-        bool callbackRequired;
 
         int cursorPos;
 
@@ -31,7 +31,6 @@ namespace owo
             this->CTRL_pressed = false;
             this->loading = false;
             this->shouldLoad = false;
-            this->callbackRequired = false;
             this->loadLogo = new Loading(sf::Vector2i(OUTLINE_THICKNESS, this->getSize().y-4-OUTLINE_THICKNESS), sf::Vector2i(this->getSize().x-OUTLINE_THICKNESS*2, 4));
             this->setReceiveEvents(true);
         }
@@ -57,7 +56,7 @@ namespace owo
 
         void pasteFromClipboard()
         {
-            if (! OpenClipboard(nullptr))
+            if (!OpenClipboard(nullptr))
             {
                 std::cerr << "Error opening the clipboard" << std::endl;
                 return;
@@ -91,6 +90,7 @@ namespace owo
         {
             this->setDimensions(0, 0, 200, 50);
             this->text = "Input";
+            this->textColor = CONSTANT::COLOR_PRIMARY;
             this->label = new Label(this->text, 16);
             this->init();
             this->generateTexture();
@@ -104,6 +104,7 @@ namespace owo
             this->text = text;
             this->highlight = highlight;
             this->label = new Label(this->text, fontSize, placement, textColor);
+            this->textColor = textColor;
             this->init();
             this->generateTexture();
         }
@@ -116,6 +117,7 @@ namespace owo
             this->setDimensions(position.x, position.y, size.x, size.y);
             this->text = text;
             this->highlight = highlight;
+            this->textColor = textColor;
             this->label = new Label(this->text, sf::Vector2i(1, 0), size+sf::Vector2i(-2, 0), fontSize, placement, textColor);
             this->init();
             this->generateTexture();
@@ -126,8 +128,8 @@ namespace owo
             this->renderTexture.clear(this->clearColor);
             if (this->text != "" || this->focused)
             {
+                this->label->setTextColor(this->textColor);
                 this->label->setText(this->text);
-                this->label->generateTexture();
                 this->renderTexture.draw(this->label->getSprite(0));
                 if (this->focused)
                 {
@@ -140,14 +142,9 @@ namespace owo
                 }
             } else
             {
-                Label l(
-                    this->highlight,
-                    this->label->getPosition(), this->label->getSize(),
-                    this->label->getFontSize(), this->label->getPlacement(),
-                    CONSTANT::COLOR_GREY_DARK
-                );
-                l.generateTexture();
-                this->renderTexture.draw(l.getSprite(0));
+                this->label->setTextColor(CONSTANT::COLOR_GREY_DARK);
+                this->label->setText(this->highlight);
+                this->renderTexture.draw(this->label->getSprite(0));
             }
             sf::Color color = CONSTANT::COLOR_WHITE_DARK;
             if (this->focused) color = this->label->getTextColor();
@@ -177,7 +174,7 @@ namespace owo
             this->focused = focused;
             this->generateTexture();
             if (!this->focused && this->cont != nullptr)
-                this->callbackRequired = true;
+                this->cont->func(this->text);
         }
 
         void onHover(bool hovered)
@@ -270,11 +267,7 @@ namespace owo
 
         void update(float dt, sf::Vector2i mousePos)
         {
-            if (this->callbackRequired)
-            {
-                this->callbackRequired = false;
-                this->cont->func(this->text);
-            }
+            
         }
 
         void setLoading(bool state)

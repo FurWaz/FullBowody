@@ -210,7 +210,7 @@ namespace owo
 
         void openCameraSource(std::string path)
         {
-            this->cam->openSource(path);
+            this->loaderThread = std::thread(&CameraView::_update_source, this);
         }
 
         void _update_source()
@@ -259,8 +259,7 @@ namespace owo
 
         ~CameraView()
         {
-
+            
         }
-
     };
 }

@@ -8,6 +8,53 @@
 
 namespace owo
 {
+    namespace GarbageCollector
+    {
+        std::vector<GraphicElement*> list;
+        bool events, updates;
+
+        const int EVENTS = 1;
+        const int UPDATES = 2;
+        void init()
+        {
+            events = false;
+            updates = false;
+        }
+
+        void addElement(GraphicElement* el)
+        {
+            list.push_back(el);
+        }
+
+        void checkForClear(int asker)
+        {
+            switch(asker)
+            {
+                case EVENTS:
+                    events = true;
+                    break;
+                case UPDATES:
+                    updates = true;
+                    break;
+                default: break;
+            }
+            if (events && updates)
+            {
+                events = false;
+                updates = false;
+                if (list.size() > 0)
+                {
+                    unloop(list.size())
+                    {
+                        std::cout << "deleting element " << i << " at " << std::addressof(list[i]) << std::endl;
+                        delete list[i];
+                    }
+                    list.clear();
+                }
+            }
+        }
+    };
+
     class Window
     {
     private:
@@ -23,15 +70,16 @@ namespace owo
         float refreshDelta;
         float updateDelta;
         
-        std::vector<GraphicElement*> graphicElements, elements;
+        std::vector<GraphicElement*> graphicElements, elements, lastElements;
         GraphicElement* focused = nullptr;
         bool shouldUpdate = false;
         bool showHitboxes = false;
+        int lastNb = 0;
 
         BodyPos* bodyPos;
 
         /**
-         * @brief Update the window's UI elements
+         * @brief Update the app's internal components
          */
         void _update()
         {
@@ -41,6 +89,7 @@ namespace owo
                 for (GraphicElement* el: this->elements)
                     el->update(this->updateDelta, this->mousePos);
                 bodyPos->update(this->updateDelta);
+                GarbageCollector::checkForClear(GarbageCollector::UPDATES);
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
         }
@@ -51,20 +100,22 @@ namespace owo
             CONSTANT::WINDOW_WIDTH = this->getWidth();
         }
 
-        void drawElement(GraphicElement* el, sf::RenderTexture* tex)
+        void drawElement(GraphicElement* el, sf::RenderTexture* tex, int* nb)
         {
             sf::RenderTexture* pTex = el->getRenderTexture();
             for (GraphicElement* child: el->getElements())
-                this->drawElement(child, pTex);
+                this->drawElement(child, pTex, nb);
             tex->draw(el->getSprite(this->refreshDelta));
+            (*nb)++;
         }
 
-        void drawElement(GraphicElement* el, sf::RenderWindow* tex)
+        void drawElement(GraphicElement* el, sf::RenderWindow* tex, int* nb)
         {
             sf::RenderTexture* pTex = el->getRenderTexture();
             for (GraphicElement* child: el->getElements())
-                this->drawElement(child, pTex);
+                this->drawElement(child, pTex, nb);
             tex->draw(el->getSprite(this->refreshDelta));
+            (*nb)++;
         }
 
         void addPhysicElement(GraphicElement* el)
@@ -72,6 +123,28 @@ namespace owo
             this->elements.push_back(el);
             for (GraphicElement* child: el->getElements())
                 this->addPhysicElement(child);
+        }
+
+        void updatePhysicElements()
+        {
+            this->lastElements = this->elements;
+            this->elements.clear();
+            for (GraphicElement* el: this->graphicElements)
+                this->addPhysicElement(el);
+
+            // check for element deletion
+            for (GraphicElement* e1: this->lastElements)
+            {
+                bool exists = false;
+                for (GraphicElement* e2: this->elements)
+                    if (e2 == e1)
+                    {
+                        exists = true;
+                        break;
+                    }
+                if (!exists)
+                    GarbageCollector::addElement(e1);
+            }
         }
 
     public:
@@ -96,18 +169,24 @@ namespace owo
             this->updateClock.restart();
             this->refreshClock.restart();
             this->screen.setVerticalSyncEnabled(true);
+            GarbageCollector::init();
         }
 
         /**
-         * @brief Draw the window's UI elements
+         * @brief Draw the window's UI elements and updates them
          */
         void refresh()
         {
             this->refreshDelta = this->refreshClock.restart().asSeconds();
             screen.clear(CONSTANT::COLOR_CLEAR);
-            int index = 0;
+            int nb = 0;
             for (GraphicElement* el: this->graphicElements)
-                this->drawElement(el, &this->screen);
+                this->drawElement(el, &this->screen, &nb);
+            if (this->lastNb != nb)
+            {
+                this->lastNb = nb;
+                this->updatePhysicElements();
+            }
                 
             if (this->showHitboxes)
             {
@@ -147,11 +226,8 @@ namespace owo
         {
             if (!this->screen.pollEvent(this->event)) return;
 
-            this->elements.clear();
-            for (GraphicElement* el: this->graphicElements)
-                this->addPhysicElement(el);
-
             int key;
+            bool canHoverTrue = true;
             switch (event.type)
             {
                 case sf::Event::Closed:
@@ -160,11 +236,29 @@ namespace owo
 
                 case sf::Event::MouseMoved:
                     this->mousePos = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
+                    for (auto i = this->elements.end()-1; i >= this->elements.begin(); i--)
+                    {
+                        GraphicElement* el = (*i);
+                        if (el->doesReceiveEvents())
+                        {
+                            if (el->collides(this->mousePos))
+                            {
+                                if (!el->isHovered() && canHoverTrue)
+                                    el->onHover(true);
+                                canHoverTrue = false;
+                            }
+                            else
+                            {
+                                if (el->isHovered())
+                                    el->onHover(false);
+                            }
+                        }
+                    }
                     break;
 
                 case sf::Event::MouseButtonPressed:
                     this->focused = nullptr;
-                    for (std::vector<GraphicElement*>::iterator i = this->elements.end()-1; i >= this->elements.begin(); i--)
+                    for (auto i = this->elements.end()-1; i >= this->elements.begin(); i--)
                     {
                         GraphicElement* el = (*i);
                         if (!el->doesReceiveEvents()) continue;
@@ -180,7 +274,7 @@ namespace owo
                     break;
 
                 case sf::Event::MouseButtonReleased:
-                    for (std::vector<GraphicElement*>::iterator i = this->elements.end()-1; i >= this->elements.begin(); i--)
+                    for (auto i = this->elements.end()-1; i >= this->elements.begin(); i--)
                     {
                         GraphicElement* el = (*i);
                         if (!el->doesReceiveEvents() || !el->isHovered()) continue;
@@ -189,7 +283,7 @@ namespace owo
                     break;
 
                 case sf::Event::MouseWheelScrolled:
-                    for (std::vector<GraphicElement*>::iterator i = this->elements.end()-1; i >= this->elements.begin(); i--)
+                    for (auto i = this->elements.end()-1; i >= this->elements.begin(); i--)
                     {
                         GraphicElement* el = (*i);
                         if (!el->doesReceiveEvents() || !el->isHovered()) continue;
@@ -218,26 +312,7 @@ namespace owo
                 default:
                     break;
             }
-            
-            bool canHoverTrue = true;
-            for (std::vector<GraphicElement*>::iterator i = this->elements.end()-1; i >= this->elements.begin(); i--)
-            {
-                GraphicElement* el = (*i);
-                if (el->doesReceiveEvents())
-                {
-                    if (el->collides(this->mousePos))
-                    {
-                        if (!el->isHovered() && canHoverTrue)
-                            el->onHover(true);
-                        canHoverTrue = false;
-                    }
-                    else
-                    {
-                        if (el->isHovered())
-                            el->onHover(false);
-                    }
-                }
-            }
+            GarbageCollector::checkForClear(GarbageCollector::EVENTS);
         }
 
         /**
@@ -247,6 +322,7 @@ namespace owo
         void addElement(GraphicElement* el)
         {
             this->graphicElements.push_back(el);
+            this->updatePhysicElements();
         }
 
         /**
@@ -266,8 +342,7 @@ namespace owo
                 }
                 counter++;
             }
-            if (index >= 0)
-                this->removeElement(index);
+            this->removeElement(index);
         }
 
         /**
@@ -276,7 +351,10 @@ namespace owo
          */
         void removeElement(int index)
         {
+            if (index >= this->graphicElements.size() || index < 0)
+                return;
             this->graphicElements.erase(this->graphicElements.begin()+index);
+            this->updatePhysicElements();
         }
 
         /**
@@ -285,7 +363,7 @@ namespace owo
         void clearElements()
         {
             this->graphicElements.clear();
-            this->elements.clear();
+            this->updatePhysicElements();
         }
 
         /**

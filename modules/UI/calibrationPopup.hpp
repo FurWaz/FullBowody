@@ -59,14 +59,14 @@ namespace owo
             if (this->calibrating && !this->loadPopupDisplayed)
             {
                 this->lf = new LoadingFrame(
-                    sf::Vector2i(this->popup->getWinSize().x/2-200, this->popup->getWinSize().y/2-60),
+                    sf::Vector2i(this->getSize().x/2-200, this->getSize().y/2-60),
                     sf::Vector2i(400, 120), CONSTANT::COLOR_BACK
                 );
-                this->popup->addComponent(this->lf);
+                this->addElement(this->lf);
                 this->loadPopupDisplayed = true;
             } else if (this->loadPopupDisplayed)
             {
-                this->popup->removeComponent(this->lf);
+                this->removeElement(this->lf);
                 this->loadPopupDisplayed = false;
             }
         }

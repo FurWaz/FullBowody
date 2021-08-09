@@ -22,7 +22,6 @@ int main(int argc, char const *argv[])
     CameraCalibrator::setWindow(&win);
     Files::setWindow(&win);
 
-    SceneManager::init();
     SceneManager::setWindow(&win);
     SceneManager::GenerateDefaultScene();
     win.setBodyPos(&SceneManager::bp);

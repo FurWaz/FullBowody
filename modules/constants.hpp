@@ -2,6 +2,9 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
+#define loop(x) for(int i = 0; i < x; i++)
+#define unloop(x) for(int i = x-1; i >= 0; i--)
+
 template<typename T> T clamp(T val, T min, T max)
 {
     if (val < min) return min;
@@ -112,6 +115,12 @@ namespace CONSTANT
     void VOIDCALLBACK_BOOL(bool state) {}
     void VOIDCALLBACK_STRING(std::string str) {}
 
+    void updateFPSdelta()
+    {
+        TRACKING_FPS_DELTA = 1000 / TRACKING_FPS;
+        CAMERA_FPS_DELTA = 1000 / CAMERA_FPS;
+    }
+
     /**
      * @brief Initialises the common variables such as the fonts
      */
@@ -119,8 +128,6 @@ namespace CONSTANT
     {
         if (!FONT.loadFromFile("./resources/fonts/Roboto-Regular.ttf"))
             std::cout << "Error loading default font" << std::endl;
-        
-        TRACKING_FPS_DELTA = 1000 / TRACKING_FPS;
-        CAMERA_FPS_DELTA = 1000 / CAMERA_FPS;
+        updateFPSdelta();
     }
 }

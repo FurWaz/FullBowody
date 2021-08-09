@@ -17,8 +17,8 @@ namespace owo
 
         void refreshView()
         {
-            this->propagateParentAbsPos();
             this->generateTexture();
+            this->propagateParentAbsPos();
             for(GraphicElement* el: this->getElements())
                 el->generateTexture();
         }
