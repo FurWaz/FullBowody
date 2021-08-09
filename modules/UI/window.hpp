@@ -44,11 +44,8 @@ namespace owo
                 updates = false;
                 if (list.size() > 0)
                 {
-                    unloop(list.size())
-                    {
-                        std::cout << "deleting element " << i << " at " << std::addressof(list[i]) << std::endl;
+                    loop(list.size())
                         delete list[i];
-                    }
                     list.clear();
                 }
             }
