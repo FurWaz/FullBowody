@@ -277,9 +277,9 @@ namespace owo
             return sf::Vector2i(this->dimensions.width, this->dimensions.height);
         }
 
-        ~GraphicElement()
+        virtual ~GraphicElement()
         {
-
+            
         }
     };
 }

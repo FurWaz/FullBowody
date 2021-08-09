@@ -297,7 +297,13 @@ namespace owo
         ~CalibrationPopup()
         {
             this->cam->detachImage(this->preview);
+            this->setCalibrating(false);
+            if (this->shouldDetectChess || this->calibrating)
+            {
+                this->shouldDetectChess = false;
+                this->shouldJoin = false;
+                this->calibrator.join();
+            }
         }
-
     };
 }

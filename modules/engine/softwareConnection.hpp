@@ -6,9 +6,10 @@
 
 typedef struct SoftwareInfo {
     unsigned short port;
+    std::string ip;
     std::string name;
-    SoftwareInfo(): port(0), name("") {}
-    SoftwareInfo(unsigned short p, std::string n): port(p), name(n) {}
+    SoftwareInfo(): port(0), ip("localhost"), name("") {}
+    SoftwareInfo(unsigned short p, std::string n, std::string i = "localhost"): port(p), ip(i), name(n) {}
 } SoftwareInfo;
 
 std::string to_string(sf::Socket::Status st)
@@ -88,6 +89,7 @@ public:
 
     void _send_body_positions()
     {
+        return;
         while (this->ready)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -101,9 +103,8 @@ public:
 
             for (SoftwareInfo soft: this->appsPorts)
             {
-                if (this->socket.send(string, length, "localhost", soft.port) == sf::Socket::Done)
-                    std::cout << "position sent to port " << soft.port << " (" << soft.name << ")" << std::endl;
-                else std::cout << "failed to send body position on port " << soft.port << std::endl;
+                if (this->socket.send(string, length, soft.ip, soft.port) != sf::Socket::Done)
+                    std::cout << "failed to send body position on port " << soft.port << std::endl;
             }
         }
     }
@@ -112,6 +113,7 @@ public:
     {
         while (this->ready)
         {
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
             char data[100];
             std::size_t received;
             sf::IpAddress sender;
@@ -123,14 +125,13 @@ public:
                 std::string string(data, received);
                 if (string.substr(0, 11) != "FullBowody-") continue;
                 std::string appName = string.substr(11, string.size());
-                this->appsPorts.push_back(SoftwareInfo(port, appName));
+                this->appsPorts.push_back(SoftwareInfo(port, appName, sender.toString()));
             }
             else
             {
                 if (result == sf::Socket::NotReady) continue;
                 if (result == 3) this->appsPorts.clear();
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 
