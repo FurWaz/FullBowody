@@ -53,11 +53,11 @@ namespace SceneManager
         win->addElement(camList);
         _populate_camlist();
 
-        Button* b = new Button("Add", sf::Vector2i(10, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT-TITLE_SIZE-50), sf::Vector2i(100, 40));
+        Button* b = new Button("Add", sf::Vector2i(10, CONSTANT::WINDOW_HEIGHT-50), sf::Vector2i(100, 40));
         b->setCallback(_add_camera);
         win->addElement(b);
 
-        b = new Button("Remove", sf::Vector2i(120, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT-TITLE_SIZE-50), sf::Vector2i(100, 40));
+        b = new Button("Remove", sf::Vector2i(120, CONSTANT::WINDOW_HEIGHT-50), sf::Vector2i(100, 40));
         b->setCallback(_rem_camera);
         win->addElement(b);
 
