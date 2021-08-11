@@ -5,21 +5,17 @@
 #        solution to estimate the body position of         #
 #        the given frame.                                  #
 #                                                          #
-#                                                          #
-#                                                          #
 ############################################################
 
 import cv2, sys,time
 import numpy as np
 import mediapipe as mp
-import pydoc
 mpPose = mp.solutions.pose
 pose = mpPose.Pose()
 
 time.sleep(1)
 sys.stdout.write("READY")
 sys.stdout.flush()
-
 
 while True:
     word = sys.stdin.buffer.readline()

@@ -8,6 +8,8 @@ A full body tracking app using two or more HD cameras, for VR, 3D animation, etc
 - Type `./build.cmd` to compile the app
 
 ## Running (Windows)
+- [temporary] To run the app, you need to have Python3 installed on your computer
+- [temporary] Install the mediapipe module for Python using the command `pip install mediapipe`
 - Open a terminal in the root folder
 - Type `./build/main.exe` to run the app
 
