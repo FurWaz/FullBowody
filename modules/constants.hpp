@@ -55,12 +55,12 @@ namespace CONSTANT
     /** @brief App transparent color*/
     sf::Color COLOR_TRANS(0, 0, 0, 0);
 
-    /** @brief Number of body joints */
-    const unsigned char NB_JOINTS = 33;
-    /** @brief Number of connections between body joints */
-    const unsigned char NB_CONNECTIONS = 35;
-    /** @brief Connections between each joint of the body for a wired representation */
-    const unsigned char POSE_CONNECTIONS[35][2] = {
+    /** @brief Number of body joints from mediapipe */
+    const unsigned char MEDIAPIPE_JOINTS = 33;
+    /** @brief Number of connections between mediapipe's body joints */
+    const unsigned char NB_MEDIAPIPE_CONNECTIONS = 35;
+    /** @brief Connections between each joint of the mediapipe body */
+    const unsigned char MEDIAPIPE_CONNECTIONS[NB_MEDIAPIPE_CONNECTIONS][2] = {
         {15, 21},
         {16, 20},
         {18, 20},
@@ -130,4 +130,49 @@ namespace CONSTANT
             std::cout << "Error loading default font" << std::endl;
         updateFPSdelta();
     }
+
+    /** @brief Number of body joints in the app*/
+    const unsigned char NB_JOINTS = 18;
+    // body joints
+    const unsigned char JOINT_HEAD = 0;
+    const unsigned char JOINT_NECK = 1;
+    const unsigned char JOINT_SHOULDER_R = 2;
+    const unsigned char JOINT_ELBOW_R = 3;
+    const unsigned char JOINT_WRIST_R = 4;
+    const unsigned char JOINT_HAND_R = 5;
+    const unsigned char JOINT_HIP_R = 6;
+    const unsigned char JOINT_KNEE_R = 7;
+    const unsigned char JOINT_ANKLE_R = 8;
+    const unsigned char JOINT_FEET_R = 9;
+    const unsigned char JOINT_SHOULDER_L = 10;
+    const unsigned char JOINT_ELBOW_L = 11;
+    const unsigned char JOINT_WRIST_L = 12;
+    const unsigned char JOINT_HAND_L = 13;
+    const unsigned char JOINT_HIP_L = 14;
+    const unsigned char JOINT_KNEE_L = 15;
+    const unsigned char JOINT_ANKLE_L = 16;
+    const unsigned char JOINT_FEET_L = 17;
+    
+    /** @brief Number of connections between the body joints */
+    const unsigned char NB_CONNECTIONS = 17;
+    /** @brief Connections between each joint of the body for a wired representation */
+    const unsigned char POSE_CONNECTIONS[NB_CONNECTIONS][2] = {
+        {JOINT_HEAD, JOINT_NECK},
+        {JOINT_NECK, JOINT_SHOULDER_R},
+        {JOINT_NECK, JOINT_SHOULDER_L},
+        {JOINT_SHOULDER_R, JOINT_ELBOW_R},
+        {JOINT_SHOULDER_L, JOINT_ELBOW_L},
+        {JOINT_ELBOW_R, JOINT_WRIST_R},
+        {JOINT_ELBOW_L, JOINT_WRIST_L},
+        {JOINT_WRIST_R, JOINT_HAND_R},
+        {JOINT_WRIST_L, JOINT_HAND_L},
+        {JOINT_NECK, JOINT_HIP_R},
+        {JOINT_NECK, JOINT_HIP_L},
+        {JOINT_HIP_R, JOINT_KNEE_R},
+        {JOINT_HIP_L, JOINT_KNEE_L},
+        {JOINT_KNEE_R, JOINT_ANKLE_R},
+        {JOINT_KNEE_L, JOINT_ANKLE_L},
+        {JOINT_ANKLE_R, JOINT_FEET_R},
+        {JOINT_ANKLE_L, JOINT_FEET_L}
+    };
 }

@@ -31,8 +31,7 @@ namespace SceneManager
     void _rem_camera();
     void _set_tracking_fps(std::string fps);
     void _set_camera_fps(std::string fps);
-    void _populate_camlist();
-    void _create_camlist();
+    void _populate_camlist(bool modified, bool added);
 
     void setWindow(Window* window)
     {
@@ -51,7 +50,7 @@ namespace SceneManager
 
         camList = new List(sf::Vector2i(0, MenuBar::MENUBAR_HEIGHT+TITLE_SIZE), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.6, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT-TITLE_SIZE-60), CONSTANT::COLOR_CLEAR);
         win->addElement(camList);
-        _populate_camlist();
+        _populate_camlist(false, false);
 
         Button* b = new Button("Add", sf::Vector2i(10, CONSTANT::WINDOW_HEIGHT-50), sf::Vector2i(100, 40));
         b->setCallback(_add_camera);
@@ -143,13 +142,13 @@ namespace SceneManager
     void _add_camera()
     {
         cameras.push_back(new Camera());
-        _populate_camlist();
+        _populate_camlist(true, true);
     }
     void _rem_camera()
     {
         if (cameras.size() == 0) return;
         cameras.erase(cameras.end()-1);
-        _populate_camlist();
+        _populate_camlist(true, false);
     }
     void _set_tracking_fps(std::string fps)
     {
@@ -177,12 +176,21 @@ namespace SceneManager
         }
         CONSTANT::updateFPSdelta();
     }
-    void _populate_camlist()
+    void _populate_camlist(bool modify, bool added)
     {
         bp.setCameras(cameras);
         camMan.setCameras(cameras);
-        camList->clearComponents();
-        for (Camera* cam: cameras)
-            camList->addComponent(new CameraView(cam, sf::Vector2i(10, 10), sf::Vector2i(camList->getSize().x-20, 400)));
+        if (!modify)
+        {
+            camList->clearComponents();
+            for (Camera* cam: cameras)
+                camList->addComponent(new CameraView(cam, sf::Vector2i(10, 10), sf::Vector2i(camList->getSize().x-20, 400)));
+        } else
+        {
+            if (added)
+                camList->addComponent(new CameraView(cameras[cameras.size()-1], sf::Vector2i(10, 10), sf::Vector2i(camList->getSize().x-20, 400)));
+            else
+                camList->removeComponent(camList->getElements().size()-1);
+        }
     }
 }

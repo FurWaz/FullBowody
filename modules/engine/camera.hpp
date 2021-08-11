@@ -308,7 +308,7 @@ namespace owo
                     {
                         for(int i = 0; i < CONSTANT::NB_CONNECTIONS; i++)
                         {
-                            if (tPoints[CONSTANT::POSE_CONNECTIONS[i][0]].z < 0.9f || tPoints[CONSTANT::POSE_CONNECTIONS[i][1]].z < 0.9f)
+                            if (tPoints[CONSTANT::POSE_CONNECTIONS[i][0]].z < 0.8f || tPoints[CONSTANT::POSE_CONNECTIONS[i][1]].z < 0.8f)
                                 continue;
                             cv::Point p1(this->frame.cols * tPoints[CONSTANT::POSE_CONNECTIONS[i][0]].x, this->frame.rows * tPoints[CONSTANT::POSE_CONNECTIONS[i][0]].y);
                             cv::Point p2(this->frame.cols * tPoints[CONSTANT::POSE_CONNECTIONS[i][1]].x, this->frame.rows * tPoints[CONSTANT::POSE_CONNECTIONS[i][1]].y);

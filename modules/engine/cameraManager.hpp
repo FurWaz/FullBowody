@@ -52,6 +52,9 @@ namespace owo
                 for (Camera* c: this->cameras)
                     c->getTracker()->startTracking();
 
+            if (this->tracking)
+                this->button->setLoading(true);
+
             this->tracking = !this->tracking;
             this->button->setText( (this->tracking)? "Stop tracking": "Start tracking" );
             this->button->setTextColor( (this->tracking)? CONSTANT::COLOR_RED_LIGHT: CONSTANT::COLOR_PRIMARY );

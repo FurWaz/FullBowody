@@ -169,7 +169,7 @@ namespace owo
 
         void update(float dt, sf::Vector2i mousePos)
         {
-            if (this->shouldJoinThread)
+            if (this->shouldJoinThread && this->loaderThread.joinable())
             {
                 this->shouldJoinThread = false;
                 this->loaderThread.join();
@@ -259,7 +259,8 @@ namespace owo
 
         ~CameraView()
         {
-            
+            if (this->input->isLoading())
+                this->loaderThread.join();
         }
     };
 }

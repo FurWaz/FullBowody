@@ -5,6 +5,8 @@
 #        solution to estimate the body position of         #
 #        the given frame.                                  #
 #                                                          #
+#                                                          #
+#                                                          #
 ############################################################
 
 import cv2, sys,time
@@ -28,7 +30,6 @@ while True:
     img = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
     result = pose.process(img)
     if (result.pose_landmarks):
-        open("python.txt", "w").write(pydoc.render_doc(result.pose_landmarks.landmark[0], "Help on %s"))
         string = ""
         for ld in result.pose_landmarks.landmark:
             try:

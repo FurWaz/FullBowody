@@ -275,6 +275,11 @@ namespace owo
             this->shouldLoad = state;
         }
 
+        bool isLoading()
+        {
+            return this->shouldLoad;
+        }
+
         sf::Sprite getSprite(float dt)
         {
             if (this->shouldLoad || this->loading != this->shouldLoad)

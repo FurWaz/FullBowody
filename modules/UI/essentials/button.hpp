@@ -3,6 +3,7 @@
 #include "./graphicElement.hpp"
 #include "./CallbackContainer.hpp"
 #include "./label.hpp"
+#include "./loading.hpp"
 
 namespace owo
 {
@@ -21,11 +22,17 @@ namespace owo
         Label* label;
         
         CallbackContainer* cont;
+        bool loading;
+        bool shouldLoad;
+        Loading* loadLogo;
 
         void init()
         {
             this->generateHoverColors();
             this->label = new Label(this->text, sf::Vector2i(), this->getSize(), this->fontSize, Label::CENTER, this->fgColor, this->bgColor);
+            this->loadLogo = new Loading(sf::Vector2i(0, this->getSize().y-4), sf::Vector2i(this->getSize().x, 4));
+            this->shouldLoad = false;
+            this->loading = false;
             this->setReceiveEvents(true);
         }
 
@@ -54,6 +61,10 @@ namespace owo
             this->label->setClearColor(this->bgColor);
             this->label->setText(this->text);
             this->renderTexture.draw(this->label->getSprite(0));
+
+            this->loading = this->shouldLoad;
+            if (this->loading)
+                this->renderTexture.draw(this->loadLogo->getSprite(0.16));
 
             this->renderTexture.display();
             this->sprite.setTexture(this->renderTexture.getTexture());
@@ -173,8 +184,20 @@ namespace owo
             this->generateTexture();
         }
 
+        void setLoading(bool state)
+        {
+            this->shouldLoad = state;
+        }
+
+        bool isLoading()
+        {
+            return this->shouldLoad;
+        }
+
         Label* getLabel()
         {
+            if (this->shouldLoad || this->loading != this->shouldLoad)
+                this->generateTexture();
             return this->label;
         }
 

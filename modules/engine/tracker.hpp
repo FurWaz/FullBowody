@@ -78,7 +78,9 @@ namespace owo
         {
             unsigned short cursor = 0;
             unsigned short index = 0;
-            while (cursor < length && index < CONSTANT::NB_JOINTS)
+            std::array<cv::Point3f, CONSTANT::MEDIAPIPE_JOINTS> joints;
+            // get the mediapipe body points from the string
+            while (cursor < length && index < CONSTANT::MEDIAPIPE_JOINTS)
             {
                 try 
                 {
@@ -109,10 +111,29 @@ namespace owo
                         coordY / nbDigitDivide(coordY), 
                         visibility / nbDigitDivide(visibility)
                     );
-                    this->points[index] = p;
+                    joints[index] = p;
                 } catch (std::exception &e) {break;}
                 index++;
             }
+            // calculates the app's body position from mediapipe
+            this->points[CONSTANT::JOINT_HEAD] = joints[0];
+            this->points[CONSTANT::JOINT_NECK] = (joints[12] + joints[11]) / 2;
+            this->points[CONSTANT::JOINT_SHOULDER_R] = joints[12];
+            this->points[CONSTANT::JOINT_SHOULDER_L] = joints[11];
+            this->points[CONSTANT::JOINT_ELBOW_R] = joints[14];
+            this->points[CONSTANT::JOINT_ELBOW_L] = joints[13];
+            this->points[CONSTANT::JOINT_WRIST_R] = joints[16];
+            this->points[CONSTANT::JOINT_WRIST_L] = joints[15];
+            this->points[CONSTANT::JOINT_HAND_R] = (joints[20] + joints[18]) / 2;
+            this->points[CONSTANT::JOINT_HAND_L] = (joints[19] + joints[17]) / 2;
+            this->points[CONSTANT::JOINT_HIP_R] = joints[24];
+            this->points[CONSTANT::JOINT_HIP_L] = joints[23];
+            this->points[CONSTANT::JOINT_KNEE_R] = joints[26];
+            this->points[CONSTANT::JOINT_KNEE_L] = joints[25];
+            this->points[CONSTANT::JOINT_ANKLE_R] = cv::Point3f(joints[28].x, joints[32].y, joints[28].z);
+            this->points[CONSTANT::JOINT_ANKLE_L] = cv::Point3f(joints[27].x, joints[31].y, joints[27].z);
+            this->points[CONSTANT::JOINT_FEET_R] = joints[32];
+            this->points[CONSTANT::JOINT_FEET_L] = joints[31];
         }
         
     public:
