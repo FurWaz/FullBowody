@@ -259,6 +259,7 @@ namespace owo
 
         ~CameraView()
         {
+            this->cam->detachImage(this->im);
             if (this->input->isLoading())
                 this->loaderThread.join();
         }

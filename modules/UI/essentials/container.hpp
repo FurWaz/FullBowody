@@ -4,18 +4,15 @@
 
 namespace owo
 {
-    class List : public virtual GraphicElement
+    class Container : public virtual GraphicElement
     {
     private:
         std::vector<GraphicElement*> elements;
-        int scrollDelta;
 
         void init()
         {
-            this->sprite.setTexture(this->renderTexture.getTexture());
-            this->setReceiveEvents(true);
+            this->setReceiveEvents(false);
             this->generateTexture();
-            this->scrollDelta = 0;
         }
 
         void refreshView()
@@ -27,14 +24,14 @@ namespace owo
         }
 
     public:
-        List()
+        Container()
         {
             this->setDimensions(0, 0, 200, 200);
             this->setClearColor(CONSTANT::COLOR_BACK);
             this->init();
         }
 
-        List(sf::Vector2i pos, sf::Vector2i size, sf::Color clearColor = CONSTANT::COLOR_CLEAR)
+        Container(sf::Vector2i pos, sf::Vector2i size, sf::Color clearColor = CONSTANT::COLOR_CLEAR)
         {
             this->setDimensions(pos.x, pos.y, size.x, size.y);
             this->setClearColor(clearColor);
@@ -43,7 +40,6 @@ namespace owo
 
         void addComponent(GraphicElement* el)
         {
-            el->setPosition(el->getPosition() + sf::Vector2i(0, this->calculateElementsSize().y + this->scrollDelta));
             this->addElement(el);
             this->refreshView();
         }
@@ -71,6 +67,7 @@ namespace owo
         {
             this->renderTexture.clear(this->clearColor);
             this->renderTexture.display();
+            this->sprite.setTexture(this->renderTexture.getTexture());
         }
 
         void onClick(int btn, bool clicked)
@@ -95,23 +92,7 @@ namespace owo
 
         void onScroll(int delta)
         {
-            int elemSize = this->calculateElementsSize().y;
-            if (delta > 0 && this->scrollDelta+delta >= 0) delta = -this->scrollDelta;
-            if (delta < 0 && elemSize+this->scrollDelta+delta+10 < this->dimensions.height) 
-            {
-                if (elemSize > this->dimensions.height)
-                    delta = (this->dimensions.height-elemSize-10) - this->scrollDelta;
-                else delta = 0;
-            }
-
-            sf::Vector2i dtPos(0, delta);
-            this->generateTexture();
-            for(GraphicElement* el: this->getElements())
-            {
-                el->setPosition(el->getPosition() + dtPos);
-                el->generateTexture();
-            }
-            this->scrollDelta += delta;
+            
         }
 
         void update(float dt, sf::Vector2i mousePos)
@@ -124,20 +105,7 @@ namespace owo
             return this->sprite;
         }
 
-        sf::Vector2i calculateElementsSize()
-        {
-            if (this->getElements().size() == 0)
-                return sf::Vector2i();
-
-            sf::Vector2i dimensions;
-            GraphicElement* child = this->getElements().at(this->getElements().size()-1);
-            for(GraphicElement* el: this->getElements())
-                dimensions.x = std::max(dimensions.x,  el->getSize().x);
-            dimensions.y = child->getPosition().y + child->getSize().y - this->scrollDelta;
-            return dimensions;
-        }
-
-        ~List()
+        ~Container()
         {
 
         }

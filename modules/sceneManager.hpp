@@ -7,12 +7,15 @@
 #include "./UI/essentials/input.hpp"
 #include "./UI/essentials/view.hpp"
 #include "./UI/essentials/list.hpp"
+#include "./UI/essentials/container.hpp"
 #include "./UI/cameraView.hpp"
 #include "./UI/menuBar.hpp"
+#include "./UI/softwareInfoPanel.hpp"
 
 #include "./engine/camera.hpp"
 #include "./engine/cameraManager.hpp"
 #include "./engine/bodypos.hpp"
+#include "./engine/softwareConnection.hpp"
 
 using namespace owo;
 
@@ -21,10 +24,19 @@ namespace SceneManager
     Window* win;
 
     std::vector<Camera*> cameras;
-    BodyPos bp;
     List* camList;
-
     CameraManager camMan;
+    List* extensionList;
+
+    BodyPos bp;
+    SoftwareConnection con;
+
+    unsigned char CURRENT_SCENE = 0;
+    const unsigned char DEFAULT_SCENE = 0;
+    const unsigned char OPTIONS_SCENE = 1;
+    const unsigned char EXTENSIONS_SCENE = 2;
+    const unsigned char ABOUT_SCENE = 3;
+    bool shouldUpdate = false;
 
     // Buttons callbacks
     void _add_camera();
@@ -32,10 +44,37 @@ namespace SceneManager
     void _set_tracking_fps(std::string fps);
     void _set_camera_fps(std::string fps);
     void _populate_camlist(bool modified, bool added);
+    void _check_for_new_ext();
 
     void setWindow(Window* window)
     {
         win = window;
+    }
+
+    void init()
+    {
+        bp.setSoftwareConnection(&con);
+        con.startConnection();
+        con.setExtensionCallback(_check_for_new_ext);
+    }
+
+    void update()
+    {
+        if (shouldUpdate)
+        {
+            if (CURRENT_SCENE == EXTENSIONS_SCENE)
+            {
+                extensionList->clearComponents();
+                for (SoftwareInfo soft: con.getExtensions())
+                    extensionList->addComponent(new SoftwareInfoPanel(sf::Vector2i(10, 10), sf::Vector2i(200, 100), soft));
+            }
+            shouldUpdate = false;
+        }
+    }
+
+    void shutdown()
+    {
+        con.stopConnection();
     }
 
     GraphicElement* createMenuBar(int pos);
@@ -43,7 +82,7 @@ namespace SceneManager
     void GenerateDefaultScene()
     {
         win->clearElements();
-        win->addElement(createMenuBar(0));
+        win->addElement(createMenuBar(DEFAULT_SCENE));
         const int TITLE_SIZE = 30;
 
         win->addElement(new Title(sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.2, MenuBar::MENUBAR_HEIGHT), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.2, TITLE_SIZE), "Cameras", 18, CONSTANT::COLOR_CLEAR));
@@ -78,7 +117,7 @@ namespace SceneManager
     void GenerateOptionsScene()
     {
         win->clearElements();
-        win->addElement(createMenuBar(1));
+        win->addElement(createMenuBar(OPTIONS_SCENE));
 
         win->addElement(new Title(sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.4, MenuBar::MENUBAR_HEIGHT), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.2, 40), " Options ", 20, CONSTANT::COLOR_CLEAR));
         List* list = new List(sf::Vector2i(0, MenuBar::MENUBAR_HEIGHT+40), sf::Vector2i(CONSTANT::WINDOW_WIDTH, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT+40), CONSTANT::COLOR_BACK);
@@ -108,19 +147,25 @@ namespace SceneManager
     void GenerateExtensionsScene()
     {
         win->clearElements();
-        win->addElement(createMenuBar(2));
+        win->addElement(createMenuBar(EXTENSIONS_SCENE));
+        win->addElement(new Title(sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.4, MenuBar::MENUBAR_HEIGHT), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.2, 40), " Extensions ", 20, CONSTANT::COLOR_CLEAR));
+
+        Container* cont = new Container(sf::Vector2i(0, MenuBar::MENUBAR_HEIGHT+40), sf::Vector2i(CONSTANT::WINDOW_WIDTH, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT-40), CONSTANT::COLOR_BACK);
+        win->addElement(cont);
+        cont->addElement(new Label("Active extensions", sf::Vector2i(10, 10), sf::Vector2i(400, 40), 18, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK));
+        extensionList = new List(sf::Vector2i(10, 60), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.7, CONSTANT::WINDOW_HEIGHT/2), CONSTANT::COLOR_CLEAR);
+        cont->addComponent(extensionList);
     }
 
     void GenerateAboutScene()
     {
         win->clearElements();
-        win->addElement(createMenuBar(3));
+        win->addElement(createMenuBar(ABOUT_SCENE));
     }
 
     GraphicElement* createMenuBar(int pos)
     {
         MenuBar* menuBar = new MenuBar();
-
         Button* btn;
         btn = new Button("Default", sf::Vector2i(0, 0), sf::Vector2i(150, MenuBar::MENUBAR_HEIGHT), 20, CONSTANT::COLOR_BLACK_DARKER);
         btn->setCallback(GenerateDefaultScene);
@@ -135,6 +180,7 @@ namespace SceneManager
         btn->setCallback(GenerateAboutScene);
         menuBar->addComponent(btn);
         menuBar->setSelectedButton(pos);
+        CURRENT_SCENE = pos;
         return menuBar;
     }
 
@@ -192,5 +238,9 @@ namespace SceneManager
             else
                 camList->removeComponent(camList->getElements().size()-1);
         }
+    }
+    void _check_for_new_ext()
+    {
+        shouldUpdate = true;
     }
 }

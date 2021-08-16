@@ -3,147 +3,191 @@
 #include <opencv2/core.hpp>
 #include <thread>
 #include "../constants.hpp"
+#include "../UI/essentials/callbackContainer.hpp"
 
-typedef struct SoftwareInfo {
-    unsigned short port;
-    std::string ip;
-    std::string name;
-    SoftwareInfo(): port(0), ip("localhost"), name("") {}
-    SoftwareInfo(unsigned short p, std::string n, std::string i = "localhost"): port(p), ip(i), name(n) {}
-} SoftwareInfo;
-
-std::string to_string(sf::Socket::Status st)
+namespace owo
 {
-    if (st == sf::Socket::Done) return "Done";
-    if (st == sf::Socket::NotReady) return "NotReady";
-    if (st == sf::Socket::Partial) return "Partial";
-    if (st == sf::Socket::Disconnected) return "Disconnected";
-    if (st == sf::Socket::Error) return "Error";
-    return "";
-}
+    typedef struct SoftwareInfo {
+        unsigned short port;
+        std::string ip;
+        std::string name;
+        SoftwareInfo(): port(0), ip("localhost"), name("") {}
+        SoftwareInfo(unsigned short p, std::string n, std::string i = "localhost"): port(p), ip(i), name(n) {}
+    } SoftwareInfo;
 
-class SoftwareConnection
-{
-private:
-    sf::UdpSocket socket;
-    bool ready;
-    bool newDataAvailable;
-    std::vector<SoftwareInfo> appsPorts;
-
-    std::array<cv::Vec3d, CONSTANT::NB_JOINTS> bodyPosition;
-
-    std::thread listenerThread;
-    std::thread senderThread;
-
-    bool setupConnection()
+    std::string to_string(sf::Socket::Status st)
     {
-        if (socket.bind(5621, "localhost") != sf::Socket::Done)
+        if (st == sf::Socket::Done) return "Done";
+        if (st == sf::Socket::NotReady) return "NotReady";
+        if (st == sf::Socket::Partial) return "Partial";
+        if (st == sf::Socket::Disconnected) return "Disconnected";
+        if (st == sf::Socket::Error) return "Error";
+        return "";
+    }
+
+    class SoftwareConnection
+    {
+    private:
+        sf::UdpSocket socket;
+        unsigned short port;
+        std::string ip;
+        bool ready;
+        bool newDataAvailable;
+        std::vector<SoftwareInfo> extensions;
+
+        std::array<cv::Vec3d, CONSTANT::NB_JOINTS> bodyPosition;
+
+        std::thread listenerThread;
+        std::thread senderThread;
+
+        CallbackContainer* cont;
+
+        bool setupConnection()
         {
-            std::cerr << "Error: Cannot bind socket port 5621, aborting" << std::endl;
-            return false;
+            this->ip = sf::IpAddress::getLocalAddress().toString();
+            this->port = 5621;
+            while (socket.bind(this->port, "localhost") != sf::Socket::Done)
+                this->port++;
+            std::cout << ">> Info: Extensions port is " << this->port << " on IP address " << this->ip << std::endl;
+            socket.setBlocking(false);
+            return true;
         }
-        socket.setBlocking(false);
-        return true;
-    }
 
-    void setupListenerThread()
-    {
-        this->listenerThread = std::thread(&SoftwareConnection::_read_input_packets, this);
-    }
-
-    void setupSenderThread()
-    {
-        this->senderThread = std::thread(&SoftwareConnection::_send_body_positions, this);
-    }
-
-    std::string toString(double number)
-    {
-        return std::to_string( ((int)(number * 100))*0.01d );
-    }
-
-public:
-    SoftwareConnection()
-    {
-        this->newDataAvailable = false;
-    }
-
-    void startConnection()
-    {
-        this->ready = this->setupConnection();
-        if (this->ready)
+        void setupListenerThread()
         {
-            this->setupListenerThread();
-            this->setupSenderThread();
+            this->listenerThread = std::thread(&SoftwareConnection::_read_input_packets, this);
         }
-    }
 
-    void stopConnection()
-    {
-        if (this->ready)
+        void setupSenderThread()
         {
-            this->ready = false;
-            this->listenerThread.join();
-            this->senderThread.join();
+            this->senderThread = std::thread(&SoftwareConnection::_send_body_positions, this);
         }
-    }
 
-    void _send_body_positions()
-    {
-        return;
-        while (this->ready)
+        std::string toString(double number)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            if (!this->newDataAvailable) continue;
+            return std::to_string( ((int)(number * 100))*0.01d );
+        }
+
+    public:
+        SoftwareConnection()
+        {
             this->newDataAvailable = false;
-            std::string data;
-            for(int i = 0; i < CONSTANT::NB_JOINTS; i++)
-                data += toString(this->bodyPosition[i][0])+"|"+toString(this->bodyPosition[i][1])+"|"+toString(this->bodyPosition[i][2])+"\n";
-            const char* string = data.c_str();
-            unsigned short length = data.size();
-
-            for (SoftwareInfo soft: this->appsPorts)
-            {
-                if (this->socket.send(string, length, soft.ip, soft.port) != sf::Socket::Done)
-                    std::cout << "failed to send body position on port " << soft.port << std::endl;
-            }
         }
-    }
 
-    void _read_input_packets()
-    {
-        while (this->ready)
+        void startConnection()
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
-            char data[100];
-            std::size_t received;
-            sf::IpAddress sender;
-            unsigned short port;
-            sf::Socket::Status result = this->socket.receive(data, 100, received, sender, port);
-            if (result == sf::Socket::Done)
+            this->ready = this->setupConnection();
+            if (this->ready)
             {
-                if (received < 11) continue;
-                std::string string(data, received);
-                if (string.substr(0, 11) != "FullBowody-") continue;
-                std::string appName = string.substr(11, string.size());
-                this->appsPorts.push_back(SoftwareInfo(port, appName, sender.toString()));
-            }
-            else
-            {
-                if (result == sf::Socket::NotReady) continue;
-                if (result == 3) this->appsPorts.clear();
+                this->setupListenerThread();
+                this->setupSenderThread();
             }
         }
-    }
 
-    void sendNewBodyPosition(std::array<cv::Vec3d, CONSTANT::NB_JOINTS> bodyPos)
-    {
-        if (!this->ready) return;
-        this->newDataAvailable = true;
-        this->bodyPosition = bodyPos;
-    }
+        void stopConnection()
+        {
+            if (this->ready)
+            {
+                this->ready = false;
+                this->listenerThread.join();
+                this->senderThread.join();
+            }
+        }
 
-    ~SoftwareConnection()
-    {
-        this->stopConnection();
-    }
-};
+        void _send_body_positions()
+        {
+            return;
+            while (this->ready)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                if (!this->newDataAvailable) continue;
+                this->newDataAvailable = false;
+                std::string data;
+                for(int i = 0; i < CONSTANT::NB_JOINTS; i++)
+                    data += toString(this->bodyPosition[i][0])+"|"+toString(this->bodyPosition[i][1])+"|"+toString(this->bodyPosition[i][2])+"\n";
+                const char* string = data.c_str();
+                unsigned short length = data.size();
+
+                for (SoftwareInfo soft: this->extensions)
+                {
+                    if (this->socket.send(string, length, soft.ip, soft.port) != sf::Socket::Done)
+                        std::cout << ">> Info: Failed to send body position on port " << soft.port << std::endl;
+                }
+            }
+        }
+
+        void _read_input_packets()
+        {
+            while (this->ready)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                char data[100];
+                std::size_t received;
+                sf::IpAddress softIP;
+                unsigned short softPORT;
+                sf::Socket::Status result = this->socket.receive(data, 100, received, softIP, softPORT);
+                if (result == sf::Socket::Done)
+                {
+                    if (received < 15) continue;
+                    std::string string(data, received);
+                    if (string.substr(0, 15) == "[ON]FullBowody-")
+                    {
+                        std::string appName = string.substr(15, string.size());
+                        this->extensions.push_back(SoftwareInfo(softPORT, appName, softIP.toString()));
+                        std::cout << "adding extension " << appName << " (" << softPORT << ")" << std::endl;
+                    } else if (string.substr(0, 16) == "[OFF]FullBowody-")
+                    {
+                        int index = -1;
+                        int counter = 0;
+                        for (SoftwareInfo soft: this->extensions)
+                        {
+                            if (soft.port == softPORT && soft.ip == softIP)
+                            {
+                                index = counter;
+                                break;
+                            }
+                            counter++;
+                        }
+                        if (index >= 0)
+                            this->extensions.erase(this->extensions.begin()+index);
+                        std::cout << "removing extension " << softPORT << std::endl;
+                    }
+                    if (this->cont != nullptr)
+                        this->cont->func();
+                }
+                else
+                {
+                    if (result == sf::Socket::NotReady) continue;
+                    if (result == 3) 
+                    {
+                        this->extensions.clear();
+                        if (this->cont != nullptr)
+                            this->cont->func();
+                    }
+                }
+            }
+        }
+
+        void sendNewBodyPosition(std::array<cv::Vec3d, CONSTANT::NB_JOINTS> bodyPos)
+        {
+            if (!this->ready) return;
+            this->newDataAvailable = true;
+            this->bodyPosition = bodyPos;
+        }
+
+        void setExtensionCallback(void(*callback)())
+        {
+            this->cont = new VoidCallbackContainer(callback);
+        }
+
+        std::vector<SoftwareInfo> getExtensions()
+        {
+            return this->extensions;
+        }
+
+        ~SoftwareConnection()
+        {
+            this->stopConnection();
+        }
+    };
+}

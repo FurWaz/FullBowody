@@ -17,6 +17,7 @@ int main(int argc, char const *argv[])
     CameraCalibrator::setWindow(&win);
     Files::setWindow(&win);
 
+    SceneManager::init();
     SceneManager::setWindow(&win);
     SceneManager::GenerateDefaultScene();
     win.setBodyPos(&SceneManager::bp);
@@ -25,9 +26,11 @@ int main(int argc, char const *argv[])
     while (win.isOpen())
     {
         win.processEvents();
+        SceneManager::update();
         win.refresh();
     }
     win.stopUpdating();
 
+    SceneManager::shutdown();
     return 0;
 }

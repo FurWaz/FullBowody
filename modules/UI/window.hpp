@@ -26,7 +26,7 @@ namespace owo
             list.push_back(el);
         }
 
-        void checkForClear(int asker)
+        bool checkForClear(int asker)
         {
             switch(asker)
             {
@@ -47,8 +47,10 @@ namespace owo
                     loop(list.size())
                         delete list[i];
                     list.clear();
+                    return true;
                 }
             }
+            return false;
         }
     };
 
@@ -86,7 +88,8 @@ namespace owo
                 for (GraphicElement* el: this->elements)
                     el->update(this->updateDelta, this->mousePos);
                 bodyPos->update(this->updateDelta);
-                GarbageCollector::checkForClear(GarbageCollector::UPDATES);
+                if(GarbageCollector::checkForClear(GarbageCollector::UPDATES))
+                    this->focused = nullptr;
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
         }
@@ -309,7 +312,8 @@ namespace owo
                 default:
                     break;
             }
-            GarbageCollector::checkForClear(GarbageCollector::EVENTS);
+            if (GarbageCollector::checkForClear(GarbageCollector::EVENTS))
+                this->focused = nullptr;
         }
 
         /**
@@ -350,6 +354,8 @@ namespace owo
         {
             if (index >= this->graphicElements.size() || index < 0)
                 return;
+            if (this->graphicElements[index] == this->focused)
+                this->focused = nullptr;
             this->graphicElements.erase(this->graphicElements.begin()+index);
             this->updatePhysicElements();
         }
@@ -359,6 +365,7 @@ namespace owo
          */
         void clearElements()
         {
+            this->focused = nullptr;
             this->graphicElements.clear();
             this->updatePhysicElements();
         }

@@ -12,9 +12,54 @@ class BodyJoint:
         return "("+str(self.x)+", "+str(self.y)+", "+str(self.z)+")"
 
 class FBConnection:
-    NB_JOINTS = 33
+    NB_JOINTS = 20
+    JOINT_HEAD = 0
+    JOINT_EYE_R = 1
+    JOINT_EYE_L = 2
+    JOINT_NECK = 3
+    JOINT_SHOULDER_R = 4
+    JOINT_ELBOW_R = 5
+    JOINT_WRIST_R = 6
+    JOINT_HAND_R = 7
+    JOINT_HIP_R = 8
+    JOINT_KNEE_R = 9
+    JOINT_ANKLE_R = 10
+    JOINT_FEET_R = 11
+    JOINT_SHOULDER_L = 12
+    JOINT_ELBOW_L = 13
+    JOINT_WRIST_L = 14
+    JOINT_HAND_L = 15
+    JOINT_HIP_L = 16
+    JOINT_KNEE_L = 17
+    JOINT_ANKLE_L = 18
+    JOINT_FEET_L = 19
+
+    NB_CONNECTIONS = 19
+    POSE_CONNECTIONS = [
+        [JOINT_HEAD, JOINT_EYE_R],
+        [JOINT_HEAD, JOINT_EYE_L],
+        [JOINT_HEAD, JOINT_NECK],
+        [JOINT_NECK, JOINT_SHOULDER_R],
+        [JOINT_NECK, JOINT_SHOULDER_L],
+        [JOINT_SHOULDER_R, JOINT_ELBOW_R],
+        [JOINT_SHOULDER_L, JOINT_ELBOW_L],
+        [JOINT_ELBOW_R, JOINT_WRIST_R],
+        [JOINT_ELBOW_L, JOINT_WRIST_L],
+        [JOINT_WRIST_R, JOINT_HAND_R],
+        [JOINT_WRIST_L, JOINT_HAND_L],
+        [JOINT_NECK, JOINT_HIP_R],
+        [JOINT_NECK, JOINT_HIP_L],
+        [JOINT_HIP_R, JOINT_KNEE_R],
+        [JOINT_HIP_L, JOINT_KNEE_L],
+        [JOINT_KNEE_R, JOINT_ANKLE_R],
+        [JOINT_KNEE_L, JOINT_ANKLE_L],
+        [JOINT_ANKLE_R, JOINT_FEET_R],
+        [JOINT_ANKLE_L, JOINT_FEET_L]
+    ]
+
     def __init__(self, name:str="PythonAddon", port:int=5621, address:str="localhost") -> None:
-        self.__LOGIN_MSG:bytes = ("FullBowody-"+name).encode("utf-8")
+        self.__LOGIN_MSG:bytes = ("[ON]FullBowody-"+name).encode("utf-8")
+        self.__LOGOUT_MSG:bytes = ("[OFF]FullBowody-"+name).encode("utf-8")
         self.__sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.__sock.setblocking(False)
         self.__thread = Thread(target=self.__retrieve_positions)
@@ -23,11 +68,14 @@ class FBConnection:
         self.__addr = address
         self.bodyPosition:list[BodyJoint] = None
         self.__callback = None
+
+    def __del__(self):
+        self.stop()
     
     def start(self) -> bool:
         try:
             self.__running = True
-            r = self.__sock.sendto(self.__LOGIN_MSG, (self.__addr, self.__port))
+            self.__sock.sendto(self.__LOGIN_MSG, (self.__addr, self.__port))
             self.__thread.start()
             return True
         except:
@@ -38,6 +86,7 @@ class FBConnection:
         if not self.__running:
             return False
         self.__running = False
+        self.__sock.sendto(self.__LOGOUT_MSG, (self.__addr, self.__port))
         self.__thread.join()
         return True
 

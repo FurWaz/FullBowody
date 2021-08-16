@@ -172,6 +172,8 @@ namespace owo
         void onFocus(bool focused)
         {
             this->focused = focused;
+            if (this->focused)
+                this->cursorPos = this->text.size();
             this->generateTexture();
             if (!this->focused && this->cont != nullptr)
                 this->cont->func(this->text);

@@ -4,9 +4,7 @@
 #include <opencv2/core.hpp>
 #include <vector>
 #include <chrono>
-#include "./softwareConnection.hpp"
-
-SoftwareConnection con;
+#include "softwareConnection.hpp"
 
 namespace owo
 {
@@ -22,6 +20,7 @@ namespace owo
         std::array<cv::Vec3d, CONSTANT::NB_JOINTS> body;
 
         float tracking_dt;
+        SoftwareConnection* con;
 
         /**
          * @brief Returns a new rotated point based on the point's position and a rotation matrix
@@ -123,7 +122,7 @@ namespace owo
                 );
             }
 
-            con.sendNewBodyPosition(this->getBody());
+            this->con->sendNewBodyPosition(this->getBody());
         }
 
     public:
@@ -135,7 +134,6 @@ namespace owo
             for(int i = 0; i < 33; i++)
                 this->body[i] = cv::Vec3d();
             this->tracking_dt = 0;
-            con.startConnection();
         }
 
         /**
@@ -205,6 +203,16 @@ namespace owo
         std::array<cv::Vec3d, CONSTANT::NB_JOINTS> getCamRays(int camIndex)
         {
             return this->rays[camIndex];
+        }
+
+        void setSoftwareConnection(SoftwareConnection* con)
+        {
+            this->con = con;
+        }
+
+        SoftwareConnection* getSoftwareConnection()
+        {
+            return this->con;
         }
 
         std::vector<Camera*> getCameras()

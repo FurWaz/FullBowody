@@ -237,13 +237,13 @@ namespace owo
             {
                 std::cerr << "err: " << std::endl << e.what();
             }
-            this->updateThread = std::thread(&Camera::_read_frame, this);
             if (!result)
             {
                 this->dimensions = sf::Vector2u(300, 300);
                 for (Image* im: this->graphImages)
                     im->black(sf::Vector2u(300, 300));
-            }
+            } else
+                this->updateThread = std::thread(&Camera::_read_frame, this);
             return result;
         }
 
@@ -496,8 +496,11 @@ namespace owo
 
         ~Camera()
         {
-            this->shouldRead = false;
-            this->updateThread.join();
+            if (this->shouldRead)
+            {
+                this->shouldRead = false;
+                this->updateThread.join();
+            }
         }
     };
 }
