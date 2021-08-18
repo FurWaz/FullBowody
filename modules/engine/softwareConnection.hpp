@@ -2,6 +2,7 @@
 #include <SFML/Network.hpp>
 #include <opencv2/core.hpp>
 #include <thread>
+#include <fstream>
 #include "../constants.hpp"
 #include "../UI/essentials/callbackContainer.hpp"
 
@@ -96,7 +97,6 @@ namespace owo
 
         void _send_body_positions()
         {
-            return;
             while (this->ready)
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -113,6 +113,9 @@ namespace owo
                     if (this->socket.send(string, length, soft.ip, soft.port) != sf::Socket::Done)
                         std::cout << ">> Info: Failed to send body position on port " << soft.port << std::endl;
                 }
+                std::ofstream stream("./resources/bodyPos.txt");
+                stream.write(string, length);
+                stream.close();
             }
         }
 

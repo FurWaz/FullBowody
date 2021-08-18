@@ -1,0 +1,247 @@
+#pragma once
+#include "./basics.hpp"
+#include "./receiver.hpp"
+
+// controllers pos and rot vars
+static double cyaw = 0, cpitch = 0, croll = 0;
+static double ct0, ct1, ct2, ct3, ct4, ct5;
+static double cpX = 0, cpY = 0, cpZ = 0;
+static double c2pX = 0, c2pY = 0, c2pZ = 0;
+
+class VRController : public vr::ITrackedDeviceServerDriver
+{
+private:
+    int index;
+    std::string serial;
+
+    vr::TrackedDeviceIndex_t id;
+    vr::PropertyContainerHandle_t propContainer;
+    vr::VRInputComponentHandle_t comphaptic;
+    vr::VRInputComponentHandle_t HButtons[4], HAnalog[3];
+
+public:
+    VRController()
+    {
+        this->id = vr::k_unTrackedDeviceIndexInvalid;
+        this->propContainer = vr::k_ulInvalidPropertyContainer;
+    }
+
+    void RunFrame()
+    {
+        if (this->index == 1) // Left controller
+        {
+            // vr::VRDriverInput()->UpdateBooleanComponent(HButtons[0], (0x8000 & GetAsyncKeyState('Z')) != 0, 0); //Application Menu
+            // vr::VRDriverInput()->UpdateBooleanComponent(HButtons[1], (0x8000 & GetAsyncKeyState('C')) != 0, 0); //Grip
+            // vr::VRDriverInput()->UpdateBooleanComponent(HButtons[2], (0x8000 & GetAsyncKeyState('V')) != 0, 0); //System
+            // vr::VRDriverInput()->UpdateBooleanComponent(HButtons[3], (0x8000 & GetAsyncKeyState('1')) != 0, 0); //Trackpad
+
+            // vr::VRDriverInput()->UpdateScalarComponent(HAnalog[0], 0.0, 0); //Trackpad x
+            // vr::VRDriverInput()->UpdateScalarComponent(HAnalog[1], 0.0, 0); //Trackpad y
+
+            // if ((GetAsyncKeyState('2') & 0x8000) != 0)
+            //     vr::VRDriverInput()->UpdateScalarComponent(HAnalog[0], 1.0, 0);
+            // if ((GetAsyncKeyState('3') & 0x8000) != 0)
+            //     vr::VRDriverInput()->UpdateScalarComponent(HAnalog[1], 1.0, 0);
+
+            // if ((GetAsyncKeyState('X') & 0x8000) != 0) //Trigger
+            //     vr::VRDriverInput()->UpdateScalarComponent(HAnalog[2], 1.0, 0);
+            // else vr::VRDriverInput()->UpdateScalarComponent(HAnalog[2], 0.0, 0);
+        } else // Right controller
+        {
+            // vr::VRDriverInput()->UpdateBooleanComponent(HButtons[0], (0x8000 & GetAsyncKeyState(190)) != 0, 0); //Application Menu
+            // vr::VRDriverInput()->UpdateBooleanComponent(HButtons[1], (0x8000 & GetAsyncKeyState(191)) != 0, 0); //Grip
+            // vr::VRDriverInput()->UpdateBooleanComponent(HButtons[2], (0x8000 & GetAsyncKeyState('N')) != 0, 0); //System
+            // vr::VRDriverInput()->UpdateBooleanComponent(HButtons[3], (0x8000 & GetAsyncKeyState('2')) != 0, 0); //Trackpad
+
+            // vr::VRDriverInput()->UpdateScalarComponent(HAnalog[0], 0.0, 0); //Trackpad x
+            // vr::VRDriverInput()->UpdateScalarComponent(HAnalog[1], 0.0, 0); //Trackpad y
+
+            // if ((GetAsyncKeyState('4') & 0x8000) != 0) //Trigger
+            //     vr::VRDriverInput()->UpdateScalarComponent(HAnalog[2], 1.0, 0);
+            // else vr::VRDriverInput()->UpdateScalarComponent(HAnalog[2], 0.0, 0);
+        }
+
+        if (this->id != vr::k_unTrackedDeviceIndexInvalid) {
+            vr::VRServerDriverHost()->TrackedDevicePoseUpdated(this->id, GetPose(), sizeof(vr::DriverPose_t));
+        }
+    }
+
+    void ProcessEvent(const vr::VREvent_t& ev)
+    {
+        switch (ev.eventType)
+        {
+            case vr::VREvent_Input_HapticVibration:
+                if (ev.data.hapticVibration.componentHandle == this->comphaptic);
+                    // haptic feedback
+                break;
+        }
+    }
+
+    vr::DriverPose_t GetPose()
+    {
+        vr::DriverPose_t pose = {0};
+        pose.poseIsValid = true;
+        pose.result = vr::TrackingResult_Running_OK;
+        pose.deviceIsConnected = true;
+
+        pose.qWorldFromDriverRotation = HmdQuaternion_Init(1, 0, 0, 0);
+        pose.qDriverFromHeadRotation = HmdQuaternion_Init(1, 0, 0, 0);
+
+        if (this->index == 1) // left controller
+        {
+            // if ((GetAsyncKeyState(70) & 0x8000) != 0) cyaw += 0.1;             //F
+            // if ((GetAsyncKeyState(72) & 0x8000) != 0) cyaw += -0.1;            //H
+            // if ((GetAsyncKeyState(84) & 0x8000) != 0) croll += 0.1;            //T
+            // if ((GetAsyncKeyState(71) & 0x8000) != 0) croll += -0.1;           //G
+            // if ((GetAsyncKeyState(66) & 0x8000) != 0) {cpitch = 0; croll = 0;} //B
+
+            // if ((GetAsyncKeyState(87) & 0x8000) != 0) cpZ += -0.01;            //W
+            // if ((GetAsyncKeyState(83) & 0x8000) != 0) cpZ += 0.01;             //S
+            // if ((GetAsyncKeyState(65) & 0x8000) != 0) cpX += -0.01;            //A
+            // if ((GetAsyncKeyState(68) & 0x8000) != 0) cpX += 0.01;             //D
+            // if ((GetAsyncKeyState(81) & 0x8000) != 0) cpY += 0.01;             //Q
+            // if ((GetAsyncKeyState(69) & 0x8000) != 0) cpY += -0.01;            //E
+            // if ((GetAsyncKeyState(82) & 0x8000) != 0) {cpY = 0; cpZ = 0;}      //R
+            
+            // pose.vecPosition[0] = cpX;
+            // pose.vecPosition[1] = cpY;
+            // pose.vecPosition[2] = cpZ;
+            pose.vecPosition[0] = bodyPos[CONSTANT::JOINT_HAND_L].x;
+            pose.vecPosition[1] = bodyPos[CONSTANT::JOINT_HAND_L].y;
+            pose.vecPosition[2] = bodyPos[CONSTANT::JOINT_HAND_L].z;
+        } else // Right controller
+        {
+            // if ((GetAsyncKeyState(73) & 0x8000) != 0) c2pZ += -0.01;                  //I
+            // if ((GetAsyncKeyState(75) & 0x8000) != 0) c2pZ += 0.01;                   //K
+            // if ((GetAsyncKeyState(74) & 0x8000) != 0) c2pX += -0.01;                  //J
+            // if ((GetAsyncKeyState(76) & 0x8000) != 0) c2pX += 0.01;                   //L
+            // if ((GetAsyncKeyState(85) & 0x8000) != 0) c2pY += 0.01;                   //U
+            // if ((GetAsyncKeyState(79) & 0x8000) != 0) c2pY += -0.01;                  //O
+            // if ((GetAsyncKeyState(80) & 0x8000) != 0) {c2pX = 0; c2pY = 0; c2pZ = 0;} //P
+
+            // pose.vecPosition[0] = c2pX;
+            // pose.vecPosition[1] = c2pY;
+            // pose.vecPosition[2] = c2pZ;
+            pose.vecPosition[0] = bodyPos[CONSTANT::JOINT_HAND_R].x;
+            pose.vecPosition[1] = bodyPos[CONSTANT::JOINT_HAND_R].y;
+            pose.vecPosition[2] = bodyPos[CONSTANT::JOINT_HAND_R].z;
+        }
+
+        //Convert yaw, pitch, roll to quaternion
+        // ct0 = cos(cyaw * 0.5);
+        // ct1 = sin(cyaw * 0.5);
+        // ct2 = cos(croll * 0.5);
+        // ct3 = sin(croll * 0.5);
+        // ct4 = cos(cpitch * 0.5);
+        // ct5 = sin(cpitch * 0.5);
+
+        //Set controller rotation
+        // pose.qRotation.w = ct0 * ct2 * ct4 + ct1 * ct3 * ct5;
+        // pose.qRotation.x = ct0 * ct3 * ct4 - ct1 * ct2 * ct5;
+        // pose.qRotation.y = ct0 * ct2 * ct5 + ct1 * ct3 * ct4;
+        // pose.qRotation.z = ct1 * ct2 * ct4 - ct0 * ct3 * ct5;
+        pose.qRotation.w = 1;
+        pose.qRotation.x = 0;
+        pose.qRotation.y = 0;
+        pose.qRotation.z = 0;
+
+        return pose;
+    }
+
+    vr::EVRInitError Activate(vr::TrackedDeviceIndex_t id)
+    {
+        this->id = id;
+        this->propContainer = vr::VRProperties()->TrackedDeviceToPropertyContainer(this->id);
+
+        vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_ControllerType_String, "vive_controller");
+        vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_InputProfilePath_String, "vive_controller");
+
+        vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_ModelNumber_String, "ViveMV");
+        vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_ManufacturerName_String, "HTC");
+        vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_RenderModelName_String, "vr_controller_vive_1_5");
+
+        vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_TrackingSystemName_String, "VR Controller");
+        vr::VRProperties()->SetInt32Property(this->propContainer, vr::Prop_DeviceClass_Int32, vr::TrackedDeviceClass_Controller);
+        
+        // controller right / left changements
+        switch (this->index)
+        {
+            case 1:
+            vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_SerialNumber_String, "CTRLSerial1");
+            case 2:
+            vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_SerialNumber_String, "CTRLSerial2");
+                break;
+        }
+
+        //  Buttons handles
+        uint64_t supportedButtons = 0xFFFFFFFFFFFFFFFFULL;
+        vr::VRProperties()->SetUint64Property(this->propContainer, vr::Prop_SupportedButtons_Uint64, supportedButtons);
+
+        // controller right / left changements
+        switch (this->index)
+        {
+            case 1:
+            vr::VRProperties()->SetInt32Property(this->propContainer, vr::Prop_ControllerRoleHint_Int32, vr::TrackedControllerRole_LeftHand);
+                break;
+            case 2:
+            vr::VRProperties()->SetInt32Property(this->propContainer, vr::Prop_ControllerRoleHint_Int32, vr::TrackedControllerRole_RightHand);
+                break;
+        }
+
+        vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_InputProfilePath_String, "{null}/input/mycontroller_profile.json");
+        vr::VRDriverInput()->CreateBooleanComponent(this->propContainer, "/input/application_menu/click", &HButtons[0]);
+        vr::VRDriverInput()->CreateBooleanComponent(this->propContainer, "/input/grip/click", &HButtons[1]);
+        vr::VRDriverInput()->CreateBooleanComponent(this->propContainer, "/input/system/click", &HButtons[2]);
+        vr::VRDriverInput()->CreateBooleanComponent(this->propContainer, "/input/trackpad/click", &HButtons[3]);
+
+        // Analog handles
+        vr::VRDriverInput()->CreateScalarComponent(
+            this->propContainer, "/input/trackpad/x", &HAnalog[0],
+            vr::EVRScalarType::VRScalarType_Absolute, vr::EVRScalarUnits::VRScalarUnits_NormalizedTwoSided
+        );
+        vr::VRDriverInput()->CreateScalarComponent(
+            this->propContainer, "/input/trackpad/y", &HAnalog[1],
+            vr::EVRScalarType::VRScalarType_Absolute, vr::EVRScalarUnits::VRScalarUnits_NormalizedTwoSided
+        );
+        vr::VRDriverInput()->CreateScalarComponent(
+            this->propContainer, "/input/trigger/value", &HAnalog[2],
+            vr::EVRScalarType::VRScalarType_Absolute, vr::EVRScalarUnits::VRScalarUnits_NormalizedOneSided
+        );
+
+        vr::VRProperties()->SetInt32Property(this->propContainer, vr::Prop_Axis0Type_Int32, vr::k_eControllerAxis_TrackPad);
+        // create haptic component
+        vr::VRDriverInput()->CreateHapticComponent(this->propContainer, "/output/haptic", &this->comphaptic);
+
+        return vr::VRInitError_None;
+    }
+
+    void Deactivate() {this->id = vr::k_unTrackedDeviceIndexInvalid;}
+    void EnterStandby() {}
+    void LeaveStandBy() {}
+    void PowerOff() {}
+    void* GetComponent(const char *nameAndVersion) {return NULL;}
+    std::string GetSerialNumber()
+    {
+        switch (this->index)
+        {
+            case 1:
+                return "CtrlSerial1";
+            case 2:
+                return "CtrlSerial2";
+        }
+        return "";
+    }
+
+    void DebugRequest(const char *pchRequest, char *pchResponseBuffer, uint32_t unResponseBufferSize)
+    {
+        if (unResponseBufferSize >= 1)
+            pchResponseBuffer[0] = 0;
+    }
+
+    void setControllerIndex(int index) {this->index = index;}
+
+    ~VRController()
+    {
+
+    }
+};
