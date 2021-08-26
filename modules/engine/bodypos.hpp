@@ -64,6 +64,7 @@ namespace owo
 
             double t1 = (x[0] * d2[1] - x[1] * d2[0])/cross;
             r = o1 + d1 * t1;
+            r[0] *= -1; r[1] *= -1;
             return true;
         }
 

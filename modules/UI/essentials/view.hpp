@@ -94,9 +94,9 @@ namespace owo
 
         void draw_origin(cv::Vec3d pos, cv::Mat rot, float size = 1.f)
         {
-            draw_line(vec3_vec2(rotate(cv::Vec3d(size, 0, 0), rot) + pos), vec3_vec2(rotate(cv::Vec3d(-size, 0, 0), rot) + pos), CONSTANT::COLOR_RED_LIGHT, 2);
-            draw_line(vec3_vec2(rotate(cv::Vec3d(0, size, 0), rot) + pos), vec3_vec2(rotate(cv::Vec3d(0, -size, 0), rot) + pos), CONSTANT::COLOR_GREEN_LIGHT, 2);
-            draw_line(vec3_vec2(rotate(cv::Vec3d(0, 0, size), rot) + pos), vec3_vec2(rotate(cv::Vec3d(0, 0, -size), rot) + pos), CONSTANT::COLOR_BLUE_LIGHT, 2);
+            draw_line(vec3_vec2(rotate(cv::Vec3d(size, 0, 0), rot) + pos), vec3_vec2(rotate(cv::Vec3d(0, 0, 0), rot) + pos), CONSTANT::COLOR_RED_LIGHT, 2);
+            draw_line(vec3_vec2(rotate(cv::Vec3d(0, size, 0), rot) + pos), vec3_vec2(rotate(cv::Vec3d(0, 0, 0), rot) + pos), CONSTANT::COLOR_GREEN_LIGHT, 2);
+            draw_line(vec3_vec2(rotate(cv::Vec3d(0, 0, size), rot) + pos), vec3_vec2(rotate(cv::Vec3d(0, 0, 0), rot) + pos), CONSTANT::COLOR_BLUE_LIGHT, 2);
         }
 
         void draw_camera(Camera* cam, std::array<cv::Vec3d, CONSTANT::NB_JOINTS> rays)
@@ -200,7 +200,6 @@ namespace owo
 
         void update(float dt, sf::Vector2i mousePos)
         {
-            this->rotation.y += dt*0.25f;
             if (clicked)
             {
                 sf::Vector2i delta = mousePos - lastMousePos;

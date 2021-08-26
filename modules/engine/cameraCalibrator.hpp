@@ -21,6 +21,7 @@ namespace CameraCalibrator
     void _cancel_calibration()
     {
         window->removeElement(calibPopup);
+        calibPopup->cancel();
     }
 
     void calibrateCamera(Camera* cam)

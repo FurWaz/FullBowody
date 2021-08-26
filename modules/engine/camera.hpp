@@ -120,7 +120,7 @@ namespace owo
         bool sourceAvailable;              // is the source of the camera ready
         bool debugMode;                    // is the camera in debug mode (for visual hints)
 
-        bool shouldRead;                   // should the camera thread read the vide stream
+        bool shouldRead;                   // should the camera thread read the video stream
         std::thread updateThread;          // video stream reading thread
 
         cv::Ptr<cv::aruco::Dictionary> aruco_dict = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50); // aruco dictionnary (aruco x4 models)
@@ -157,7 +157,7 @@ namespace owo
             this->shouldRead = false;
             this->debugMode = false;
             this->rotation = cv::Mat::eye(cv::Size(3, 3), CV_64F);
-            this->aruco_board = cv::aruco::GridBoard::create(3, 2, 0.088, 0.005, this->aruco_dict, 0);
+            this->aruco_board = cv::aruco::GridBoard::create(3, 2, 0.0876, 0.005, this->aruco_dict, 0);
 
             this->last_refresh_time = std::chrono::steady_clock::now();
         }
@@ -169,8 +169,8 @@ namespace owo
         {
             cv::Mat rotMat(3, 3, CV_64F);
             cv::Rodrigues(this->aruco_boardRotation, rotMat);
-            rotMat = rotMat.t();
             cv::Mat pos(3, 1, CV_64F);
+            rotMat = rotMat.t();
             pos = -rotMat * this->aruco_boardPosition;
 
             this->position[0] = pos.at<double>(0, 0);
@@ -295,12 +295,25 @@ namespace owo
                     detectArucoMarkers();
                     getArucoBoardPosition();
                     getCamPosRot();
+                    cv::Mat tor;
+                    cv::undistort(this->frame, tor, this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients);
+                    cv::imshow("Undistorded", tor);
+                    cv::waitKey(1);
                     if (this->aruco_ids.size() > 0)
                     {
                         cv::aruco::drawDetectedMarkers(this->frame, this->aruco_corners, this->aruco_ids);
+                        std::vector<cv::Vec3d> tvec, rvec;
+                        cv::aruco::estimatePoseSingleMarkers(this->aruco_corners, 0.088, this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients, rvec, tvec);
+                        for(int i = 0; i < this->aruco_ids.size(); i++)
+                        {
+                            cv::drawFrameAxes(
+                                this->frame, this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients,
+                                rvec[i], tvec[i], 0.03, 6
+                            );
+                        }
                         cv::drawFrameAxes(
                             this->frame, this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients,
-                            this->aruco_boardRotation, this->aruco_boardPosition, 0.042, 6
+                            this->aruco_boardRotation, this->aruco_boardPosition, 0.05, 8
                         );
                     }
                     std::array<cv::Point3f, CONSTANT::NB_JOINTS> tPoints = this->tracker->getPoints();

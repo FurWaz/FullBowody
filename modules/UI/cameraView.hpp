@@ -25,8 +25,16 @@ namespace owo
         Button* loadBtn;
         Button* saveBtn;
         Button* detectBtn;
-        std::string cameraSource;
 
+        cv::Vec3d camPos, camRot;
+        Label* camposx_text;
+        Label* camposy_text;
+        Label* camposz_text;
+        Label* camrotx_text;
+        Label* camroty_text;
+        Label* camrotz_text;
+
+        std::string cameraSource;
         std::thread loaderThread;
         bool shouldJoinThread;
         float dt;
@@ -92,6 +100,38 @@ namespace owo
                 sf::Vector2i(this->dimensions.width/2-35, 20),
                 16, Label::LEFT, CONSTANT::COLOR_FORE
             );
+
+            int fieldSize = (this->getSize().x/2)/3;
+            this->camposx_text = new Label(
+                "X: 0cm",
+                sf::Vector2i(this->dimensions.width/2, 140), sf::Vector2i(fieldSize, 20),
+                16, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK
+            );
+            this->camposy_text = new Label(
+                "Y: 0cm",
+                sf::Vector2i(this->dimensions.width/2+fieldSize, 140), sf::Vector2i(fieldSize, 20),
+                16, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK
+            );
+            this->camposz_text = new Label(
+                "Z: 0cm",
+                sf::Vector2i(this->dimensions.width/2+fieldSize*2, 140), sf::Vector2i(fieldSize, 20),
+                16, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK
+            );
+            this->camrotx_text = new Label(
+                "X: 0",
+                sf::Vector2i(this->dimensions.width/2, 200), sf::Vector2i(fieldSize, 20),
+                16, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK
+            );
+            this->camroty_text = new Label(
+                "Y: 0",
+                sf::Vector2i(this->dimensions.width/2+fieldSize, 200), sf::Vector2i(fieldSize, 20),
+                16, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK
+            );
+            this->camrotz_text = new Label(
+                "Z: 0",
+                sf::Vector2i(this->dimensions.width/2+fieldSize*2, 200), sf::Vector2i(fieldSize, 20),
+                16, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK
+            );
             
             this->cam->attachImage(this->im);
             this->input->setCallback(&CameraView::openCameraSource, this);
@@ -106,6 +146,12 @@ namespace owo
             this->addElement(this->input);
             this->addElement(this->checkbox);
             this->addElement(this->checkbox_text);
+            this->addElement(this->camposx_text);
+            this->addElement(this->camposy_text);
+            this->addElement(this->camposz_text);
+            this->addElement(this->camrotx_text);
+            this->addElement(this->camroty_text);
+            this->addElement(this->camrotz_text);
             this->addElement(this->calibrateBtn);
             this->addElement(this->detectBtn);
             this->addElement(this->loadBtn);
@@ -169,10 +215,30 @@ namespace owo
 
         void update(float dt, sf::Vector2i mousePos)
         {
-            if (this->shouldJoinThread && this->loaderThread.joinable())
+            if (this->shouldJoinThread)
             {
                 this->shouldJoinThread = false;
                 this->loaderThread.join();
+            }
+            cv::Vec3d pos = this->cam->getPosition();
+            cv::Vec3d rot;
+            cv::Rodrigues(this->cam->getRotation(), rot);
+            if (pos != this->camPos) // update pos
+            {
+                this->camPos = pos;
+                this->camposx_text->setText("X: "+std::to_string((int)(pos[0]*100))+"cm");
+                this->camposy_text->setText("Y: "+std::to_string((int)(pos[1]*100))+"cm");
+                this->camposz_text->setText("Z: "+std::to_string((int)(pos[2]*100))+"cm");
+            }
+            if (rot != this->camRot) // update rot
+            {
+                this->camRot = rot;
+                this->camrotx_text->setTextColor(CONSTANT::COLOR_FORE);
+                this->camroty_text->setTextColor(CONSTANT::COLOR_FORE);
+                this->camrotz_text->setTextColor(CONSTANT::COLOR_FORE);
+                this->camrotx_text->setText("X: "+std::to_string((int)(rot[0]*CONSTANT::RAD2DEG)));
+                this->camroty_text->setText("Y: "+std::to_string((int)(rot[1]*CONSTANT::RAD2DEG)));
+                this->camrotz_text->setText("Z: "+std::to_string((int)(rot[2]*CONSTANT::RAD2DEG)));
             }
         }
 
@@ -215,6 +281,7 @@ namespace owo
 
         void _update_source()
         {
+            this->shouldJoinThread = false;
             std::string txt = this->input->getText();
             if (txt != "")
             {

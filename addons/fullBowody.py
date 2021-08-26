@@ -12,32 +12,30 @@ class BodyJoint:
         return "("+str(self.x)+", "+str(self.y)+", "+str(self.z)+")"
 
 class FBConnection:
-    NB_JOINTS = 20
+    NB_JOINTS = 19
     JOINT_HEAD = 0
-    JOINT_EYE_R = 1
-    JOINT_EYE_L = 2
-    JOINT_NECK = 3
-    JOINT_SHOULDER_R = 4
-    JOINT_ELBOW_R = 5
-    JOINT_WRIST_R = 6
-    JOINT_HAND_R = 7
-    JOINT_HIP_R = 8
-    JOINT_KNEE_R = 9
-    JOINT_ANKLE_R = 10
-    JOINT_FEET_R = 11
-    JOINT_SHOULDER_L = 12
-    JOINT_ELBOW_L = 13
-    JOINT_WRIST_L = 14
-    JOINT_HAND_L = 15
-    JOINT_HIP_L = 16
-    JOINT_KNEE_L = 17
-    JOINT_ANKLE_L = 18
-    JOINT_FEET_L = 19
+    JOINT_NOSE = 1
+    JOINT_NECK = 2
+    JOINT_SHOULDER_R = 3
+    JOINT_ELBOW_R = 4
+    JOINT_WRIST_R = 5
+    JOINT_HAND_R = 6
+    JOINT_HIP_R = 7
+    JOINT_KNEE_R = 8
+    JOINT_ANKLE_R = 9
+    JOINT_FEET_R = 10
+    JOINT_SHOULDER_L = 11
+    JOINT_ELBOW_L = 12
+    JOINT_WRIST_L = 13
+    JOINT_HAND_L = 14
+    JOINT_HIP_L = 15
+    JOINT_KNEE_L = 16
+    JOINT_ANKLE_L = 17
+    JOINT_FEET_L = 18
 
-    NB_CONNECTIONS = 19
+    NB_CONNECTIONS = 18
     POSE_CONNECTIONS = [
-        [JOINT_HEAD, JOINT_EYE_R],
-        [JOINT_HEAD, JOINT_EYE_L],
+        [JOINT_HEAD, JOINT_NOSE],
         [JOINT_HEAD, JOINT_NECK],
         [JOINT_NECK, JOINT_SHOULDER_R],
         [JOINT_NECK, JOINT_SHOULDER_L],
@@ -73,6 +71,7 @@ class FBConnection:
         self.stop()
     
     def start(self) -> bool:
+        if self.__running: return
         try:
             self.__running = True
             self.__sock.sendto(self.__LOGIN_MSG, (self.__addr, self.__port))

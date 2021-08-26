@@ -5,10 +5,10 @@
 class VRDriver : vr::IServerTrackedDeviceProvider
 {
 private:
+    // VRHeadset* headset = nullptr;
     VRController* leftControl = nullptr;
     VRController* rightControl = nullptr;
     Receiver receiver;
-    // VRHeadset* headset = nullptr;
     
 public:
     const char* const* GetInterfaceVersions() {return vr::k_InterfaceVersions;}
@@ -69,6 +69,6 @@ public:
 
     ~VRDriver()
     {
-
+        
     }
 };

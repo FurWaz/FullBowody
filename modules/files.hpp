@@ -38,8 +38,9 @@ namespace Files
         popup->getCloseButton()->setCallback(removePopup);
         popup->addComponent(input);
         popup->addComponent(btn);
-        input->generateTexture();
         window->addElement(popup);
+        input->generateTexture();
+        btn->generateTexture();
     }
 
     void setWindow(Window* win)

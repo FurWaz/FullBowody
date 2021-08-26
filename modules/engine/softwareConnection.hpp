@@ -2,7 +2,6 @@
 #include <SFML/Network.hpp>
 #include <opencv2/core.hpp>
 #include <thread>
-#include <fstream>
 #include "../constants.hpp"
 #include "../UI/essentials/callbackContainer.hpp"
 
@@ -66,7 +65,7 @@ namespace owo
 
         std::string toString(double number)
         {
-            return std::to_string( ((int)(number * 100))*0.01d );
+            return std::to_string(number);
         }
 
     public:
@@ -113,9 +112,6 @@ namespace owo
                     if (this->socket.send(string, length, soft.ip, soft.port) != sf::Socket::Done)
                         std::cout << ">> Info: Failed to send body position on port " << soft.port << std::endl;
                 }
-                std::ofstream stream("./resources/bodyPos.txt");
-                stream.write(string, length);
-                stream.close();
             }
         }
 
@@ -131,6 +127,7 @@ namespace owo
                 sf::Socket::Status result = this->socket.receive(data, 100, received, softIP, softPORT);
                 if (result == sf::Socket::Done)
                 {
+                    std::cout << "received new data: " << data << std::endl;
                     if (received < 15) continue;
                     std::string string(data, received);
                     if (string.substr(0, 15) == "[ON]FullBowody-")

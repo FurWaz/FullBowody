@@ -1,61 +1,8 @@
 #pragma once
 #include <thread>
 #include <string>
-#include <fstream>
-#include <streambuf>
+#include <WinSock2.h>
 #include "./basics.hpp"
-
-namespace CONSTANT
-{
-    /** @brief Number of body joints in the app*/
-    const unsigned char NB_JOINTS = 20;
-    // body joints
-    const unsigned char JOINT_HEAD = 0;
-    const unsigned char JOINT_EYE_R = 1;
-    const unsigned char JOINT_EYE_L = 2;
-    const unsigned char JOINT_NECK = 3;
-    const unsigned char JOINT_SHOULDER_R = 4;
-    const unsigned char JOINT_ELBOW_R = 5;
-    const unsigned char JOINT_WRIST_R = 6;
-    const unsigned char JOINT_HAND_R = 7;
-    const unsigned char JOINT_HIP_R = 8;
-    const unsigned char JOINT_KNEE_R = 9;
-    const unsigned char JOINT_ANKLE_R = 10;
-    const unsigned char JOINT_FEET_R = 11;
-    const unsigned char JOINT_SHOULDER_L = 12;
-    const unsigned char JOINT_ELBOW_L = 13;
-    const unsigned char JOINT_WRIST_L = 14;
-    const unsigned char JOINT_HAND_L = 15;
-    const unsigned char JOINT_HIP_L = 16;
-    const unsigned char JOINT_KNEE_L = 17;
-    const unsigned char JOINT_ANKLE_L = 18;
-    const unsigned char JOINT_FEET_L = 19;
-    
-    /** @brief Number of connections between the body joints */
-    const unsigned char NB_CONNECTIONS = 19;
-    /** @brief Connections between each joint of the body for a wired representation */
-    const unsigned char POSE_CONNECTIONS[NB_CONNECTIONS][2] = {
-        {JOINT_HEAD, JOINT_NECK},
-        {JOINT_HEAD, JOINT_EYE_R},
-        {JOINT_HEAD, JOINT_EYE_L},
-        {JOINT_NECK, JOINT_SHOULDER_R},
-        {JOINT_NECK, JOINT_SHOULDER_L},
-        {JOINT_SHOULDER_R, JOINT_ELBOW_R},
-        {JOINT_SHOULDER_L, JOINT_ELBOW_L},
-        {JOINT_ELBOW_R, JOINT_WRIST_R},
-        {JOINT_ELBOW_L, JOINT_WRIST_L},
-        {JOINT_WRIST_R, JOINT_HAND_R},
-        {JOINT_WRIST_L, JOINT_HAND_L},
-        {JOINT_NECK, JOINT_HIP_R},
-        {JOINT_NECK, JOINT_HIP_L},
-        {JOINT_HIP_R, JOINT_KNEE_R},
-        {JOINT_HIP_L, JOINT_KNEE_L},
-        {JOINT_KNEE_R, JOINT_ANKLE_R},
-        {JOINT_KNEE_L, JOINT_ANKLE_L},
-        {JOINT_ANKLE_R, JOINT_FEET_R},
-        {JOINT_ANKLE_L, JOINT_FEET_L}
-    };
-}
 
 typedef struct Point3f
 {
@@ -71,19 +18,102 @@ class Receiver
 private:
     std::thread receiver;
     bool running;
+    WSAData wsa;
+    sockaddr_in server_addr;
+    int sock;
+    bool ready;
+
+    const unsigned short SERVER_PORT = 5621;
+    const std::string SERVER_IP = "127.0.0.1";
+    const std::string LOGIN_MSG = "[ON]FullBowody-VRPlugin";
+    const std::string LOGOUT_MSG = "[OFF]FullBowody-VRPlugin";
+
+    void calculateRelativePositions()
+    {
+        // Set hand position relative to head orientation and position
+        float HEADRot = atan2(
+            (bodyPos[CONSTANT::JOINT_NOSE].x-bodyPos[CONSTANT::JOINT_HEAD].x),
+            (bodyPos[CONSTANT::JOINT_NOSE].y-bodyPos[CONSTANT::JOINT_HEAD].y)
+        );
+        Point3f HEADPos = bodyPos[CONSTANT::JOINT_HEAD];
+
+        uint32_t nbDevices = 1;
+        vr::TrackedDevicePose_t devicesInfo[vr::k_unMaxTrackedDeviceCount];
+        vr::VRServerDriverHost()->GetRawTrackedDevicePoses(0, devicesInfo, nbDevices);
+        vr::DriverPose_t DPose = matrix2pose(devicesInfo[0].mDeviceToAbsoluteTracking);
+        float HMDRot = quaternion2euler(DPose.qRotation).y;
+        Point3f HMDPos(DPose.vecPosition[0], DPose.vecPosition[1], DPose.vecPosition[2]);
+
+        println(("Head rot: "+std::to_string(HEADRot*rad2deg)+" | HMD rot: "+std::to_string(HMDRot*rad2deg)).c_str());
+
+        for (int i = CONSTANT::JOINT_NECK; i < CONSTANT::NB_JOINTS; i++)
+        {
+            Point3f* p = &bodyPos[i];
+            p->y = (p->y-HEADPos.y) + HMDPos.y;
+
+            // head-relative position
+            p->x = -cos(HEADRot) * p->x + sin(HEADRot) * p->z;
+            p->z =  cos(HEADRot) * p->z - sin(HEADRot) * p->x;
+
+            // world-relative position
+            p->x =  cos(HMDRot) * p->x - sin(HMDRot) * p->z;
+            p->z =  cos(HMDRot) * p->z + sin(HMDRot) * p->x;
+        }
+    }
+
+    vr::DriverPose_t matrix2pose(vr::HmdMatrix34_t matrix)
+    {
+        vr::DriverPose_t res;
+        res.deviceIsConnected = true;
+        res.poseIsValid = true;
+        res.vecPosition[0] = matrix.m[0][3];
+        res.vecPosition[1] = matrix.m[1][3];
+        res.vecPosition[2] = matrix.m[2][3];
+        res.qRotation.w = sqrt(fmax(0, 1 + matrix.m[0][0] + matrix.m[1][1]+ matrix.m[2][2])) / 2;
+        res.qRotation.x = sqrt(fmax(0, 1 + matrix.m[0][0] - matrix.m[1][1] - matrix.m[2][2])) / 2;
+        res.qRotation.y = sqrt(fmax(0, 1 - matrix.m[0][0] + matrix.m[1][1] - matrix.m[2][2])) / 2;
+        res.qRotation.z = sqrt(fmax(0, 1 - matrix.m[0][0] - matrix.m[1][1] + matrix.m[2][2])) / 2;
+        res.qRotation.x = copysign(res.qRotation.x, matrix.m[2][1] - matrix.m[1][2]);
+        res.qRotation.y = copysign(res.qRotation.y, matrix.m[0][2] - matrix.m[2][0]);
+        res.qRotation.z = copysign(res.qRotation.z, matrix.m[1][0] - matrix.m[0][1]);
+        return res;
+    }
 
 public:
     Receiver()
     {
-        
+        for(int i = 0; i < CONSTANT::NB_JOINTS; i++)
+            bodyPos[i] = Point3f();
+        this->Init();
+    }
+
+    void Init()
+    {
+        //init wsa
+        this->ready = true;
+        if (WSAStartup(MAKEWORD(2, 2), &this->wsa) != 0)
+            this->ready = false;
+        if (!this->ready) return;
+        // create socket
+        this->sock = socket(AF_INET, SOCK_DGRAM, 0);
+        if ( this->sock == SOCKET_ERROR )
+            this->ready = false;
+        u_long state = 1;
+        ioctlsocket(this->sock, FIONBIO, &state); // non blocking socket
     }
 
     void Start()
     {
-        this->running = false;
-        for(int i = 0; i < CONSTANT::NB_JOINTS; i++)
-            bodyPos[i] = Point3f();
-        if (this->running) return;
+        if (!this->ready || this->running) return;
+
+        // address setup
+        memset((char*) &this->server_addr, 0, sizeof(this->server_addr));
+        this->server_addr.sin_family = AF_INET;
+        this->server_addr.sin_port = htons(this->SERVER_PORT);
+        this->server_addr.sin_addr.S_un.S_addr = inet_addr(this->SERVER_IP.c_str());
+
+        // send login message
+        sendto(this->sock, this->LOGIN_MSG.c_str(), this->LOGIN_MSG.size(), 0, (sockaddr*) &this->server_addr, sizeof(this->server_addr));
         this->running = true;
         this->receiver = std::thread(&Receiver::_check_for_data, this);
     }
@@ -94,6 +124,7 @@ public:
         {
             this->running = false;
             this->receiver.join();
+            sendto(this->sock, this->LOGOUT_MSG.c_str(), this->LOGOUT_MSG.size(), 0, (sockaddr*) &this->server_addr, sizeof(this->server_addr));
         }
     }
 
@@ -101,14 +132,15 @@ public:
     {
         while (this->running)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            
-            std::ifstream stream("C:/Users/FurWaz/Documents/GitHub/FullBowody/resources/bodyPos.txt");
-            std::string data((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
-            stream.close();
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+            char buf[1024];
+            int servlen = sizeof(this->server_addr);
+            if (recvfrom(this->sock, buf, sizeof(buf), 0, (sockaddr*) &this->server_addr, &servlen) == SOCKET_ERROR)
+                continue;
+            std::string data(buf);
             unsigned short cursor = 0;
             unsigned short index = 0;
-            // get the body points from the string
+            // get the raw body points from the string
             while (cursor < data.size() && index < CONSTANT::NB_JOINTS)
             {
                 try 
@@ -139,19 +171,14 @@ public:
                 } catch (std::exception &e) {break;}
                 index++;
             }
-            bodyPos[CONSTANT::JOINT_HAND_L].x -= bodyPos[CONSTANT::JOINT_HEAD].x;
-            bodyPos[CONSTANT::JOINT_HAND_L].y -= bodyPos[CONSTANT::JOINT_HEAD].y;
-            bodyPos[CONSTANT::JOINT_HAND_L].z -= bodyPos[CONSTANT::JOINT_HEAD].z;
-            bodyPos[CONSTANT::JOINT_HAND_R].x -= bodyPos[CONSTANT::JOINT_HEAD].x;
-            bodyPos[CONSTANT::JOINT_HAND_R].y -= bodyPos[CONSTANT::JOINT_HEAD].y;
-            bodyPos[CONSTANT::JOINT_HAND_R].z -= bodyPos[CONSTANT::JOINT_HEAD].z;
-            bodyPos[CONSTANT::JOINT_HAND_L].x = -bodyPos[CONSTANT::JOINT_HAND_L].x;
-            bodyPos[CONSTANT::JOINT_HAND_R].x = -bodyPos[CONSTANT::JOINT_HAND_R].x;
+            this->calculateRelativePositions();
         }
     }
 
     ~Receiver()
     {
         this->Stop();
+        closesocket(this->sock);
+        WSACleanup();
     }
 };

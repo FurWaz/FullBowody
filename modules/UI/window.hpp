@@ -86,7 +86,12 @@ namespace owo
             {
                 this->updateDelta = this->updateClock.restart().asSeconds();
                 for (GraphicElement* el: this->elements)
-                    el->update(this->updateDelta, this->mousePos);
+                {
+                    try
+                    {
+                        el->update(this->updateDelta, this->mousePos);
+                    } catch (std::out_of_range &e) {break;}
+                }
                 bodyPos->update(this->updateDelta);
                 if(GarbageCollector::checkForClear(GarbageCollector::UPDATES))
                     this->focused = nullptr;
@@ -168,7 +173,9 @@ namespace owo
             this->setSize(width, height);
             this->updateClock.restart();
             this->refreshClock.restart();
-            this->screen.setVerticalSyncEnabled(true);
+            sf::Image icon;
+            if (icon.loadFromFile("./resources/pics/fullbowody.png"))
+                this->screen.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
             GarbageCollector::init();
         }
 
@@ -178,6 +185,12 @@ namespace owo
         void refresh()
         {
             this->refreshDelta = this->refreshClock.restart().asSeconds();
+            if (!this->screen.hasFocus())
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                return;
+            }
+            if (this->refreshDelta < 1/30) return;
             screen.clear(CONSTANT::COLOR_CLEAR);
             int nb = 0;
             for (GraphicElement* el: this->graphicElements)
@@ -224,93 +237,94 @@ namespace owo
          */
         void processEvents()
         {
-            if (!this->screen.pollEvent(this->event)) return;
-
-            int key;
-            bool canHoverTrue = true;
-            switch (event.type)
+            while (this->screen.pollEvent(this->event))
             {
-                case sf::Event::Closed:
-                    this->close();
-                    break;
+                int key;
+                bool canHoverTrue = true;
+                switch (event.type)
+                {
+                    case sf::Event::Closed:
+                        this->close();
+                        break;
 
-                case sf::Event::MouseMoved:
-                    this->mousePos = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
-                    for (auto i = this->elements.end()-1; i >= this->elements.begin(); i--)
-                    {
-                        GraphicElement* el = (*i);
-                        if (el->doesReceiveEvents())
+                    case sf::Event::MouseMoved:
+                        this->mousePos = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
+                        for (auto i = this->elements.end()-1; i >= this->elements.begin(); i--)
                         {
-                            if (el->collides(this->mousePos))
+                            GraphicElement* el = (*i);
+                            if (el->doesReceiveEvents())
                             {
-                                if (!el->isHovered() && canHoverTrue)
-                                    el->onHover(true);
-                                canHoverTrue = false;
-                            }
-                            else
-                            {
-                                if (el->isHovered())
-                                    el->onHover(false);
+                                if (el->collides(this->mousePos))
+                                {
+                                    if (!el->isHovered() && canHoverTrue)
+                                        el->onHover(true);
+                                    canHoverTrue = false;
+                                }
+                                else
+                                {
+                                    if (el->isHovered())
+                                        el->onHover(false);
+                                }
                             }
                         }
-                    }
-                    break;
+                        break;
 
-                case sf::Event::MouseButtonPressed:
-                    this->focused = nullptr;
-                    for (auto i = this->elements.end()-1; i >= this->elements.begin(); i--)
-                    {
-                        GraphicElement* el = (*i);
-                        if (!el->doesReceiveEvents()) continue;
-                        if (el->isHovered())
+                    case sf::Event::MouseButtonPressed:
+                        this->focused = nullptr;
+                        for (auto i = this->elements.end()-1; i >= this->elements.begin(); i--)
                         {
-                            el->onClick(event.mouseButton.button, true);
-                            this->focused = el;
-                            if (!el->isFocused()) el->onFocus(true);
-                            break;
-                        } else
-                            if (el->isFocused()) el->onFocus(false);
-                    }
-                    break;
+                            GraphicElement* el = (*i);
+                            if (!el->doesReceiveEvents()) continue;
+                            if (el->isHovered())
+                            {
+                                el->onClick(event.mouseButton.button, true);
+                                this->focused = el;
+                                if (!el->isFocused()) el->onFocus(true);
+                                break;
+                            } else
+                                if (el->isFocused()) el->onFocus(false);
+                        }
+                        break;
 
-                case sf::Event::MouseButtonReleased:
-                    for (auto i = this->elements.end()-1; i >= this->elements.begin(); i--)
-                    {
-                        GraphicElement* el = (*i);
-                        if (!el->doesReceiveEvents() || !el->isHovered()) continue;
-                        el->onClick(event.mouseButton.button, false);
-                    }
-                    break;
+                    case sf::Event::MouseButtonReleased:
+                        for (auto i = this->elements.end()-1; i >= this->elements.begin(); i--)
+                        {
+                            GraphicElement* el = (*i);
+                            if (!el->doesReceiveEvents() || !el->isHovered()) continue;
+                            el->onClick(event.mouseButton.button, false);
+                        }
+                        break;
 
-                case sf::Event::MouseWheelScrolled:
-                    for (auto i = this->elements.end()-1; i >= this->elements.begin(); i--)
-                    {
-                        GraphicElement* el = (*i);
-                        if (!el->doesReceiveEvents() || !el->isHovered()) continue;
-                        el->onScroll(event.mouseWheelScroll.delta*100);
-                    }
-                    break;
+                    case sf::Event::MouseWheelScrolled:
+                        for (auto i = this->elements.end()-1; i >= this->elements.begin(); i--)
+                        {
+                            GraphicElement* el = (*i);
+                            if (!el->doesReceiveEvents() || !el->isHovered()) continue;
+                            el->onScroll(event.mouseWheelScroll.delta*100);
+                        }
+                        break;
 
-                case sf::Event::KeyPressed:
-                    if (this->focused == nullptr) return;
-                    key = event.key.code;
-                    this->screen.pollEvent(this->event);
-                    if (event.type == sf::Event::TextEntered)
-                        this->focused->onKey(key, event.text.unicode, true);
-                    else this->focused->onKey(key, CONSTANT::NO_CHAR, true);
-                    break;
+                    case sf::Event::KeyPressed:
+                        if (this->focused == nullptr) return;
+                        key = event.key.code;
+                        this->screen.pollEvent(this->event);
+                        if (event.type == sf::Event::TextEntered)
+                            this->focused->onKey(key, event.text.unicode, true);
+                        else this->focused->onKey(key, CONSTANT::NO_CHAR, true);
+                        break;
 
-                case sf::Event::KeyReleased:
-                    if (this->focused == nullptr) return;
-                    key = event.key.code;
-                    this->screen.pollEvent(this->event);
-                    if (event.type == sf::Event::TextEntered)
-                        this->focused->onKey(key, event.text.unicode, false);
-                    else this->focused->onKey(key, CONSTANT::NO_CHAR, false);
-                    break;
-                    
-                default:
-                    break;
+                    case sf::Event::KeyReleased:
+                        if (this->focused == nullptr) return;
+                        key = event.key.code;
+                        this->screen.pollEvent(this->event);
+                        if (event.type == sf::Event::TextEntered)
+                            this->focused->onKey(key, event.text.unicode, false);
+                        else this->focused->onKey(key, CONSTANT::NO_CHAR, false);
+                        break;
+                        
+                    default:
+                        break;
+                }
             }
             if (GarbageCollector::checkForClear(GarbageCollector::EVENTS))
                 this->focused = nullptr;

@@ -52,25 +52,6 @@ namespace owo
             this->fgColor = this->fgColor_normal;
         }
 
-        void generateTexture()
-        {
-            this->renderTexture.create(this->dimensions.width, this->dimensions.height);
-            this->renderTexture.clear(this->bgColor);
-
-            this->label->setTextColor(this->fgColor);
-            this->label->setClearColor(this->bgColor);
-            this->label->setText(this->text);
-            this->renderTexture.draw(this->label->getSprite(0));
-
-            this->loading = this->shouldLoad;
-            if (this->loading)
-                this->renderTexture.draw(this->loadLogo->getSprite(0.16));
-
-            this->renderTexture.display();
-            this->sprite.setTexture(this->renderTexture.getTexture());
-            this->sprite.setPosition(sf::Vector2f(this->dimensions.left, this->dimensions.top));
-        }
-
     public:
         Button()
         {
@@ -103,6 +84,25 @@ namespace owo
             this->setDimensions(pos.x, pos.y, size.x, size.y);
             init();
             generateTexture();
+        }
+
+        void generateTexture()
+        {
+            this->renderTexture.create(this->dimensions.width, this->dimensions.height);
+            this->renderTexture.clear(this->bgColor);
+
+            this->label->setTextColor(this->fgColor);
+            this->label->setClearColor(this->bgColor);
+            this->label->setText(this->text);
+            this->renderTexture.draw(this->label->getSprite(0));
+
+            this->loading = this->shouldLoad;
+            if (this->loading)
+                this->renderTexture.draw(this->loadLogo->getSprite(0.16));
+
+            this->renderTexture.display();
+            this->sprite.setTexture(this->renderTexture.getTexture());
+            this->sprite.setPosition(sf::Vector2f(this->dimensions.left, this->dimensions.top));
         }
 
         template<class T> void setCallback(void (T::*callback)(), T* c)

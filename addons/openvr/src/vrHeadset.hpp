@@ -23,16 +23,16 @@ public:
     {
         this->id = vr::k_unTrackedDeviceIndexInvalid;
         this->propContainer = vr::k_ulInvalidPropertyContainer;
+    }
 
+    void Init()
+    {
         this->IPD = vr::VRSettings()->GetFloat(vr::k_pch_SteamVR_Section, vr::k_pch_SteamVR_IPD_Float);
-        // char ser[1024];
-        // vr::VRSettings()->GetString(vr::k_pch_Null_Section, vr::k_pch_Null_SerialNumber_String, ser, sizeof(ser));
-        // this->serial = ser;
-        // char mod[1024];
-        // vr::VRSettings()->GetString(vr::k_pch_Null_Section, vr::k_pch_Null_ModelNumber_String, mod, sizeof(mod));
-        // this->model = mod;
-        this->model = "FullBowody";
-        this->serial = "CustomHMD";
+        char buf[1024];
+        vr::VRSettings()->GetString(vr::k_pch_Null_Section, vr::k_pch_Null_SerialNumber_String, buf, sizeof(buf));
+        this->serial = buf;
+        vr::VRSettings()->GetString(vr::k_pch_Null_Section, vr::k_pch_Null_ModelNumber_String, buf, sizeof(buf));
+        this->model = buf;
 
         this->winX = vr::VRSettings()->GetInt32(vr::k_pch_Null_Section, vr::k_pch_Null_WindowX_Int32);
         this->winY = vr::VRSettings()->GetInt32(vr::k_pch_Null_Section, vr::k_pch_Null_WindowY_Int32);
@@ -48,6 +48,8 @@ public:
     {
         this->id = id;
         this->propContainer = vr::VRProperties()->TrackedDeviceToPropertyContainer(this->id);
+
+        this->Init();
 
         vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_ModelNumber_String, this->model.c_str());
         vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_RenderModelName_String, this->model.c_str());
@@ -176,28 +178,23 @@ public:
         // pose.vecPosition[0] = pX;
         // pose.vecPosition[1] = pY;
         // pose.vecPosition[2] = pZ;
-
-        pose.vecPosition[0] = 0;
-        pose.vecPosition[1] = 0;
-        pose.vecPosition[2] = 0;
+        pose.vecPosition[0] = bodyPos[CONSTANT::JOINT_HEAD].x;
+        pose.vecPosition[1] = bodyPos[CONSTANT::JOINT_HEAD].y;
+        pose.vecPosition[2] = bodyPos[CONSTANT::JOINT_HEAD].z;
 
         //Convert yaw, pitch, roll to quaternion
-        t0 = cos(yaw * 0.5);
-        t1 = sin(yaw * 0.5);
-        t2 = cos(roll * 0.5);
-        t3 = sin(roll * 0.5);
-        t4 = cos(pitch * 0.5);
-        t5 = sin(pitch * 0.5);
+        // t0 = cos(yaw * 0.5);
+        // t1 = sin(yaw * 0.5);
+        // t2 = cos(roll * 0.5);
+        // t3 = sin(roll * 0.5);
+        // t4 = cos(pitch * 0.5);
+        // t5 = sin(pitch * 0.5);
 
         //Set head tracking rotation
         // pose.qRotation.w = t0 * t2 * t4 + t1 * t3 * t5;
         // pose.qRotation.x = t0 * t3 * t4 - t1 * t2 * t5;
         // pose.qRotation.y = t0 * t2 * t5 + t1 * t3 * t4;
         // pose.qRotation.z = t1 * t2 * t4 - t0 * t3 * t5;
-        pose.qRotation.w = 1;
-        pose.qRotation.x = 0;
-        pose.qRotation.y = 0;
-        pose.qRotation.z = 0;
 
         return pose;
     }
@@ -210,8 +207,6 @@ public:
 
     void* GetComponent(const char* nameAndVersion)
     {
-        if (!stricmp(nameAndVersion, vr::IVRDisplayComponent_Version))
-            return (vr::IVRDisplayComponent*) this;
         return NULL;
     }
 

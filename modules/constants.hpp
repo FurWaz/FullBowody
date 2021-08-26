@@ -101,6 +101,8 @@ namespace CONSTANT
     /** @brief App's main font */
     sf::Font FONT;
     const char NO_CHAR = '~';
+    const float RAD2DEG = 180.f / 3.1415926f;
+    const float DEG2RAD = 3.1415926f / 180.f;
 
     unsigned short TRACKING_FPS = 20;
     unsigned short CAMERA_FPS = 30;
@@ -130,38 +132,36 @@ namespace CONSTANT
             std::cout << "Error loading default font" << std::endl;
         updateFPSdelta();
     }
-
+    
     /** @brief Number of body joints in the app*/
-    const unsigned char NB_JOINTS = 20;
+    const unsigned char NB_JOINTS = 19;
     // body joints
     const unsigned char JOINT_HEAD = 0;
-    const unsigned char JOINT_EYE_R = 1;
-    const unsigned char JOINT_EYE_L = 2;
-    const unsigned char JOINT_NECK = 3;
-    const unsigned char JOINT_SHOULDER_R = 4;
-    const unsigned char JOINT_ELBOW_R = 5;
-    const unsigned char JOINT_WRIST_R = 6;
-    const unsigned char JOINT_HAND_R = 7;
-    const unsigned char JOINT_HIP_R = 8;
-    const unsigned char JOINT_KNEE_R = 9;
-    const unsigned char JOINT_ANKLE_R = 10;
-    const unsigned char JOINT_FEET_R = 11;
-    const unsigned char JOINT_SHOULDER_L = 12;
-    const unsigned char JOINT_ELBOW_L = 13;
-    const unsigned char JOINT_WRIST_L = 14;
-    const unsigned char JOINT_HAND_L = 15;
-    const unsigned char JOINT_HIP_L = 16;
-    const unsigned char JOINT_KNEE_L = 17;
-    const unsigned char JOINT_ANKLE_L = 18;
-    const unsigned char JOINT_FEET_L = 19;
+    const unsigned char JOINT_NOSE = 1;
+    const unsigned char JOINT_NECK = 2;
+    const unsigned char JOINT_SHOULDER_R = 3;
+    const unsigned char JOINT_ELBOW_R = 4;
+    const unsigned char JOINT_WRIST_R = 5;
+    const unsigned char JOINT_HAND_R = 6;
+    const unsigned char JOINT_HIP_R = 7;
+    const unsigned char JOINT_KNEE_R = 8;
+    const unsigned char JOINT_ANKLE_R = 9;
+    const unsigned char JOINT_FEET_R = 10;
+    const unsigned char JOINT_SHOULDER_L = 11;
+    const unsigned char JOINT_ELBOW_L = 12;
+    const unsigned char JOINT_WRIST_L = 13;
+    const unsigned char JOINT_HAND_L = 14;
+    const unsigned char JOINT_HIP_L = 15;
+    const unsigned char JOINT_KNEE_L = 16;
+    const unsigned char JOINT_ANKLE_L = 17;
+    const unsigned char JOINT_FEET_L = 18;
     
     /** @brief Number of connections between the body joints */
-    const unsigned char NB_CONNECTIONS = 19;
+    const unsigned char NB_CONNECTIONS = 18;
     /** @brief Connections between each joint of the body for a wired representation */
     const unsigned char POSE_CONNECTIONS[NB_CONNECTIONS][2] = {
         {JOINT_HEAD, JOINT_NECK},
-        {JOINT_HEAD, JOINT_EYE_R},
-        {JOINT_HEAD, JOINT_EYE_L},
+        {JOINT_HEAD, JOINT_NOSE},
         {JOINT_NECK, JOINT_SHOULDER_R},
         {JOINT_NECK, JOINT_SHOULDER_L},
         {JOINT_SHOULDER_R, JOINT_ELBOW_R},

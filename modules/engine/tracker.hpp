@@ -9,6 +9,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include "../constants.hpp"
 #include "../UI/essentials/callbackContainer.hpp"
 #include "./ipc.hpp"
 
@@ -116,9 +117,8 @@ namespace owo
                 index++;
             }
             // calculates the app's body position from mediapipe
+            this->points[CONSTANT::JOINT_NOSE] = joints[0];
             this->points[CONSTANT::JOINT_HEAD] = (joints[8] + joints[7]) / 2;
-            this->points[CONSTANT::JOINT_EYE_R] = joints[5];
-            this->points[CONSTANT::JOINT_EYE_L] = joints[2];
             this->points[CONSTANT::JOINT_NECK] = (joints[12] + joints[11]) / 2;
             this->points[CONSTANT::JOINT_SHOULDER_R] = joints[12];
             this->points[CONSTANT::JOINT_SHOULDER_L] = joints[11];

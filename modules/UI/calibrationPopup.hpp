@@ -15,6 +15,9 @@ namespace owo
     class CalibrationPopup : public virtual GraphicElement
     {
     private:
+        const unsigned short VALID_THRESHOLD = 1;
+        const unsigned short CALIBR_THRESHOLD = 1;
+
         Popup* popup;
         Camera* cam;
         Image* preview;
@@ -25,7 +28,7 @@ namespace owo
         Label* nbImages;
         sf::RenderTexture temp;
 
-        LoadingFrame* lf;
+        LoadingFrame* lf = nullptr;
         std::vector<std::unique_ptr<cv::Mat>> images;
         std::vector<cv::Point2f> markers;
         CalibrationData calibData;
@@ -33,9 +36,6 @@ namespace owo
         std::thread calibrator;
         bool calibrating;
         bool shouldJoin;
-        bool loadPopupDisplayed;
-        bool shouldChangeText;
-        bool shouldDetectChess;
         std::string newText;
 
         void populateImagesList(bool added)
@@ -56,26 +56,18 @@ namespace owo
         {
             this->generateTexture();
             this->calibrating = state;
-            if (this->calibrating && !this->loadPopupDisplayed)
+            if (this->calibrating && this->lf == nullptr)
             {
                 this->lf = new LoadingFrame(
                     sf::Vector2i(this->getSize().x/2-200, this->getSize().y/2-60),
                     sf::Vector2i(400, 120), CONSTANT::COLOR_BACK
                 );
                 this->addElement(this->lf);
-                this->loadPopupDisplayed = true;
-            } else if (this->loadPopupDisplayed)
+            } else if (this->lf != nullptr)
             {
                 this->removeElement(this->lf);
-                this->loadPopupDisplayed = false;
+                this->lf = nullptr;
             }
-        }
-
-        void changeLoadText(std::string txt)
-        {
-            this->shouldChangeText = true;
-            this->newText = txt;
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
         
     public:
@@ -112,12 +104,8 @@ namespace owo
             this->saveBtn->setCallback(&CalibrationPopup::_launch_calibration, this);
             this->popup->addComponent(this->saveBtn);
 
-            this->loadPopupDisplayed = false;
             this->setCalibrating(false);
             this->shouldJoin = false;
-            this->shouldChangeText = false;
-            this->shouldDetectChess = true;
-            this->calibrator = std::thread(&CalibrationPopup::_detect_chessboard, this);
         }
 
         void generateTexture()
@@ -161,11 +149,6 @@ namespace owo
             {
                 this->shouldJoin = false;
                 this->calibrator.join();
-                if (!this->calibrating && !this->shouldJoin && !this->shouldDetectChess)
-                {
-                    this->shouldDetectChess = true;
-                    this->calibrator = std::thread(&CalibrationPopup::_detect_chessboard, this);
-                }
             }
         }
 
@@ -184,24 +167,9 @@ namespace owo
             this->populateImagesList(false);
         }
 
-        void _detect_chessboard()
-        {
-            while (this->shouldDetectChess)
-            {
-                cv::findChessboardCorners(this->cam->getRawImage(), cv::Size(8, 5), markers, cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE);
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            }
-        }
-
         void _launch_calibration()
         {
-            if (this->images.size() < 20) return;
-            if (this->shouldDetectChess)
-            {
-                this->shouldDetectChess = false;
-                this->markers.clear();
-                this->calibrator.join();
-            }
+            if (this->images.size() < CALIBR_THRESHOLD) return;
             if (!this->calibrating)
                 this->calibrator = std::thread(&CalibrationPopup::_execute_calibration, this);
         }
@@ -215,57 +183,49 @@ namespace owo
         void _execute_calibration()
         {
             this->setCalibrating(true);
-            this->changeLoadText("Setting up calibration");
+            this->lf->setText("Setting up calibration");
             cv::Size boardSize(8, 5);
-            float squareSize = 2.8;
-
-            std::vector<cv::Mat> rVectors, tVectors;
-            cv::Mat distCoeffs(8, 1, CV_64F);
-            cv::Mat camMatrix(3, 3, CV_64F);
-            std::vector<std::vector<cv::Point2f>> imgPoints(this->images.size());
-            std::vector<std::vector<cv::Point3f>> objPoints(1);
+            float squareSize = 2.733;
+            cv::Mat distCoeffs, camMatrix, rVectors, tVectors;
             
-            this->changeLoadText("Finding calibration points");
+            this->lf->setText("Finding calibration points");
             unsigned short detected = 0;
-            unsigned short shift = 0;
+            std::vector<std::vector<cv::Point2f>> imgPoints;
             for (int s = 0; s < this->images.size(); s++)
             {
                 cv::Mat gray;
                 cv::cvtColor(*this->images[s], gray, cv::COLOR_BGR2GRAY);
-                bool result = cv::findChessboardCorners(gray, boardSize, imgPoints[s-shift], cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE);
-                if (!result)
-                {
-                    imgPoints.erase(imgPoints.begin()+s-shift);
-                    shift++;
-                    continue;
-                }
-                cv::cornerSubPix(gray, imgPoints[s-shift], cv::Size(10, 10), cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::EPS+cv::TermCriteria::COUNT, 10, 0.1));
+                std::vector<cv::Point2f> points;
+                bool result = cv::findChessboardCorners(gray, boardSize, points, cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE);
+                if (!result) continue;
+                cv::cornerSubPix(gray, points, cv::Size(10, 10), cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::EPS+cv::TermCriteria::COUNT, 20, 0.01));
+                imgPoints.push_back(points);
                 detected++;
             }
 
             std::string message = "";
-            if (detected > 15)
+            if (detected > CALIBR_THRESHOLD)
             {
-                this->changeLoadText("Calibrating camera");
+                this->lf->setText("Calibrating camera");
+                std::vector<std::vector<cv::Point3f>> objPoints(1);
                 for (int i = 0; i < boardSize.height; i++)
                     for (int j = 0; j < boardSize.width; j++)
-                        objPoints[0].push_back(cv::Point3f(j * squareSize, i * squareSize, 0.f));    
+                        objPoints[0].push_back(cv::Point3f(j * squareSize, i * squareSize, 0.f));
                 objPoints.resize(imgPoints.size(), objPoints[0]);
-                cv::calibrateCamera(objPoints, imgPoints, boardSize, camMatrix, distCoeffs, rVectors, tVectors);
 
-                this->changeLoadText("Saving calibration");
+                cv::calibrateCamera(objPoints, imgPoints, cv::Size((*this->images[0]).rows, (*this->images[0]).cols), camMatrix, distCoeffs, rVectors, tVectors);
+
+                this->lf->setText("Saving calibration");
                 this->calibData.cameraMatrix = camMatrix;
                 this->calibData.distanceCoefficients = distCoeffs;
                 message = "Done";
             } else
-            {
-                message = "Error: Can't find chessboard in more than 15 images";
-            }
+                message = "Error: Can't find enough images with chessboard detected";
 
             this->lf->stopLoading();
-            this->changeLoadText(message);
-            std::this_thread::sleep_for(std::chrono::seconds( (detected>15)? 1: 3 ));
-            if (detected>15)
+            this->lf->setText(message);
+            std::this_thread::sleep_for(std::chrono::seconds( (detected > VALID_THRESHOLD)? 1: 3 ));
+            if (detected > VALID_THRESHOLD)
             {
                 Files::setCallback(&CalibrationPopup::_save_calib, this);
                 Files::askForFile();
@@ -282,28 +242,24 @@ namespace owo
 
         sf::Sprite getSprite(float dt)
         {
-            if (this->shouldDetectChess)
-                for(cv::Point2f p: this->markers)
-                    cv::circle(this->cam->getRawImage(), p, 3, cv::Scalar(0, 0, 255), 3);
-            if (this->shouldChangeText)
-            {
-                this->shouldChangeText = false;
-                this->lf->setText(this->newText);
-            }
             this->generateTexture();
             return this->sprite;
         }
 
-        ~CalibrationPopup()
+        void cancel()
         {
             this->cam->detachImage(this->preview);
             this->setCalibrating(false);
-            if (this->shouldDetectChess || this->calibrating)
+            if (this->calibrating)
             {
-                this->shouldDetectChess = false;
                 this->shouldJoin = false;
                 this->calibrator.join();
             }
+        }
+
+        ~CalibrationPopup()
+        {
+            
         }
     };
 }

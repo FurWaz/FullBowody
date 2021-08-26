@@ -255,6 +255,8 @@ namespace owo
                         this->pasteFromClipboard();
                         break;
                     }
+                    if (c == 13)
+                        break;
                     if (c != CONSTANT::NO_CHAR)
                         this->addLetter(c);
                     break;

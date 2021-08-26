@@ -11,15 +11,16 @@ namespace owo
         sf::Color textColor;
         int fontSize;
         int placement;
+        bool shouldDraw = false;
 
     public:
         void generateTexture()
         {
+            this->renderTexture.clear(this->clearColor);
             sf::Text txt(this->text, CONSTANT::FONT, this->fontSize);
             txt.setFillColor(this->textColor);
-            
-            this->renderTexture.clear(this->clearColor);
             txt.setPosition(this->calculateTextPos(this->text));
+            
             this->renderTexture.draw(txt);
             this->renderTexture.display();
             this->sprite.setTexture(this->renderTexture.getTexture());
@@ -131,13 +132,13 @@ namespace owo
         void setFontSize(int size)
         {
             this->fontSize = size;
-            this->generateTexture();
+            this->shouldDraw = true;
         }
 
         void setPlacement(int placement)
         {
             this->placement = placement;
-            this->generateTexture();
+            this->shouldDraw = true;
         }
 
         void setTextColor(sf::Color color)
@@ -148,11 +149,16 @@ namespace owo
         void setText(std::string text)
         {
             this->text = text;
-            this->generateTexture();
+            this->shouldDraw = true;
         }
 
         sf::Sprite getSprite(float dt)
         {
+            if (this->shouldDraw)
+            {
+                this->shouldDraw = false;
+                this->generateTexture();
+            }
             return this->sprite;
         }
 
