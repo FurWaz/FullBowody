@@ -110,7 +110,7 @@ namespace owo
                 for (SoftwareInfo soft: this->extensions)
                 {
                     if (this->socket.send(string, length, soft.ip, soft.port) != sf::Socket::Done)
-                        std::cout << ">> Info: Failed to send body position on port " << soft.port << std::endl;
+                        ;// debug
                 }
             }
         }
@@ -127,14 +127,12 @@ namespace owo
                 sf::Socket::Status result = this->socket.receive(data, 100, received, softIP, softPORT);
                 if (result == sf::Socket::Done)
                 {
-                    std::cout << "received new data: " << data << std::endl;
                     if (received < 15) continue;
                     std::string string(data, received);
                     if (string.substr(0, 15) == "[ON]FullBowody-")
                     {
                         std::string appName = string.substr(15, string.size());
                         this->extensions.push_back(SoftwareInfo(softPORT, appName, softIP.toString()));
-                        std::cout << "adding extension " << appName << " (" << softPORT << ")" << std::endl;
                     } else if (string.substr(0, 16) == "[OFF]FullBowody-")
                     {
                         int index = -1;
@@ -150,7 +148,6 @@ namespace owo
                         }
                         if (index >= 0)
                             this->extensions.erase(this->extensions.begin()+index);
-                        std::cout << "removing extension " << softPORT << std::endl;
                     }
                     if (this->cont != nullptr)
                         this->cont->func();
@@ -183,6 +180,16 @@ namespace owo
         std::vector<SoftwareInfo> getExtensions()
         {
             return this->extensions;
+        }
+
+        std::string getIP()
+        {
+            return this->ip;
+        }
+
+        unsigned short getPort()
+        {
+            return this->port;
         }
 
         ~SoftwareConnection()

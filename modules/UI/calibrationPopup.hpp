@@ -154,6 +154,7 @@ namespace owo
 
         void _add_image()
         {
+            this->preview->blink();
             cv::Mat* im = new cv::Mat();
             this->cam->getRawImage().copyTo(*im);
             this->images.push_back(std::unique_ptr<cv::Mat>(im));
@@ -186,19 +187,23 @@ namespace owo
             this->lf->setText("Setting up calibration");
             cv::Size boardSize(8, 5);
             float squareSize = 2.733;
-            cv::Mat distCoeffs, camMatrix, rVectors, tVectors;
-            
-            this->lf->setText("Finding calibration points");
             unsigned short detected = 0;
+            cv::Mat distCoeffs, camMatrix, rVectors, tVectors;
             std::vector<std::vector<cv::Point2f>> imgPoints;
+            std::vector<std::vector<cv::Point3f>> objPoints(1);
+            for (int i = 0; i < boardSize.height; i++)
+                for (int j = 0; j < boardSize.width; j++)
+                    objPoints[0].push_back(cv::Point3f(i * squareSize, j * squareSize, 0.f));
+        
+            this->lf->setText("Finding calibration points");
             for (int s = 0; s < this->images.size(); s++)
             {
                 cv::Mat gray;
                 cv::cvtColor(*this->images[s], gray, cv::COLOR_BGR2GRAY);
                 std::vector<cv::Point2f> points;
-                bool result = cv::findChessboardCorners(gray, boardSize, points, cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE);
+                bool result = cv::findChessboardCorners(gray, boardSize, points, cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE | cv::CALIB_CB_FAST_CHECK);
                 if (!result) continue;
-                cv::cornerSubPix(gray, points, cv::Size(10, 10), cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::EPS+cv::TermCriteria::COUNT, 20, 0.01));
+                cv::cornerSubPix(gray, points, cv::Size(11, 11), cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::EPS+cv::TermCriteria::COUNT, 30, 0.001));
                 imgPoints.push_back(points);
                 detected++;
             }
@@ -207,12 +212,7 @@ namespace owo
             if (detected > CALIBR_THRESHOLD)
             {
                 this->lf->setText("Calibrating camera");
-                std::vector<std::vector<cv::Point3f>> objPoints(1);
-                for (int i = 0; i < boardSize.height; i++)
-                    for (int j = 0; j < boardSize.width; j++)
-                        objPoints[0].push_back(cv::Point3f(j * squareSize, i * squareSize, 0.f));
                 objPoints.resize(imgPoints.size(), objPoints[0]);
-
                 cv::calibrateCamera(objPoints, imgPoints, cv::Size((*this->images[0]).rows, (*this->images[0]).cols), camMatrix, distCoeffs, rVectors, tVectors);
 
                 this->lf->setText("Saving calibration");

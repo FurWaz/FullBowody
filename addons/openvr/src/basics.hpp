@@ -23,11 +23,13 @@ Euler quaternion2euler(vr::HmdQuaternion_t q) {
     angles.x = std::atan2(sinr_cosp, cosr_cosp);
 
     // pitch (y-axis rotation)
-    double sinp = 2 * (q.w * q.y - q.z * q.x);
-    if (std::abs(sinp) >= 1)
-        angles.y = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
-    else
-        angles.y = std::asin(sinp);
+        // double sinp = 2 * (q.w * q.y - q.z * q.x);
+        // if (std::abs(sinp) >= 1)
+        //     angles.y = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+        // else
+        //     angles.y = std::asin(sinp);
+    double t = 2 * (q.w * q.y - q.z * q.x);
+    angles.y = std::asin(t);
 
     // yaw (z-axis rotation)
     double siny_cosp = 2 * (q.w * q.z + q.x * q.y);

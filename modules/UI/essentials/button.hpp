@@ -146,7 +146,8 @@ namespace owo
         
         void onKey(int key, char c, bool pressed)
         {
-            
+            if (pressed && key == sf::Keyboard::Space)
+                this->onClick(0, true);
         }
 
         void onScroll(int delta)

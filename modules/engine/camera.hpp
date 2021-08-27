@@ -472,6 +472,15 @@ namespace owo
         }
 
         /**
+         * @brief Returns the camera's calibration data object
+         * @returns the camera's calibration
+         */
+        CalibrationData getCalibrationData()
+        {
+            return this->calibrData;
+        }
+
+        /**
          * @brief Returns the current FOV of the camera according to it's calibration data
          * @return A 2D point correponding to the camera's FOV in radians (dividec by 2)
          */

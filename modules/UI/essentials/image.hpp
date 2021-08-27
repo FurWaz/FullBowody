@@ -15,6 +15,8 @@ namespace owo
         sf::Sprite imgSprite;
         float scaleFactor;
 
+        float blinkDelta;
+
         void generateTexture()
         {
             this->shouldUpdate = false;
@@ -53,6 +55,9 @@ namespace owo
             tex.loadFromImage(this->img);
             tex.setSmooth(true);
             imgSprite.setTexture(tex);
+            imgSprite.setColor(sf::Color(255, 255, 255));
+            if (this->blinkDelta != 0)
+                imgSprite.setColor(sf::Color(this->blinkDelta*255, this->blinkDelta*255, this->blinkDelta*255));
             this->renderTexture.draw(imgSprite);
             this->renderTexture.display();
             this->sprite.setTexture(this->renderTexture.getTexture());
@@ -61,6 +66,7 @@ namespace owo
         void init()
         {
             this->setFlipped(false);
+            this->blinkDelta = 0;
         }
 
     public:
@@ -137,6 +143,11 @@ namespace owo
             shouldGenerate? this->generateTexture() : this->updateTexture();
         }
 
+        void blink()
+        {
+            this->blinkDelta = 0.2;
+        }
+
         void onClick(int btn, bool clicked)
         {
             this->clicked = clicked;
@@ -180,6 +191,8 @@ namespace owo
 
         sf::Sprite getSprite(float dt)
         {
+            this->blinkDelta = std::max(this->blinkDelta-dt, 0.f);
+            if (this->blinkDelta != 0) this->updateTexture();
             return this->sprite;
         }
 

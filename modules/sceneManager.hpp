@@ -149,10 +149,13 @@ namespace SceneManager
         win->clearElements();
         win->addElement(createMenuBar(EXTENSIONS_SCENE));
         win->addElement(new Title(sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.4, MenuBar::MENUBAR_HEIGHT), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.2, 40), " Extensions ", 20, CONSTANT::COLOR_CLEAR));
-
+        
         Container* cont = new Container(sf::Vector2i(0, MenuBar::MENUBAR_HEIGHT+40), sf::Vector2i(CONSTANT::WINDOW_WIDTH, CONSTANT::WINDOW_HEIGHT-MenuBar::MENUBAR_HEIGHT-40), CONSTANT::COLOR_BACK);
+        cont->addElement(new Label("PORT: "+std::to_string(con.getPort()), sf::Vector2i(CONSTANT::WINDOW_WIDTH-140, 10), sf::Vector2i(120, 40), 20, Label::CENTER, CONSTANT::COLOR_FORE, CONSTANT::COLOR_CLEAR));
+        cont->addElement(new Label("IP: "+con.getIP(), sf::Vector2i(CONSTANT::WINDOW_WIDTH-340, 10), sf::Vector2i(180, 40), 20, Label::CENTER, CONSTANT::COLOR_FORE, CONSTANT::COLOR_CLEAR));
+
         win->addElement(cont);
-        cont->addElement(new Label("Active extensions", sf::Vector2i(10, 10), sf::Vector2i(400, 40), 18, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK));
+        cont->addElement(new Label("Active extensions:", sf::Vector2i(10, 20), sf::Vector2i(400, 40), 18, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK));
         extensionList = new List(sf::Vector2i(10, 60), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.7, CONSTANT::WINDOW_HEIGHT/2), CONSTANT::COLOR_CLEAR);
         cont->addComponent(extensionList);
     }

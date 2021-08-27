@@ -12,6 +12,8 @@ typedef struct Point3f
 } Point3f;
 
 Point3f bodyPos[CONSTANT::NB_JOINTS];
+float HeadRot, HMDRot;
+Point3f HeadPos, HMDPos;
 
 class Receiver
 {
@@ -28,36 +30,40 @@ private:
     const std::string LOGIN_MSG = "[ON]FullBowody-VRPlugin";
     const std::string LOGOUT_MSG = "[OFF]FullBowody-VRPlugin";
 
-    void calculateRelativePositions()
+    void calculateVRPositions()
     {
         // Set hand position relative to head orientation and position
-        float HEADRot = atan2(
+        HeadRot = atan2(
             (bodyPos[CONSTANT::JOINT_NOSE].x-bodyPos[CONSTANT::JOINT_HEAD].x),
-            (bodyPos[CONSTANT::JOINT_NOSE].y-bodyPos[CONSTANT::JOINT_HEAD].y)
+            (bodyPos[CONSTANT::JOINT_NOSE].z-bodyPos[CONSTANT::JOINT_HEAD].z)
         );
-        Point3f HEADPos = bodyPos[CONSTANT::JOINT_HEAD];
+        HeadPos = bodyPos[CONSTANT::JOINT_HEAD];
 
         uint32_t nbDevices = 1;
         vr::TrackedDevicePose_t devicesInfo[vr::k_unMaxTrackedDeviceCount];
         vr::VRServerDriverHost()->GetRawTrackedDevicePoses(0, devicesInfo, nbDevices);
         vr::DriverPose_t DPose = matrix2pose(devicesInfo[0].mDeviceToAbsoluteTracking);
-        float HMDRot = quaternion2euler(DPose.qRotation).y;
-        Point3f HMDPos(DPose.vecPosition[0], DPose.vecPosition[1], DPose.vecPosition[2]);
+        HMDRot = atan2(
+            DPose.qRotation.x,
+            DPose.qRotation.z
+        ) * -2;
+        HMDPos = Point3f(DPose.vecPosition[0], DPose.vecPosition[1], DPose.vecPosition[2]);
 
-        println(("Head rot: "+std::to_string(HEADRot*rad2deg)+" | HMD rot: "+std::to_string(HMDRot*rad2deg)).c_str());
+        float angleShift = HMDRot - HeadRot;
 
         for (int i = CONSTANT::JOINT_NECK; i < CONSTANT::NB_JOINTS; i++)
         {
             Point3f* p = &bodyPos[i];
-            p->y = (p->y-HEADPos.y) + HMDPos.y;
+            // make position relative to head
+            p->y = (p->y-HeadPos.y) + HMDPos.y;
+            p->x -= HeadPos.x;
+            p->z -= HeadPos.z;
 
-            // head-relative position
-            p->x = -cos(HEADRot) * p->x + sin(HEADRot) * p->z;
-            p->z =  cos(HEADRot) * p->z - sin(HEADRot) * p->x;
-
-            // world-relative position
-            p->x =  cos(HMDRot) * p->x - sin(HMDRot) * p->z;
-            p->z =  cos(HMDRot) * p->z + sin(HMDRot) * p->x;
+            // convert from app coordinates to vr world coordinates
+            float newX = -cos(angleShift) * p->x - sin(angleShift) * p->z;
+            float newZ = cos(angleShift) * p->z - sin(angleShift) * p->x;
+            p->x = newX + HMDPos.x;
+            p->z = newZ + HMDPos.z;
         }
     }
 
@@ -171,7 +177,7 @@ public:
                 } catch (std::exception &e) {break;}
                 index++;
             }
-            this->calculateRelativePositions();
+            this->calculateVRPositions();
         }
     }
 

@@ -87,63 +87,47 @@ public:
         pose.qWorldFromDriverRotation = HmdQuaternion_Init(1, 0, 0, 0);
         pose.qDriverFromHeadRotation = HmdQuaternion_Init(1, 0, 0, 0);
 
-        if (this->index == 1) // left controller
+        unsigned char wristIndex, handIndex;
+        if (this->index == 1)                                        // left controller
         {
-            // if ((GetAsyncKeyState(70) & 0x8000) != 0) cyaw += 0.1;             //F
-            // if ((GetAsyncKeyState(72) & 0x8000) != 0) cyaw += -0.1;            //H
-            // if ((GetAsyncKeyState(84) & 0x8000) != 0) croll += 0.1;            //T
-            // if ((GetAsyncKeyState(71) & 0x8000) != 0) croll += -0.1;           //G
-            // if ((GetAsyncKeyState(66) & 0x8000) != 0) {cpitch = 0; croll = 0;} //B
-
-            // if ((GetAsyncKeyState(87) & 0x8000) != 0) cpZ += -0.01;            //W
-            // if ((GetAsyncKeyState(83) & 0x8000) != 0) cpZ += 0.01;             //S
-            // if ((GetAsyncKeyState(65) & 0x8000) != 0) cpX += -0.01;            //A
-            // if ((GetAsyncKeyState(68) & 0x8000) != 0) cpX += 0.01;             //D
-            // if ((GetAsyncKeyState(81) & 0x8000) != 0) cpY += 0.01;             //Q
-            // if ((GetAsyncKeyState(69) & 0x8000) != 0) cpY += -0.01;            //E
-            // if ((GetAsyncKeyState(82) & 0x8000) != 0) {cpY = 0; cpZ = 0;}      //R
-            
-            // pose.vecPosition[0] = cpX;
-            // pose.vecPosition[1] = cpY;
-            // pose.vecPosition[2] = cpZ;
+            wristIndex = CONSTANT::JOINT_WRIST_L;
+            handIndex = CONSTANT::JOINT_HAND_L;
             pose.vecPosition[0] = bodyPos[CONSTANT::JOINT_HAND_L].x;
             pose.vecPosition[1] = bodyPos[CONSTANT::JOINT_HAND_L].y;
             pose.vecPosition[2] = bodyPos[CONSTANT::JOINT_HAND_L].z;
-        } else // Right controller
+        } else                                                       // Right controller
         {
-            // if ((GetAsyncKeyState(73) & 0x8000) != 0) c2pZ += -0.01;                  //I
-            // if ((GetAsyncKeyState(75) & 0x8000) != 0) c2pZ += 0.01;                   //K
-            // if ((GetAsyncKeyState(74) & 0x8000) != 0) c2pX += -0.01;                  //J
-            // if ((GetAsyncKeyState(76) & 0x8000) != 0) c2pX += 0.01;                   //L
-            // if ((GetAsyncKeyState(85) & 0x8000) != 0) c2pY += 0.01;                   //U
-            // if ((GetAsyncKeyState(79) & 0x8000) != 0) c2pY += -0.01;                  //O
-            // if ((GetAsyncKeyState(80) & 0x8000) != 0) {c2pX = 0; c2pY = 0; c2pZ = 0;} //P
-
-            // pose.vecPosition[0] = c2pX;
-            // pose.vecPosition[1] = c2pY;
-            // pose.vecPosition[2] = c2pZ;
+            wristIndex = CONSTANT::JOINT_WRIST_R;
+            handIndex = CONSTANT::JOINT_HAND_R;
             pose.vecPosition[0] = bodyPos[CONSTANT::JOINT_HAND_R].x;
             pose.vecPosition[1] = bodyPos[CONSTANT::JOINT_HAND_R].y;
             pose.vecPosition[2] = bodyPos[CONSTANT::JOINT_HAND_R].z;
         }
 
+        float distXZ = sqrtf( pow(bodyPos[handIndex].x-bodyPos[wristIndex].x, 2) + pow(bodyPos[handIndex].x-bodyPos[wristIndex].x, 2) );
+        float cpitch = atan2(
+            bodyPos[handIndex].x-bodyPos[wristIndex].x,
+            bodyPos[handIndex].z-bodyPos[wristIndex].z
+        ) + 3.1415926;
+        float croll = atan2(
+            bodyPos[handIndex].y-bodyPos[wristIndex].y,
+            distXZ
+        );
+        float cyaw = 0;
+
         //Convert yaw, pitch, roll to quaternion
-        // ct0 = cos(cyaw * 0.5);
-        // ct1 = sin(cyaw * 0.5);
-        // ct2 = cos(croll * 0.5);
-        // ct3 = sin(croll * 0.5);
-        // ct4 = cos(cpitch * 0.5);
-        // ct5 = sin(cpitch * 0.5);
+        ct0 = cos(cyaw * 0.5);
+        ct1 = sin(cyaw * 0.5);
+        ct2 = cos(croll * 0.5);
+        ct3 = sin(croll * 0.5);
+        ct4 = cos(cpitch * 0.5);
+        ct5 = sin(cpitch * 0.5);
 
         //Set controller rotation
-        // pose.qRotation.w = ct0 * ct2 * ct4 + ct1 * ct3 * ct5;
-        // pose.qRotation.x = ct0 * ct3 * ct4 - ct1 * ct2 * ct5;
-        // pose.qRotation.y = ct0 * ct2 * ct5 + ct1 * ct3 * ct4;
-        // pose.qRotation.z = ct1 * ct2 * ct4 - ct0 * ct3 * ct5;
-        pose.qRotation.w = 1;
-        pose.qRotation.x = 0;
-        pose.qRotation.y = 0;
-        pose.qRotation.z = 0;
+        pose.qRotation.w = ct0 * ct2 * ct4 + ct1 * ct3 * ct5;
+        pose.qRotation.x = ct0 * ct3 * ct4 - ct1 * ct2 * ct5;
+        pose.qRotation.y = ct0 * ct2 * ct5 + ct1 * ct3 * ct4;
+        pose.qRotation.z = ct1 * ct2 * ct4 - ct0 * ct3 * ct5;
 
         return pose;
     }

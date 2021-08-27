@@ -16,6 +16,7 @@ namespace owo
     class CameraView : public virtual GraphicElement
     {
     private:
+        const std::string CALIBRATION_MESSAGE = "/!\\ Camera not calibrated yet /!\\";
         Camera* cam;
         Image* im;
         Input* input;
@@ -33,10 +34,12 @@ namespace owo
         Label* camrotx_text;
         Label* camroty_text;
         Label* camrotz_text;
+        Label* calibrMsg;
 
         std::string cameraSource;
         std::thread loaderThread;
         bool shouldJoinThread;
+        bool calibrMsgShowing;
         float dt;
 
         void init()
@@ -100,6 +103,12 @@ namespace owo
                 sf::Vector2i(this->dimensions.width/2-35, 20),
                 16, Label::LEFT, CONSTANT::COLOR_FORE
             );
+            this->calibrMsg = new Label(
+                CALIBRATION_MESSAGE,
+                sf::Vector2i(this->dimensions.width*0.5, this->dimensions.height-150),
+                sf::Vector2i(this->dimensions.width*0.2, 20),
+                16, Label::LEFT, CONSTANT::COLOR_RED_LIGHT, CONSTANT::COLOR_BACK
+            );
 
             int fieldSize = (this->getSize().x/2)/3;
             this->camposx_text = new Label(
@@ -152,12 +161,14 @@ namespace owo
             this->addElement(this->camrotx_text);
             this->addElement(this->camroty_text);
             this->addElement(this->camrotz_text);
+            this->addElement(this->calibrMsg);
             this->addElement(this->calibrateBtn);
             this->addElement(this->detectBtn);
             this->addElement(this->loadBtn);
             this->addElement(this->saveBtn);
             this->propagateParentAbsPos();
             this->dt = 0;
+            this->calibrMsgShowing = true;
         }
 
     public:
@@ -239,6 +250,14 @@ namespace owo
                 this->camrotx_text->setText("X: "+std::to_string((int)(rot[0]*CONSTANT::RAD2DEG)));
                 this->camroty_text->setText("Y: "+std::to_string((int)(rot[1]*CONSTANT::RAD2DEG)));
                 this->camrotz_text->setText("Z: "+std::to_string((int)(rot[2]*CONSTANT::RAD2DEG)));
+            }
+            if (this->cam->getCalibrationData().valide != this->calibrMsgShowing)
+            {
+                this->calibrMsgShowing = this->cam->getCalibrationData().valide;
+                if (this->calibrMsgShowing)
+                    this->calibrMsg->setText("");
+                else
+                    this->calibrMsg->setText(CALIBRATION_MESSAGE);
             }
         }
 
