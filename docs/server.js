@@ -1,11 +1,7 @@
-let http = require("http");
-let fs = require("fs")
-let server = http.createServer({}, (req, res) => {
-    if (req.url == "/")
-        req.url = "/index.html";
-    try {res.write(fs.readFileSync(__dirname+req.url, {encoding: "utf-8"}));}
-    catch {}
-    res.end();
+let express = require("express")();
+express.get("/*", (req, res) => {
+    if (req.url == "/") req.url = "/index.html";
+    let path = (__dirname+req.url).split("?")[0];
+    res.sendFile(path);
 });
-
-server.listen(8080);
+express.listen(80);

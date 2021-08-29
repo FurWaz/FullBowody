@@ -1,7 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto');
 
 :root {
-    --gradient: linear-gradient(75deg, #43cea2, #185a9d);
+    --gradient: linear-gradient(60deg, #43ceb0, #0256aa);
+    --color-black: #333;
+    --color-gray-dark: #555;
+    --color-gray-light: #AAA;
+    --color-white: #FFF;
+
+    --header-size-max: 60vh;
+    --header-size-min: 30vh;
+
+    --border-radius: 6px;
+    --padding: 10px;
 }
 
 body {
@@ -10,23 +20,17 @@ body {
     font-family: "Roboto";
 }
 
-header {
-    background: var(--gradient);
-    background-attachment: fixed;
-    background-size: 100vw 100vh;
-    box-shadow: 0px 0px 14px #0004 inset;
-    height: 180px;
-    overflow: hidden;
-}
-
-div#content {
-    padding: 20px 100px;
+div#main-container {
+    padding: 40px 100px;
+    min-height: 100vh;
+    overflow-x: hidden;
+    z-index: 0;
 }
 
 .center-x {
     text-align: center;
     margin: 0px auto;
-    width: 100%;
+    width: min-content;
 }
 
 .center-y {
@@ -37,6 +41,14 @@ div#content {
     width: 100%;
 }
 
+.align-x {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    width: min-content;
+    height: min-content;
+}
+
 span.shift {
     display: block;
     padding-left: 20px;
@@ -45,27 +57,27 @@ span.shift {
 h1 {
     color: white;
     font-size: 60px;
-    text-shadow: 0px 4px 14px #0004;
 }
 
 h2 {
-    color: #333;
+    color: var(--color-black);
     font-size: 24px;
-    border-left: solid 4px #333;
+    border-left: solid 4px var(--color-black);
     padding: 0px 14px;
     margin: 0px;
 }
 
 h3 {
-    color: #333;
+    color: var(--color-black);
     font-size: 20px;
-    text-decoration: underline 2px #333;
+    text-decoration: underline 2px var(--color-black);
     margin: 0px;
 }
 
 p {
     font-size: 16px;
-    color: #333;
+    color: var(--color-black);
+    white-space: nowrap;
 }
 
 p.info {
@@ -79,7 +91,7 @@ p.info {
 code {
     font-family: 'Courier New', Courier, monospace;
     font-size: 16px;
-    background-color: #333;
+    background-color: var(--color-black);
     border-radius: 4px;
     color: white;
     padding: 3px 6px;
