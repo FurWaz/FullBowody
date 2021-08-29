@@ -6,6 +6,15 @@
     padding: 20px;
 }
 
+.subtitle {
+    text-align: center;
+    white-space: nowrap;
+    font-size: 16px;
+    color: var(--color-black);
+    margin: 0px;
+    padding: 0px;
+}
+
 .title-container {
     height: 30px;
     width: 40vw;
