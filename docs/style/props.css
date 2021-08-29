@@ -8,11 +8,12 @@
 
 .subtitle {
     text-align: center;
+    width: min-content;
+    margin: 0px auto;
+    padding: 0px;
     white-space: nowrap;
     font-size: 16px;
     color: var(--color-black);
-    margin: 0px;
-    padding: 0px;
 }
 
 .title-container {
