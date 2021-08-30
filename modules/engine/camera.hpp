@@ -24,7 +24,7 @@ namespace owo
         public:
         cv::Mat cameraMatrix = cv::Mat(3, 3, CV_64F);
         cv::Mat distanceCoefficients = cv::Mat(8, 1, CV_64F);
-        bool valide = false;
+        bool valid = false;
 
         /**
          * @brief Loads the calibration data from a given file
@@ -59,7 +59,7 @@ namespace owo
             } else result = false;
 
             inStream.close();
-            this->valide = result;
+            this->valid = result;
             return result;
         }
 
@@ -95,6 +95,15 @@ namespace owo
 
             outStream.close();
             return result;
+        }
+
+        /**
+         * @brief Returns id the calibration data is valid or not
+         * @return a boolean representing is the data is valid
+         */
+        bool isValid()
+        {
+            return this->valid;
         }
     };
 
@@ -196,7 +205,7 @@ namespace owo
          */
         void getArucoBoardPosition()
         {
-            if (this->calibrData.valide)
+            if (this->calibrData.isValid())
                 cv::aruco::estimatePoseBoard(
                     this->aruco_corners, this->aruco_ids, this->aruco_board,
                     this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients,
@@ -295,10 +304,10 @@ namespace owo
                     detectArucoMarkers();
                     getArucoBoardPosition();
                     getCamPosRot();
-                    cv::Mat tor;
-                    cv::undistort(this->frame, tor, this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients);
-                    cv::imshow("Undistorded", tor);
-                    cv::waitKey(1);
+                    // cv::Mat tor;
+                    // cv::undistort(this->frame, tor, this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients);
+                    // cv::imshow("Undistorded", tor);
+                    // cv::waitKey(1);
                     if (this->aruco_ids.size() > 0)
                     {
                         cv::aruco::drawDetectedMarkers(this->frame, this->aruco_corners, this->aruco_ids);

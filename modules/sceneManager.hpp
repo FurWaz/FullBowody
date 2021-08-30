@@ -109,6 +109,8 @@ namespace SceneManager
         win->addElement(separator);
 
         Button* trackBtn = new Button("Start tracking", sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.725, CONSTANT::WINDOW_HEIGHT-90), sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.15, 70), 20);
+            trackBtn->setText( camMan.isTracking()? "Stop tracking": "Start tracking" );
+            trackBtn->setTextColor( camMan.isTracking()? CONSTANT::COLOR_RED_LIGHT: CONSTANT::COLOR_PRIMARY );
         camMan.attachButton(trackBtn);
         trackBtn->setCallback(&CameraManager::toogleCameraTracking, &camMan);
         win->addElement(trackBtn);

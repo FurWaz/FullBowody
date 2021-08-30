@@ -168,7 +168,20 @@ namespace owo
             this->addElement(this->saveBtn);
             this->propagateParentAbsPos();
             this->dt = 0;
-            this->calibrMsgShowing = true;
+            this->calibrMsgShowing = false;
+            this->checkForValidCalibrationData();
+        }
+
+        void checkForValidCalibrationData()
+        {
+            if (this->cam->getCalibrationData().isValid() != this->calibrMsgShowing)
+            {
+                this->calibrMsgShowing = this->cam->getCalibrationData().isValid();
+                if (this->calibrMsgShowing)
+                    this->calibrMsg->setText("");
+                else
+                    this->calibrMsg->setText(CALIBRATION_MESSAGE);
+            }
         }
 
     public:
@@ -251,14 +264,7 @@ namespace owo
                 this->camroty_text->setText("Y: "+std::to_string((int)(rot[1]*CONSTANT::RAD2DEG)));
                 this->camrotz_text->setText("Z: "+std::to_string((int)(rot[2]*CONSTANT::RAD2DEG)));
             }
-            if (this->cam->getCalibrationData().valide != this->calibrMsgShowing)
-            {
-                this->calibrMsgShowing = this->cam->getCalibrationData().valide;
-                if (this->calibrMsgShowing)
-                    this->calibrMsg->setText("");
-                else
-                    this->calibrMsg->setText(CALIBRATION_MESSAGE);
-            }
+            this->checkForValidCalibrationData();
         }
 
         sf::Sprite getSprite(float dt)

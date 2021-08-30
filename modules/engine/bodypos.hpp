@@ -51,20 +51,19 @@ namespace owo
          * @param r the calculated intersection point
          * @return If the intersection has been found or not
          */
-        bool intersection(cv::Vec3d o1, cv::Vec3d p1, cv::Vec3d o2, cv::Vec3d p2,
-                      cv::Vec3d &r)
+        bool intersection(cv::Vec3d o1, cv::Vec3d d1, cv::Vec3d o2, cv::Vec3d d2, cv::Vec3d &r)
         {
             cv::Vec3d x = o2 - o1;
-            cv::Vec3d d1 = p1 - o1;
-            cv::Vec3d d2 = p2 - o2;
 
             double cross = d1[0]*d2[1] - d1[1]*d2[0];
             if (abs(cross) < 1e-8)
                 return false;
 
             double t1 = (x[0] * d2[1] - x[1] * d2[0])/cross;
-            r = o1 + d1 * t1;
-            r[0] *= -1; r[1] *= -1;
+            double t2 = (x[0] * d1[1] - x[1] * d1[0])/cross;
+            cv::Vec3d i1 = o1 + d1 * t1;
+            cv::Vec3d i2 = o2 + d2 * t2;
+            r = (i1 + i2) * 0.5;
             return true;
         }
 
@@ -84,7 +83,7 @@ namespace owo
                 const cv::Point3f p = points[i];
                 double rotX = ((p.y - 0.5) * 2) * fov.y;
                 double rotY = ((p.x - 0.5) * 2) * fov.x;
-                rays[i] = this->rotate(cv::Vec3d(-std::sin(rotY), std::sin(rotX), std::cos(rotX) * std::cos(rotY)), rot);
+                rays[i] = this->rotate(cv::Vec3d(std::sin(rotY), std::sin(rotX), std::cos(rotX) * std::cos(rotY)), rot);
             }
         }
 
@@ -117,8 +116,8 @@ namespace owo
 
                 // calculate the point position
                 this->intersection(
-                    this->cameras.at(cam1)->getPosition(), this->rays[cam1][i],
-                    this->cameras.at(cam2)->getPosition(), this->rays[cam2][i],
+                    this->cameras[cam1]->getPosition(), this->rays[cam1][i],
+                    this->cameras[cam2]->getPosition(), this->rays[cam2][i],
                     this->body[i]
                 );
             }
@@ -181,7 +180,7 @@ namespace owo
                     
             for(int i = 0; i < this->cameras.size(); i++)
             {
-                Camera* c = this->cameras.at(i);
+                Camera* c = this->cameras[i];
                 c->getTracker()->setNewTrackingDataAvailable(false);
                 this->calculateCamRays(c, this->rays[i]);
             }

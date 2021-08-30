@@ -96,7 +96,7 @@ namespace owo
                 std::cout << "Error: Error during Stdin SetHandleInformation" << std::endl;
                 
             // Create the child process
-            char* command = (char*) "python ./modules/engine/tracker.py";
+            char* command = (char*) "./modules/engine/tracker/tracker.exe";
             PROCESS_INFORMATION piProcInfo;
             STARTUPINFO siStartInfo;
             BOOL bSuccess = FALSE; 
@@ -118,7 +118,8 @@ namespace owo
                 NULL,          // use parent's environment 
                 NULL,          // use parent's current directory 
                 &siStartInfo,  // STARTUPINFO pointer 
-                &piProcInfo);  // receives PROCESS_INFORMATION 
+                &piProcInfo    // receives PROCESS_INFORMATION 
+            );
             
             if ( bSuccess )
             {
@@ -129,10 +130,9 @@ namespace owo
             }
             else return false;
 
-            this->running = true;
-
             //start the reading thread
             this->readingThread = std::thread(&IPC::_read_output, this);
+            this->running = true;
             return true;
         }
 
@@ -151,10 +151,10 @@ namespace owo
             { 
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 bSuccess = ReadFile( g_hChildStd_OUT_Rd, chBuf, SIZE, &dwRead, NULL);
-                if (this->call != nullptr && dwRead > 0)
-                    this->call->func(chBuf, dwRead);
                 if( ! bSuccess || dwRead == 0)
                     break;
+                if (this->call != nullptr && dwRead > 0)
+                    this->call->func(chBuf, dwRead);
             }
         }
 
@@ -201,6 +201,7 @@ namespace owo
          */
         void stopChild()
         {
+            if (!this->running) return;
             writeToChild("STOP\n", 6);
             this->running = false;
             this->readingThread.join();
@@ -208,11 +209,7 @@ namespace owo
 
         ~IPC()
         {
-            if (running)
-            {
-                this->running = false;
-                this->readingThread.join();
-            }
+            this->stopChild();
         }
     };
 }

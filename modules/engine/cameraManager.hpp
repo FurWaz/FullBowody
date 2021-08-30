@@ -62,6 +62,11 @@ namespace owo
             this->button = button;
         }
 
+        bool isTracking()
+        {
+            return this->tracking;
+        }
+
         ~CameraManager()
         {
 

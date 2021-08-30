@@ -213,8 +213,8 @@ namespace owo
         void startTracking()
         {
             this->ipc.startChild();
-            this->running = true;
             this->sendingThread = std::thread(&Tracker::_check_for_input_data, this);
+            this->running = true;
         }
 
         /**
@@ -222,6 +222,8 @@ namespace owo
          */
         void stopTracking()
         {
+            if (!this->running) return;
+            this->dataAvailable = false;
             this->ipc.stopChild();
             this->running = false;
             this->sendingThread.join();
@@ -268,7 +270,7 @@ namespace owo
 
         ~Tracker()
         {
-            
+            this->stopTracking();
         }
     };
 }

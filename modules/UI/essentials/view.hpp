@@ -122,8 +122,8 @@ namespace owo
             {
                 for(int i = 0; i < CONSTANT::NB_CONNECTIONS; i++)
                     draw_line(
-                        vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][0]], rot) + pos),
-                        vec3_vec2(rotate(rays[CONSTANT::POSE_CONNECTIONS[i][1]], rot) + pos),
+                        vec3_vec2(rays[CONSTANT::POSE_CONNECTIONS[i][0]] + pos),
+                        vec3_vec2(rays[CONSTANT::POSE_CONNECTIONS[i][1]] + pos),
                         CONSTANT::COLOR_PURPLE_LIGHT
                     );
             }
