@@ -1,6 +1,6 @@
 .obj-container {
     width: 80%;
-    height: 20vh;
+    height: fit-content;
     border-radius: var(--border-radius);
     margin: 0px auto;
     padding: 20px;
@@ -28,7 +28,7 @@
     width: 40vw;
     border-radius: var(--border-radius);
     background-color: var(--color-gray-light);
-    margin-top: 15px;
+    margin-top: 17px;
     position: fixed;
 }
 
@@ -66,4 +66,32 @@
     width: 80px;
     height: 80px;
     filter: saturate(0) brightness(0.2);
+}
+
+.number-counter {
+    font-size: 80px;
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
+}
+
+.cat-name {
+    font-size: 40px;
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
+}
+
+div.text-chunk {
+    height: max-content;
+    text-align: center;
+    width: 26%;
+}
+
+p.text-chunk {
+    font-size: 16px;
+    color: var(--color-black);
+    font-family: "Roboto";
+    white-space: normal;
+    line-height: 1.2em;
 }
