@@ -15,7 +15,7 @@ function loadContent(id=PAGE.HOME, saveState=true) {
 
     if (id < PAGE.LAST_PAGE_ID)
         moveContentRight();
-    if (id > PAGE.LAST_PAGE_ID)
+    else
         moveContentLeft();
 
     setTimeout(() => {
@@ -39,10 +39,10 @@ function loadContent(id=PAGE.HOME, saveState=true) {
     }, ANIMATION_TIME/2);
 
     PAGE.LAST_PAGE_ID = id;
-    if (saveState)
-        history.pushState({}, "FullBowody", "?page="+id2str(id));
     CONTAINER.style.zIndex = 0;
     document.getElementById("menu-container").style.zIndex = "10";
+    if (saveState)
+        history.pushState({}, "FullBowody", "?page="+id2str(id));
 }
 function id2str(id=PAGE.HOME)
 {
@@ -77,4 +77,5 @@ window.onpopstate = ev => {
     let strPage = url.searchParams.get("page");
     loadContent(str2id(strPage), false);
 };
-window.onpopstate(null);
+
+window.onpopstate();

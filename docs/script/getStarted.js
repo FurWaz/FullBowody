@@ -68,7 +68,7 @@ function loadGetStarted() {
                 createCode(CODE.CSHARP, cppDemo)
             )
         )
-    )
+    );
 }
 
 let pythonDemo = `

@@ -51,8 +51,12 @@ div#main-container {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
-    width: min-content;
+    width: fit-content;
     height: fit-content;
+}
+
+.align-y {
+    display: block;
 }
 
 span.shift {
@@ -71,6 +75,7 @@ h2 {
     border-left: solid 4px var(--color-black);
     padding: 0px 14px;
     margin: 0px;
+    white-space: normal;
 }
 
 h3 {
