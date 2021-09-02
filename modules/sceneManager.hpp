@@ -128,7 +128,6 @@ namespace SceneManager
         Label* l1 = new Label("Show elements hitboxes", sf::Vector2i(10, 10), sf::Vector2i(200, 50), 16, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK);
         Checkbox* b1 = new Checkbox(sf::Vector2i(250, -35), sf::Vector2i(20, 20), CONSTANT::COLOR_PRIMARY, CONSTANT::COLOR_BACK);
         b1->setChecked(win->doesShowhitboxes());
-        
         b1->setCallback(&Window::setShowHitBoxes, win);
         list->addComponent(l1);
         list->addComponent(b1);
@@ -144,6 +143,13 @@ namespace SceneManager
         i1->setCallback(_set_camera_fps);
         list->addComponent(l1);
         list->addComponent(i1);
+        
+        Label* l2 = new Label("Smooth tracked position", sf::Vector2i(10, 10), sf::Vector2i(200, 50), 16, Label::LEFT, CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK);
+        Checkbox* b2 = new Checkbox(sf::Vector2i(250, -35), sf::Vector2i(20, 20), CONSTANT::COLOR_PRIMARY, CONSTANT::COLOR_BACK);
+        b2->setChecked(bp.getSmoothPosition());
+        b2->setCallback(&BodyPos::setSmoothPosition, &bp);
+        list->addComponent(l2);
+        list->addComponent(b2);
     }
 
     void GenerateExtensionsScene()

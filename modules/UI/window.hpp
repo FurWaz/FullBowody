@@ -185,11 +185,11 @@ namespace owo
         void refresh()
         {
             this->refreshDelta = this->refreshClock.restart().asSeconds();
-            // if (!this->screen.hasFocus())
-            // {
-            //     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            //     return;
-            // }
+            if (!this->screen.hasFocus())
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                return;
+            }
             if (this->refreshDelta < 1/30) return;
             screen.clear(CONSTANT::COLOR_CLEAR);
             int nb = 0;

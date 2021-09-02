@@ -2,12 +2,6 @@
 #include "./basics.hpp"
 #include "./receiver.hpp"
 
-// controllers pos and rot vars
-static double cyaw = 0, cpitch = 0, croll = 0;
-static double ct0, ct1, ct2, ct3, ct4, ct5;
-static double cpX = 0, cpY = 0, cpZ = 0;
-static double c2pX = 0, c2pY = 0, c2pZ = 0;
-
 class VRController : public vr::ITrackedDeviceServerDriver
 {
 private:
@@ -88,6 +82,7 @@ public:
         pose.qDriverFromHeadRotation = HmdQuaternion_Init(1, 0, 0, 0);
 
         unsigned char wristIndex, handIndex;
+        float cyaw, croll, cpitch;
         if (this->index == 1)                                        // left controller
         {
             wristIndex = CONSTANT::JOINT_WRIST_L;
@@ -104,24 +99,23 @@ public:
             pose.vecPosition[2] = bodyPos[CONSTANT::JOINT_HAND_R].z;
         }
 
-        float distXZ = sqrtf( pow(bodyPos[handIndex].x-bodyPos[wristIndex].x, 2) + pow(bodyPos[handIndex].x-bodyPos[wristIndex].x, 2) );
-        float cpitch = atan2(
+        cyaw = atan2(
             bodyPos[handIndex].x-bodyPos[wristIndex].x,
             bodyPos[handIndex].z-bodyPos[wristIndex].z
         ) + 3.1415926;
-        float croll = atan2(
+        cpitch = atan2(
             bodyPos[handIndex].y-bodyPos[wristIndex].y,
-            distXZ
+            sqrtf( pow(bodyPos[handIndex].x-bodyPos[wristIndex].x, 2) + pow(bodyPos[handIndex].x-bodyPos[wristIndex].x, 2) )
         );
-        float cyaw = 0;
+        croll = 0;
 
         //Convert yaw, pitch, roll to quaternion
-        ct0 = cos(cyaw * 0.5);
-        ct1 = sin(cyaw * 0.5);
-        ct2 = cos(croll * 0.5);
-        ct3 = sin(croll * 0.5);
-        ct4 = cos(cpitch * 0.5);
-        ct5 = sin(cpitch * 0.5);
+        float ct0 = cos(croll * 0.5);
+        float ct1 = sin(croll * 0.5);
+        float ct2 = cos(cpitch * 0.5);
+        float ct3 = sin(cpitch * 0.5);
+        float ct4 = cos(cyaw * 0.5);
+        float ct5 = sin(cyaw * 0.5);
 
         //Set controller rotation
         pose.qRotation.w = ct0 * ct2 * ct4 + ct1 * ct3 * ct5;

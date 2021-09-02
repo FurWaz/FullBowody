@@ -18,9 +18,11 @@ namespace owo
         std::vector<Camera*> cameras;
         std::vector<std::array<cv::Vec3d, CONSTANT::NB_JOINTS>> rays;
         std::array<cv::Vec3d, CONSTANT::NB_JOINTS> body;
+        std::array<cv::Vec3d, CONSTANT::NB_JOINTS> trackedBody;
 
         float tracking_dt;
         SoftwareConnection* con;
+        bool smoothPosition = false;
 
         /**
          * @brief Returns a new rotated point based on the point's position and a rotation matrix
@@ -93,7 +95,7 @@ namespace owo
         void calculateBodyPosition()
         {
             if (this->cameras.size() < 2) return;
-            for (int i = 0; i < CONSTANT::NB_JOINTS; i++)
+            for (unsigned char i = 0; i < CONSTANT::NB_JOINTS; i++)
             {
                 int cam1 = 0;
                 int cam2 = 1;
@@ -118,9 +120,16 @@ namespace owo
                 this->intersection(
                     this->cameras[cam1]->getPosition(), this->rays[cam1][i],
                     this->cameras[cam2]->getPosition(), this->rays[cam2][i],
-                    this->body[i]
+                    this->trackedBody[i]
                 );
             }
+
+            if (this->smoothPosition)
+            {
+                for (unsigned char i = 0; i < CONSTANT::NB_JOINTS; i++)
+                    this->body[i] += (this->trackedBody[i] - this->body[i]) / 2;
+            }
+            else this->body = this->trackedBody;
 
             this->con->sendNewBodyPosition(this->getBody());
         }
@@ -203,6 +212,16 @@ namespace owo
         std::array<cv::Vec3d, CONSTANT::NB_JOINTS> getCamRays(int camIndex)
         {
             return this->rays[camIndex];
+        }
+
+        void setSmoothPosition(bool state)
+        {
+            this->smoothPosition = state;
+        }
+
+        bool getSmoothPosition()
+        {
+            return this->smoothPosition;
         }
 
         void setSoftwareConnection(SoftwareConnection* con)

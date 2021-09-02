@@ -38,7 +38,7 @@ namespace owo
             this->camRot[1] = this->rotation.y;
             this->camPos[0] = std::cos(this->rotation.x) * -camDist * std::sin(this->rotation.y);
             this->camPos[1] = std::cos(this->rotation.x) *  camDist * std::cos(this->rotation.y);
-            this->camPos[2] = std::sin(this->rotation.x) *  camDist;
+            this->camPos[2] = std::sin(this->rotation.x) *  camDist + 1;
         }
 
         sf::Vector2f vec3_vec2(cv::Vec3d coord)

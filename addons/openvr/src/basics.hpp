@@ -133,3 +133,10 @@ namespace CONSTANT
         {JOINT_ANKLE_L, JOINT_FEET_L}
     };
 }
+
+namespace TRACKER
+{
+    const unsigned char HIPS = 1;
+    const unsigned char FEET_L = 2;
+    const unsigned char FEET_R = 3;
+}
