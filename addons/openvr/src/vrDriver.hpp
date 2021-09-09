@@ -7,7 +7,7 @@
 class VRDriver : vr::IServerTrackedDeviceProvider
 {
 private:
-    // VRHeadset* headset = nullptr;
+    VRHeadset* headset = nullptr;
     VRController* leftControl = nullptr;
     VRController* rightControl = nullptr;
     Receiver receiver;
@@ -36,7 +36,7 @@ public:
         if (err == vr::VRInitError_None)
         {
             this->receiver.Start();
-            // this->headset = new VRHeadset();
+            this->headset = new VRHeadset();
             this->leftControl = new VRController();
             this->rightControl = new VRController();
             this->leftControl->setControllerIndex(1);
@@ -49,7 +49,7 @@ public:
             this->station1 = new VRStation(1);
             this->station2 = new VRStation(2);
 
-            // vr::VRServerDriverHost()->TrackedDeviceAdded(this->headset->GetSerialNumber().c_str(), vr::TrackedDeviceClass_HMD, this->headset);
+            vr::VRServerDriverHost()->TrackedDeviceAdded(this->headset->GetSerialNumber().c_str(), vr::TrackedDeviceClass_HMD, this->headset);
             vr::VRServerDriverHost()->TrackedDeviceAdded(this->leftControl->GetSerialNumber().c_str(), vr::TrackedDeviceClass_Controller, this->leftControl);
             vr::VRServerDriverHost()->TrackedDeviceAdded(this->rightControl->GetSerialNumber().c_str(), vr::TrackedDeviceClass_Controller, this->rightControl);
 
@@ -65,8 +65,8 @@ public:
 
     void Cleanup()
     {
-        // if (this->headset)
-        //     delete this->headset;
+        if (this->headset)
+            delete this->headset;
         if (this->leftControl)
             delete this->leftControl;
         if (this->rightControl)
@@ -98,7 +98,7 @@ public:
         //         this->rightControl->ProcessEvent(vrEvent);
         // }
         
-        // this->headset->RunFrame();
+        this->headset->RunFrame();
         this->leftControl->RunFrame();
         this->rightControl->RunFrame();
         

@@ -175,7 +175,7 @@ public:
         vr::VRDriverInput()->CreateBooleanComponent(this->propContainer, "/input/system/touch", &HButtons[1]);
         vr::VRDriverInput()->CreateHapticComponent(this->propContainer, "/output/haptic", &this->comphaptic);
 
-        vr::VRProperties()->SetUint64Property(this->propContainer, vr::Prop_CurrentUniverseId_Uint64, 2);
+        vr::VRProperties()->SetUint64Property(this->propContainer, vr::Prop_CurrentUniverseId_Uint64, 5621);
 
         return vr::VRInitError_None;
     }

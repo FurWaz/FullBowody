@@ -98,7 +98,7 @@ public:
         this->propContainer = vr::VRProperties()->TrackedDeviceToPropertyContainer(this->id);
 
         // Set some universe ID (Must be 2 or higher)
-        vr::VRProperties()->SetUint64Property(this->propContainer, vr::Prop_CurrentUniverseId_Uint64, 2);
+        vr::VRProperties()->SetUint64Property(this->propContainer, vr::Prop_CurrentUniverseId_Uint64, 5621);
         vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_ModelNumber_String, "TrackingReference");
         vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_RenderModelName_String, "locator");
         vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_NamedIconPathDeviceReady_String, "{null}/icons/trackingreference_ready.png");
