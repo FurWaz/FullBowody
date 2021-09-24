@@ -1,6 +1,7 @@
 #pragma once
 #include "../../constants.hpp"
 #include "./graphicElement.hpp"
+#include <windows.h>
 
 namespace owo
 {
@@ -12,6 +13,7 @@ namespace owo
         int fontSize;
         int placement;
         bool shouldDraw = false;
+        bool isURL = false;
 
     public:
         void generateTexture()
@@ -20,10 +22,23 @@ namespace owo
             sf::Text txt(this->text, CONSTANT::FONT, this->fontSize);
             txt.setFillColor(this->textColor);
             txt.setPosition(this->calculateTextPos(this->text));
+
+            if (this->isURL && this->hovered) {
+                sf::RectangleShape rect;
+                rect.setPosition(sf::Vector2f(0, this->dimensions.height-2));
+                rect.setSize(sf::Vector2f(this->dimensions.width, 2));
+                rect.setFillColor(this->getTextColor());
+                this->renderTexture.draw(rect);
+            }
             
             this->renderTexture.draw(txt);
             this->renderTexture.display();
             this->sprite.setTexture(this->renderTexture.getTexture());
+        }
+
+        void checkForUrl() {
+            this->isURL = (strcmp(this->getText().substr(0, 4).c_str(), "http") == 0);
+            this->setReceiveEvents(this->isURL);
         }
 
         static const int LEFT = 1;
@@ -35,6 +50,7 @@ namespace owo
             this->text = "Label";
             this->fontSize = 16;
             this->setDimensions(0, 0, 20, 20);
+            this->checkForUrl();
             this->generateTexture();
         }
 
@@ -46,6 +62,7 @@ namespace owo
             this->textColor = textColor;
             this->clearColor = clearColor;
             this->setDimensions(0, 0, 20, 20);
+            this->checkForUrl();
             this->generateTexture();
         }
 
@@ -59,12 +76,15 @@ namespace owo
             this->clearColor = clearColor;
             sf::Vector2u txtSize = this->calculateTextSize(this->text);
             this->setDimensions(position.x, position.y, (size.x == -1)? txtSize.x+10: size.x, (size.y == -1)? txtSize.y+4: size.y);
+            this->checkForUrl();
             this->generateTexture();
         }
 
         void onClick(int btn, bool clicked)
         {
             this->clicked = clicked;
+            std::wstring txt(this->text.begin(), this->text.end());
+            if (this->clicked) ShellExecuteW(0, 0, txt.c_str(), 0, 0, 5);
         }
 
         void onFocus(bool focused)
@@ -75,6 +95,7 @@ namespace owo
         void onHover(bool hovered)
         {
             this->hovered = hovered;
+            this->generateTexture();
         }
         
         void onKey(int key, char c, bool pressed)
@@ -150,6 +171,7 @@ namespace owo
         {
             this->text = text;
             this->shouldDraw = true;
+            this->checkForUrl();
         }
 
         sf::Sprite getSprite(float dt)

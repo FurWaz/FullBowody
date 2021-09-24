@@ -172,6 +172,32 @@ namespace SceneManager
     {
         win->clearElements();
         win->addElement(createMenuBar(ABOUT_SCENE));
+
+        win->addElement(new Title(
+            sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.3, MenuBar::MENUBAR_HEIGHT),
+            sf::Vector2i(CONSTANT::WINDOW_WIDTH*0.4, 40), " Credits ", 20,
+            CONSTANT::COLOR_CLEAR
+        ));
+        win->addElement(new Container(
+            sf::Vector2i(20, 60+MenuBar::MENUBAR_HEIGHT),
+            sf::Vector2i(CONSTANT::WINDOW_WIDTH-40, 200),
+            CONSTANT::COLOR_BACK
+        ));
+        win->addElement(new Label(
+            "Author: FurWaz", sf::Vector2i(30, 70+MenuBar::MENUBAR_HEIGHT),
+            sf::Vector2i(CONSTANT::WINDOW_WIDTH-260, 30), 18, Label::LEFT,
+            CONSTANT::COLOR_FORE, CONSTANT::COLOR_BACK
+        ));
+        win->addElement(new Label(
+            "https://furwaz.github.io/", sf::Vector2i(30, 100+MenuBar::MENUBAR_HEIGHT),
+            sf::Vector2i(190, 30), 16, Label::LEFT,
+            CONSTANT::COLOR_BLUE_LIGHT, CONSTANT::COLOR_BACK
+        ));
+        win->addElement(new Image(
+            "./resources/pics/furwaz.png",
+            sf::Vector2i(CONSTANT::WINDOW_WIDTH-220, 60+MenuBar::MENUBAR_HEIGHT), sf::Vector2i(200, 200),
+            CONSTANT::COLOR_BACK
+        ));
     }
 
     GraphicElement* createMenuBar(int pos)
