@@ -5,6 +5,7 @@
 #include "../constants.hpp"
 #include "../engine/bodypos.hpp"
 #include "./essentials/graphicElement.hpp"
+#include "./systemTray.hpp"
 
 namespace owo
 {
@@ -177,6 +178,8 @@ namespace owo
             if (icon.loadFromFile("./resources/pics/fullbowody.png"))
                 this->screen.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
             GarbageCollector::init();
+
+            createTray(this->screen.getSystemHandle());
         }
 
         /**
@@ -184,7 +187,7 @@ namespace owo
          */
         void refresh()
         {
-            this->refreshDelta = this->refreshClock.restart().asSeconds();
+            this->refreshDelta += this->refreshClock.restart().asSeconds();
             if (!this->screen.hasFocus())
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -217,6 +220,7 @@ namespace owo
                     index++;
                 }
             }
+            this->refreshDelta -= 1/30.f;
             this->screen.display();
         }
 

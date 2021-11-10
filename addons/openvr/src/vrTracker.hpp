@@ -155,24 +155,23 @@ public:
         this->id = id;
         this->propContainer = vr::VRProperties()->TrackedDeviceToPropertyContainer(this->id);
 
-        vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_ControllerType_String, "vive_controller");
-        vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_InputProfilePath_String, "vive_controller");
+        // line below maybe causing trackers to be assigned as controllers
+        // vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_ControllerType_String, "vive_tracker");
+        // vr::VRProperties()->SetInt32Property(this->propContainer, vr::Prop_ControllerRoleHint_Int32, vr::TrackedControllerRole_OptOut);
+        // vr::VRDriverInput()->CreateBooleanComponent(this->propContainer, "/input/system/click", &HButtons[0]);
+        // vr::VRDriverInput()->CreateBooleanComponent(this->propContainer, "/input/system/touch", &HButtons[1]);
+
+        vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_InputProfilePath_String, "vive_tracker");
 
         vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_ModelNumber_String, "ViveMV");
         vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_ManufacturerName_String, "HTC");
-        vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_RenderModelName_String, "vr_controller_05_wireless_b");
+        vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_RenderModelName_String, "vr_tracker_05_wireless_b");
 
-        vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_TrackingSystemName_String, "VR Controller");
-        vr::VRProperties()->SetInt32Property(this->propContainer, vr::Prop_DeviceClass_Int32, vr::TrackedDeviceClass_Controller);
-
+        vr::VRProperties()->SetInt32Property(this->propContainer, vr::Prop_DeviceClass_Int32, vr::TrackedDeviceClass_GenericTracker);
         vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_TrackingSystemName_String, "VR Tracker");
         vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_SerialNumber_String, this->serial.c_str());
-        vr::VRProperties()->SetInt32Property(this->propContainer, vr::Prop_DeviceClass_Int32, vr::TrackedDeviceClass_Controller);
-        vr::VRProperties()->SetInt32Property(this->propContainer, vr::Prop_ControllerRoleHint_Int32, vr::TrackedControllerRole_OptOut);
 
         vr::VRProperties()->SetStringProperty(this->propContainer, vr::Prop_InputProfilePath_String, "{null}/input/example_tracker_bindings.json");
-        vr::VRDriverInput()->CreateBooleanComponent(this->propContainer, "/input/system/click", &HButtons[0]);
-        vr::VRDriverInput()->CreateBooleanComponent(this->propContainer, "/input/system/touch", &HButtons[1]);
         vr::VRDriverInput()->CreateHapticComponent(this->propContainer, "/output/haptic", &this->comphaptic);
 
         vr::VRProperties()->SetUint64Property(this->propContainer, vr::Prop_CurrentUniverseId_Uint64, 5621);

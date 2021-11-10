@@ -36,7 +36,7 @@ public:
         if (err == vr::VRInitError_None)
         {
             this->receiver.Start();
-            this->headset = new VRHeadset();
+            // this->headset = new VRHeadset();
             this->leftControl = new VRController();
             this->rightControl = new VRController();
             this->leftControl->setControllerIndex(1);
@@ -46,8 +46,8 @@ public:
             this->feetLTracker = new VRTracker(TRACKER::FEET_L);
             this->feetRTracker = new VRTracker(TRACKER::FEET_R);
 
-            this->station1 = new VRStation(1);
-            this->station2 = new VRStation(2);
+            // this->station1 = new VRStation(1);
+            // this->station2 = new VRStation(2);
 
             vr::VRServerDriverHost()->TrackedDeviceAdded(this->headset->GetSerialNumber().c_str(), vr::TrackedDeviceClass_HMD, this->headset);
             vr::VRServerDriverHost()->TrackedDeviceAdded(this->leftControl->GetSerialNumber().c_str(), vr::TrackedDeviceClass_Controller, this->leftControl);
@@ -89,16 +89,16 @@ public:
 
     void RunFrame()
     {
-        // vr::VREvent_t ev;
-        // while (vr::VRServerDriverHost()->PollNextEvent(&ev, sizeof(ev)))
-        // {
-        //     if (this->leftControl)
-        //         this->leftControl->ProcessEvent(vrEvent);
-        //     if (this->rightControl)
-        //         this->rightControl->ProcessEvent(vrEvent);
-        // }
+        vr::VREvent_t ev;
+        while (vr::VRServerDriverHost()->PollNextEvent(&ev, sizeof(ev)))
+        {
+            // if (this->leftControl)
+                this->leftControl->ProcessEvent(ev);
+            // if (this->rightControl)
+                this->rightControl->ProcessEvent(ev);
+        }
         
-        this->headset->RunFrame();
+        // this->headset->RunFrame();
         this->leftControl->RunFrame();
         this->rightControl->RunFrame();
         
@@ -106,8 +106,8 @@ public:
         this->feetLTracker->RunFrame();
         this->feetRTracker->RunFrame();
 
-        this->station1->RunFrame();
-        this->station2->RunFrame();
+        // this->station1->RunFrame();
+        // this->station2->RunFrame();
     }
 
     ~VRDriver()

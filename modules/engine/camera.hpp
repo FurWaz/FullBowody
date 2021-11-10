@@ -237,9 +237,17 @@ namespace owo
                 this->updateThread.join();
             }
             bool result = true;
+            // check if input is number or not (for device index or url)
+            int deviceIndex = -1;
             try
             {
-                result = this->source.open(address);
+                deviceIndex = std::stoi(address);
+            } catch (std::exception &e) {}
+
+            // open device index or url
+            try
+            {
+                result = (deviceIndex<0)? this->source.open(address): this->source.open(deviceIndex);
                 this->setDimensionsFromSource();
             }
             catch (std::exception &e)
@@ -304,10 +312,6 @@ namespace owo
                     detectArucoMarkers();
                     getArucoBoardPosition();
                     getCamPosRot();
-                    // cv::Mat tor;
-                    // cv::undistort(this->frame, tor, this->calibrData.cameraMatrix, this->calibrData.distanceCoefficients);
-                    // cv::imshow("Undistorded", tor);
-                    // cv::waitKey(1);
                     if (this->aruco_ids.size() > 0)
                     {
                         cv::aruco::drawDetectedMarkers(this->frame, this->aruco_corners, this->aruco_ids);
