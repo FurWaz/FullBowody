@@ -1,0 +1,34 @@
+@keyframes popup-in {
+    0% {transform: translateY(20px); opacity: 0;}
+    100% {transform: translateY(0px); opacity: 1;}
+}
+
+.info-popup-container {
+    border-radius: var(--border-radius);
+    background-color: #333E;
+    position: absolute;
+    left: 0px; top: 0px;
+    width: min-content;
+    height: min-content;
+    padding: 8px;
+    opacity: 1;
+    pointer-events: none;
+    box-shadow: 0px 4px 10px #0004;
+    transform: translateY(0px);
+    animation: popup-in 200ms ease;
+    transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.info-popup-disappear {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.info-popup-text {
+    font-size: 18px;
+    color: var(--color-white);
+    font-family: "Roboto";
+    white-space: nowrap;
+    margin: 0px;
+    padding: 0px;
+}

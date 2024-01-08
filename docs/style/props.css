@@ -1,0 +1,97 @@
+.obj-container {
+    width: 80%;
+    height: fit-content;
+    border-radius: var(--border-radius);
+    margin: 0px auto;
+    padding: 20px;
+}
+
+.subtitle {
+    text-align: center;
+    width: min-content;
+    margin: 0px auto;
+    padding: 0px;
+    white-space: nowrap;
+    font-size: 16px;
+    color: var(--color-black);
+}
+
+.title-container {
+    height: 30px;
+    width: 40vw;
+    padding: 0px;
+    margin: 10px auto;
+}
+
+.title-bar {
+    height: 3px;
+    width: 40vw;
+    border-radius: var(--border-radius);
+    background-color: var(--color-gray-light);
+    margin-top: 17px;
+    position: fixed;
+}
+
+.title-text {
+    font-size: 28px;
+    font-family: "Roboto";
+    margin: 0px auto;
+    padding: 0px 4px;
+    width: min-content;
+    background-color: var(--color-white);
+    color: var(--color-gray-dark);
+    position: relative;
+}
+
+.item-container {
+    width: min-content;
+    height: min-content;
+    cursor: pointer;
+    transform: scale(1);
+    transition: transform 100ms ease;
+} .item-container:hover {
+    transform: scale(1.05);
+}
+
+.item-text {
+    font-size: 20px;
+    margin: 4px 0px;
+    color: var(--color-black);
+    font-family: "Roboto";
+    white-space: nowrap;
+    text-align: center;
+}
+
+.item-icon {
+    width: 80px;
+    height: 80px;
+    filter: saturate(0) brightness(0.2);
+}
+
+.number-counter {
+    font-size: 80px;
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
+}
+
+.cat-name {
+    font-size: 40px;
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
+}
+
+div.text-chunk {
+    height: max-content;
+    text-align: center;
+    width: 26%;
+}
+
+p.text-chunk {
+    font-size: 16px;
+    color: var(--color-black);
+    font-family: "Roboto";
+    white-space: normal;
+    line-height: 1.2em;
+}

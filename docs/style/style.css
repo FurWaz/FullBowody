@@ -1,0 +1,171 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto');
+
+:root {
+    --gradient: linear-gradient(60deg, #43bece, #0256aa);
+    --color-black: #333;
+    --color-gray-dark: #555;
+    --color-gray-light: #AAA;
+    --color-white: #FFF;
+
+    --color-comment: #FFF4;
+    --color-keyword: rgb(255, 96, 255);
+    --color-function: rgb(0, 162, 255);
+    --color-string: rgb(0, 255, 128);
+    --color-object: rgb(255, 217, 0);
+
+    --header-size-max: 60vh;
+    --header-size-min: 30vh;
+
+    --border-radius: 6px;
+    --padding: 10px;
+}
+
+body {
+    margin: 0px;
+    padding: 0px;
+    font-family: "Roboto";
+}
+
+div#main-container {
+    padding: 40px 100px;
+    min-height: 100vh;
+    overflow-x: hidden;
+    z-index: 0;
+}
+
+.center-x {
+    text-align: center;
+    margin: 0px auto;
+    width: min-content;
+}
+
+.center-y {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+}
+
+.align-x {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    width: fit-content;
+    height: fit-content;
+}
+
+.align-y {
+    display: block;
+}
+
+span.shift {
+    display: block;
+    padding-left: 20px;
+}
+
+h1 {
+    color: white;
+    font-size: 60px;
+}
+
+h2 {
+    color: var(--color-black);
+    font-size: 24px;
+    border-left: solid 4px var(--color-black);
+    padding: 0px 14px;
+    margin: 0px;
+    white-space: normal;
+}
+
+h3 {
+    color: var(--color-black);
+    font-size: 20px;
+    text-decoration: underline 2px var(--color-black);
+    margin: 0px;
+}
+
+p {
+    font-size: 16px;
+    color: var(--color-black);
+    white-space: nowrap;
+}
+
+p.info {
+    color: #666;
+    font-size: 20px;
+    text-align: center;
+    padding: 0px 14px;
+    margin: 0px;
+}
+
+.highlight {
+    font-weight: bolder;
+    text-decoration: underline 1px var(--color-black);
+}
+
+.text-center {
+    text-align: center;
+    width: 100%;
+}
+
+.text-left {
+    text-align: left;
+    width: 100%;
+}
+
+.text-right {
+    text-align: right;
+    width: 100%;
+}
+
+.restrict-x {
+    width: 60%;
+    margin: 0px auto;
+    white-space: normal;
+}
+
+div.codezone {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    background-color: var(--color-black);
+    border-radius: var(--border-radius);
+    color: white;
+    padding: 2px 4px;
+    width: fit-content;
+    height: min-content;
+    margin: 0px 10px;
+} .codezone > p {
+    margin: 2px 0px;
+    color: var(--color-white);
+    white-space: normal;
+} .codezone > p > span {
+    display: inline-block;
+}
+
+code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    background-color: var(--color-black);
+    border-radius: var(--border-radius);
+    color: white;
+    padding: 2px 4px;
+    width: min-content;
+    height: min-content;
+}
+
+a {
+    font-size: 16px;
+    display: inline-block;
+    background: var(--gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-decoration: none;
+}
+
+footer {
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FullBowody</title>
+
+    <meta property="og:title" content="FurWaz | FullBowody">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://furwaz.github.io/FullBowody/">
+    <meta property="og:image" content="https://furwaz.github.io/FullBowody/resources/thumbnail.png">
+    <meta property="og:description" content="A free full body tracking app using HD cameras for VR, 3D animation, etc.">
+    <meta name="theme-color" content="#43bece">
+
+    <link rel="shortcut icon" href="./resources/icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="./style/style.css">
+    <link rel="stylesheet" href="./style/header.css">
+    <link rel="stylesheet" href="./style/props.css">
+    <link rel="stylesheet" href="./style/popups.css">
+    <script src="./script/constants.js" defer></script>
+        <script src="./script/home.js" defer></script>
+        <script src="./script/getStarted.js" defer></script>
+        <script src="./script/download.js" defer></script>
+        <script src="./script/about.js" defer></script>
+    <script src="./script/script.js" defer></script>
+</head>
+<body>
+    <header class="center-y" id="header-container">
+        <div class="center-x">
+            <div class="align-x" id="header-title">
+                <div class="center-y">
+                    <img id="header-icon" src="./resources/icon.png" alt="icon">
+                </div>
+                <div class="center-y">
+                    <h1 id="header-text">FullBowody</h1>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="menu-container" id="menu-container">
+        <div class="menu-element center-y" onclick="loadContent(PAGE.HOME);">
+            <p>Home</p>
+        </div>
+        <div class="menu-element center-y" onclick="loadContent(PAGE.GET_STARTED);">
+            <p>Get started</p>
+        </div>
+        <div class="menu-element center-y" onclick="loadContent(PAGE.DOWNLOAD);">
+            <p>Download</p>
+        </div>
+        <div class="menu-element center-y" onclick="loadContent(PAGE.ABOUT);">
+            <p>About</p>
+        </div>
+    </div>
+    <div id="main-container">
+        
+    </div>
+    <iframe src="" style="display: none;" id="file-downloader"></iframe>
+    <footer>
+        <p>Author:
+            <a href="https://github.com/furwaz">FurWaz</a>
+        </p>
+    </footer>
+</body>
+</html>

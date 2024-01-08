@@ -1,0 +1,4 @@
+.vscode
+__pycache__
+lineCounter.py
+node_modules/
